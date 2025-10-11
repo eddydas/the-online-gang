@@ -1,5 +1,7 @@
 // @ts-check
 
+const { TOTAL_TURNS } = require('./constants');
+
 /**
  * @typedef {Object} Token
  * @property {number} number - Token number (1 to N)
@@ -17,7 +19,7 @@
 
 /**
  * Generates N tokens for the game
- * @param {number} playerCount - Number of players (2-8)
+ * @param {number} playerCount - Number of players
  * @returns {Token[]} Array of tokens numbered 1 to N
  */
 function generateTokens(playerCount) {
@@ -78,17 +80,17 @@ function applyTokenAction(tokens, action) {
 }
 
 /**
- * Initializes empty token history for a player (4 turns)
- * @returns {(number|null)[]} Array of 4 nulls
+ * Initializes empty token history for a player (TOTAL_TURNS turns)
+ * @returns {(number|null)[]} Array of TOTAL_TURNS nulls
  */
 function initializePlayerTokenHistory() {
-  return [null, null, null, null];
+  return Array(TOTAL_TURNS).fill(null);
 }
 
 /**
  * Updates token history for a specific turn
  * @param {(number|null)[]} history - Current history array
- * @param {number} turn - Turn number (1-4)
+ * @param {number} turn - Turn number (1 to TOTAL_TURNS)
  * @param {number} tokenNumber - Token number selected
  * @returns {(number|null)[]} Updated history (new array)
  */

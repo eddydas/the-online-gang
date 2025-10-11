@@ -1,5 +1,6 @@
 // @ts-check
 const { generateTokens, applyTokenAction, initializePlayerTokenHistory, updateTokenHistory } = require('../src/tokens');
+const { MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS } = require('../src/constants');
 
 describe('Token System', () => {
 
@@ -30,14 +31,14 @@ describe('Token System', () => {
     });
 
     test('should work with minimum 2 players', () => {
-      const tokens = generateTokens(2);
-      expect(tokens).toHaveLength(2);
+      const tokens = generateTokens(MIN_PLAYERS);
+      expect(tokens).toHaveLength(MIN_PLAYERS);
       expect(tokens.map(t => t.number)).toEqual([1, 2]);
     });
 
     test('should work with maximum 8 players', () => {
-      const tokens = generateTokens(8);
-      expect(tokens).toHaveLength(8);
+      const tokens = generateTokens(MAX_PLAYERS);
+      expect(tokens).toHaveLength(MAX_PLAYERS);
       expect(tokens.map(t => t.number)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     });
   });
@@ -253,7 +254,7 @@ describe('Token System', () => {
   describe('Token History', () => {
     test('should initialize empty history for player', () => {
       const history = initializePlayerTokenHistory();
-      expect(history).toEqual([null, null, null, null]);
+      expect(history).toEqual(Array(TOTAL_TURNS).fill(null));
     });
 
     test('should update token history for specific turn', () => {

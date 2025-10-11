@@ -1,5 +1,7 @@
 // @ts-check
 
+const { MIN_PLAYERS, MAX_PLAYERS, MIN_TURN, MAX_TURN } = require('./constants');
+
 /**
  * @typedef {Object} Card
  * @property {string} rank - Card rank (2-10, J, Q, K, A)
@@ -72,12 +74,12 @@ function randomizeCardBackColor() {
 /**
  * Deals 2 hole cards to each player
  * @param {Card[]} deck - The deck to deal from
- * @param {number} playerCount - Number of players (2-8)
+ * @param {number} playerCount - Number of players
  * @returns {DealHoleCardsResult} Hole cards for each player and remaining deck
  */
 function dealHoleCards(deck, playerCount) {
-  if (playerCount < 2 || playerCount > 8) {
-    throw new Error('Player count must be between 2 and 8');
+  if (playerCount < MIN_PLAYERS || playerCount > MAX_PLAYERS) {
+    throw new Error(`Player count must be between ${MIN_PLAYERS} and ${MAX_PLAYERS}`);
   }
 
   const deckCopy = [...deck];
@@ -112,12 +114,12 @@ function dealHoleCards(deck, playerCount) {
  * Turn 3: 1 card (river)
  * Turn 4: 0 cards (no more dealing)
  * @param {Card[]} deck - The deck to deal from
- * @param {number} turn - Current turn number (1-4)
+ * @param {number} turn - Current turn number
  * @returns {DealCommunityCardsResult} Community cards and remaining deck
  */
 function dealCommunityCards(deck, turn) {
-  if (turn < 1 || turn > 4) {
-    throw new Error('Turn must be between 1 and 4');
+  if (turn < MIN_TURN || turn > MAX_TURN) {
+    throw new Error(`Turn must be between ${MIN_TURN} and ${MAX_TURN}`);
   }
 
   const deckCopy = [...deck];

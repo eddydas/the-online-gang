@@ -1,5 +1,6 @@
 // @ts-check
 const { determineWinLoss, sortPlayersByHandStrength } = require('../src/winCondition');
+const { MAX_PLAYERS } = require('../src/constants');
 
 describe('Win/Loss Determination', () => {
 
@@ -393,18 +394,18 @@ describe('Win/Loss Determination', () => {
 
     test('should handle 8 players maximum', () => {
       const players = [];
-      for (let i = 1; i <= 8; i++) {
+      for (let i = 1; i <= MAX_PLAYERS; i++) {
         players.push({
           id: `p${i}`,
           name: `Player${i}`,
           hand: { rank: i, name: 'Hand', tiebreakers: [i] },
-          currentToken: 9 - i // Reverse order
+          currentToken: MAX_PLAYERS + 1 - i // Reverse order
         });
       }
 
       const result = determineWinLoss(players);
 
-      expect(result.sortedPlayers).toHaveLength(8);
+      expect(result.sortedPlayers).toHaveLength(MAX_PLAYERS);
       expect(result.expectedTokens).toEqual([8, 7, 6, 5, 4, 3, 2, 1]);
     });
   });

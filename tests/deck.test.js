@@ -1,4 +1,5 @@
 const { createDeck, shuffleDeck, randomizeCardBackColor, dealHoleCards, dealCommunityCards, RANKS, SUITS } = require('../src/deck');
+const { MIN_PLAYERS, MAX_PLAYERS } = require('../src/constants');
 
 describe('Deck Module', () => {
 
@@ -145,17 +146,17 @@ describe('Deck Module', () => {
 
     test('should work with 2 players (minimum)', () => {
       const deck = shuffleDeck(createDeck());
-      const result = dealHoleCards(deck, 2);
+      const result = dealHoleCards(deck, MIN_PLAYERS);
 
-      expect(result.holeCards).toHaveLength(2);
+      expect(result.holeCards).toHaveLength(MIN_PLAYERS);
       expect(result.remainingDeck).toHaveLength(48);
     });
 
     test('should work with 8 players (maximum)', () => {
       const deck = shuffleDeck(createDeck());
-      const result = dealHoleCards(deck, 8);
+      const result = dealHoleCards(deck, MAX_PLAYERS);
 
-      expect(result.holeCards).toHaveLength(8);
+      expect(result.holeCards).toHaveLength(MAX_PLAYERS);
       expect(result.remainingDeck).toHaveLength(36);
     });
   });
@@ -218,8 +219,8 @@ describe('Deck Module', () => {
     test('dealHoleCards should throw for invalid player count', () => {
       const deck = shuffleDeck(createDeck());
       expect(() => dealHoleCards(deck, 0)).toThrow();
-      expect(() => dealHoleCards(deck, 1)).toThrow();
-      expect(() => dealHoleCards(deck, 9)).toThrow();
+      expect(() => dealHoleCards(deck, MIN_PLAYERS - 1)).toThrow();
+      expect(() => dealHoleCards(deck, MAX_PLAYERS + 1)).toThrow();
     });
 
     test('dealHoleCards should throw for insufficient cards', () => {
