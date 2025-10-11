@@ -47,6 +47,12 @@ npm run test:watch
 npm run test:coverage
 ```
 
+### Type Check JavaScript Files
+We use JSDoc + TypeScript for type safety without compilation:
+```bash
+npm run typecheck
+```
+
 Expected output:
 ```
 Test Suites: 1 passed, 1 total
@@ -124,6 +130,7 @@ npm test
 - **[REQUIREMENTS.md](REQUIREMENTS.md)** - Complete game requirements and specifications
 - **[TDD_MVP_PLAN.md](TDD_MVP_PLAN.md)** - 5-week sprint plan with TDD approach
 - **[TESTING.md](TESTING.md)** - Comprehensive testing guide
+- **[TYPE_SAFETY.md](TYPE_SAFETY.md)** - JSDoc type safety guide (TypeScript-like types without compilation)
 - **[TEST_SETUP_COMPLETE.md](TEST_SETUP_COMPLETE.md)** - Test infrastructure overview
 
 ## 🎨 Visual Demo
@@ -170,6 +177,8 @@ npm run test:coverage
 | `npm test` | Run all tests |
 | `npm run test:watch` | Run tests in watch mode |
 | `npm run test:coverage` | Run tests with coverage report |
+| `npm run typecheck` | Type check JavaScript files with TypeScript |
+| `npm run lint` | Run type checking (alias for typecheck) |
 
 ## 🎯 Key Features
 
