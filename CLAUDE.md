@@ -56,12 +56,20 @@ npm run lint               # Alias for typecheck
 
 **Game Flow:**
 ```
-LOBBY → CARD_DEAL → READY_UP → TOKEN_TRADING → TURN_COMPLETE
-            ↑                                         ↓
-            └──────────── (repeat 4 turns) ──────────┘
-                                  ↓ (after turn 4)
-                              END_GAME
+LOBBY (initial join only)
+  ↓
+CARD_DEAL → READY_UP → TOKEN_TRADING → TURN_COMPLETE
+    ↑                                         ↓
+    └──────────── (repeat 4 turns) ──────────┘
+                          ↓ (after turn 4)
+                       END_GAME
+                          ↓
+            "Ready for Next Game" button
+                          ↓
+                   (back to CARD_DEAL)
 ```
+
+**Important:** Game does NOT return to lobby after END_GAME. Uses "Ready for Next Game" button for seamless continuous play.
 
 ### P2P Architecture (peer.js)
 
@@ -216,10 +224,11 @@ describe('Poker Hand Evaluation', () => {
 ## Edge Cases to Remember
 
 1. **Tied hands can swap tokens:** Players with identical hands (A-A-K-Q-J vs A-A-K-Q-J) can have either token order and still win
-2. **Late joiners:** Must wait for next game (can't join mid-game)
+2. **Late joiners:** Show lobby screen, wait for current game to finish (can't join mid-game)
 3. **Token stealing:** Uses timestamp conflict resolution (earlier selection wins)
 4. **Card back color:** Randomized once per game (blue or red), not per card
 5. **Host authority:** All state changes must originate from host
+6. **No return to lobby:** After END_GAME, use "Ready for Next Game" button (seamless continuous play, not "Play Again")
 
 ## Current Sprint
 
