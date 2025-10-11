@@ -1,4 +1,4 @@
-const { createDeck, shuffleDeck, randomizeCardBackColor, RANKS, SUITS } = require('../src/deck');
+const { createDeck, shuffleDeck, randomizeCardBackColor, dealHoleCards, dealCommunityCards, RANKS, SUITS } = require('../src/deck');
 
 describe('Deck Module', () => {
 
@@ -102,6 +102,115 @@ describe('Deck Module', () => {
       }
       // With 20 calls, we should get both colors (99.999% probability)
       expect(colors.size).toBe(2);
+    });
+  });
+
+  describe('dealHoleCards', () => {
+    test('should deal 2 cards to each player', () => {
+      const deck = shuffleDeck(createDeck());
+      const playerCount = 4;
+      const result = dealHoleCards(deck, playerCount);
+
+      expect(result.holeCards).toHaveLength(playerCount);
+      result.holeCards.forEach(hand => {
+        expect(hand).toHaveLength(2);
+      });
+    });
+
+    test('should deal unique cards to each player', () => {
+      const deck = shuffleDeck(createDeck());
+      const playerCount = 5;
+      const result = dealHoleCards(deck, playerCount);
+
+      const allCards = result.holeCards.flat();
+      const uniqueCards = new Set(allCards.map(card => `${card.rank}${card.suit}`));
+      expect(uniqueCards.size).toBe(playerCount * 2);
+    });
+
+    test('should return remaining deck without dealt cards', () => {
+      const deck = shuffleDeck(createDeck());
+      const playerCount = 3;
+      const result = dealHoleCards(deck, playerCount);
+
+      expect(result.remainingDeck).toHaveLength(52 - (playerCount * 2));
+    });
+
+    test('should not modify original deck', () => {
+      const deck = shuffleDeck(createDeck());
+      const originalLength = deck.length;
+      dealHoleCards(deck, 4);
+
+      expect(deck).toHaveLength(originalLength);
+    });
+
+    test('should work with 2 players (minimum)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealHoleCards(deck, 2);
+
+      expect(result.holeCards).toHaveLength(2);
+      expect(result.remainingDeck).toHaveLength(48);
+    });
+
+    test('should work with 8 players (maximum)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealHoleCards(deck, 8);
+
+      expect(result.holeCards).toHaveLength(8);
+      expect(result.remainingDeck).toHaveLength(36);
+    });
+  });
+
+  describe('dealCommunityCards', () => {
+    test('should deal 3 cards for turn 1 (flop)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealCommunityCards(deck, 1);
+
+      expect(result.communityCards).toHaveLength(3);
+    });
+
+    test('should deal 1 card for turn 2 (turn)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealCommunityCards(deck, 2);
+
+      expect(result.communityCards).toHaveLength(1);
+    });
+
+    test('should deal 1 card for turn 3 (river)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealCommunityCards(deck, 3);
+
+      expect(result.communityCards).toHaveLength(1);
+    });
+
+    test('should deal 0 cards for turn 4 (no more community cards)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealCommunityCards(deck, 4);
+
+      expect(result.communityCards).toHaveLength(0);
+    });
+
+    test('should return remaining deck without dealt cards', () => {
+      const deck = shuffleDeck(createDeck());
+      const originalLength = deck.length;
+      const result = dealCommunityCards(deck, 1);
+
+      expect(result.remainingDeck).toHaveLength(originalLength - 3);
+    });
+
+    test('should not modify original deck', () => {
+      const deck = shuffleDeck(createDeck());
+      const originalLength = deck.length;
+      dealCommunityCards(deck, 1);
+
+      expect(deck).toHaveLength(originalLength);
+    });
+
+    test('should deal unique cards', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealCommunityCards(deck, 1);
+
+      const uniqueCards = new Set(result.communityCards.map(card => `${card.rank}${card.suit}`));
+      expect(uniqueCards.size).toBe(3);
     });
   });
 
