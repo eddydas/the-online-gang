@@ -5,11 +5,17 @@
  */
 
 /**
- * @typedef {Object} PlayerWithHand
- * @property {string} id - Player ID
- * @property {string} name - Player name
+ * @typedef {import('./gameState').Player} Player
+ */
+
+/**
+ * @typedef {Object} PlayerWithHandExtension
  * @property {HandResult} hand - Evaluated hand
  * @property {number} currentToken - Selected token number
+ */
+
+/**
+ * @typedef {Player & PlayerWithHandExtension} PlayerWithHand
  */
 
 /**
