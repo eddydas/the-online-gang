@@ -5,7 +5,8 @@
       "Bash(npm run typecheck:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npm run test:coverage:*)"
+      "Bash(npm run test:coverage:*)",
+      "Bash(npm test:*)"
     ],
     "deny": [],
     "ask": []
