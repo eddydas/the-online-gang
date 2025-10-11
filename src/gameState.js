@@ -77,7 +77,7 @@ function startGame(state) {
   }));
 
   // Deal community cards for turn 1 (0 cards)
-  const { communityCards } = dealCommunityCards(remainingDeck, 1);
+  const { communityCards, remainingDeck: deckAfterCommunity } = dealCommunityCards(remainingDeck, 1);
 
   // Initialize ready status
   /** @type {Object.<string, boolean>} */
@@ -91,7 +91,7 @@ function startGame(state) {
     phase: 'READY_UP',
     turn: 1,
     players: playersWithCards,
-    deck: remainingDeck,
+    deck: deckAfterCommunity,
     tokens: generateTokens(state.players.length),
     communityCards,
     readyStatus
