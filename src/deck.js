@@ -76,6 +76,10 @@ function randomizeCardBackColor() {
  * @returns {DealHoleCardsResult} Hole cards for each player and remaining deck
  */
 function dealHoleCards(deck, playerCount) {
+  if (playerCount < 2 || playerCount > 8) {
+    throw new Error('Player count must be between 2 and 8');
+  }
+
   const deckCopy = [...deck];
   /** @type {Card[][]} */
   const holeCards = [];
@@ -112,6 +116,10 @@ function dealHoleCards(deck, playerCount) {
  * @returns {DealCommunityCardsResult} Community cards and remaining deck
  */
 function dealCommunityCards(deck, turn) {
+  if (turn < 1 || turn > 4) {
+    throw new Error('Turn must be between 1 and 4');
+  }
+
   const deckCopy = [...deck];
   /** @type {Card[]} */
   const communityCards = [];

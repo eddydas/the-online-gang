@@ -355,6 +355,96 @@ describe('Poker Hand Evaluation', () => {
       expect(result.description).toContain('Queen');
       expect(result.description).toContain('Eight'); // "Eights" not "8"
     });
+
+    test('should describe Ace-low straight as Five high', () => {
+      const cards = [
+        { rank: '5', suit: '♠' },
+        { rank: '4', suit: '♥' },
+        { rank: '3', suit: '♦' },
+        { rank: '2', suit: '♣' },
+        { rank: 'A', suit: '♠' },
+        { rank: 'K', suit: '♥' },
+        { rank: 'Q', suit: '♦' }
+      ];
+
+      const result = evaluateHand(cards);
+      expect(result.rank).toBe(5);
+      expect(result.description).toContain('Five');
+    });
+  });
+
+  describe('Critical Edge Cases', () => {
+    test('should NOT detect straight flush when straight and flush are different suits', () => {
+      // Flush in spades, but straight uses mixed suits
+      const cards = [
+        { rank: 'A', suit: '♠' },
+        { rank: 'K', suit: '♠' },
+        { rank: 'Q', suit: '♠' },
+        { rank: 'J', suit: '♠' },
+        { rank: '3', suit: '♠' }, // 5 spades = flush
+        { rank: '10', suit: '♥' }, // But 10 is not a spade
+        { rank: '2', suit: '♦' }
+      ];
+
+      const result = evaluateHand(cards);
+      // Should be Flush (rank 6), NOT Straight Flush (rank 9) or Royal Flush (rank 10)
+      expect(result.rank).toBe(6);
+      expect(result.name).toBe('Flush');
+    });
+
+    test('should detect ace-low straight flush', () => {
+      const cards = [
+        { rank: '5', suit: '♥' },
+        { rank: '4', suit: '♥' },
+        { rank: '3', suit: '♥' },
+        { rank: '2', suit: '♥' },
+        { rank: 'A', suit: '♥' },
+        { rank: 'K', suit: '♠' },
+        { rank: 'Q', suit: '♦' }
+      ];
+
+      const result = evaluateHand(cards);
+      expect(result.rank).toBe(9);
+      expect(result.name).toBe('Straight Flush');
+    });
+
+    test('should find best straight flush when 6 cards in flush suit', () => {
+      const cards = [
+        { rank: '9', suit: '♦' },
+        { rank: '8', suit: '♦' },
+        { rank: '7', suit: '♦' },
+        { rank: '6', suit: '♦' },
+        { rank: '5', suit: '♦' },
+        { rank: '4', suit: '♦' }, // 6 diamonds
+        { rank: 'A', suit: '♠' }
+      ];
+
+      const result = evaluateHand(cards);
+      expect(result.rank).toBe(9); // Straight Flush
+      expect(result.name).toBe('Straight Flush');
+      // Should pick 9-8-7-6-5, not 8-7-6-5-4
+    });
+
+    test('should handle full house with two trips correctly', () => {
+      // Should pick best trip + best pair
+      const cards = [
+        { rank: 'A', suit: '♠' },
+        { rank: 'A', suit: '♥' },
+        { rank: 'A', suit: '♦' },
+        { rank: 'K', suit: '♣' },
+        { rank: 'K', suit: '♠' },
+        { rank: 'K', suit: '♥' },
+        { rank: '2', suit: '♦' }
+      ];
+
+      const result = evaluateHand(cards);
+      expect(result.rank).toBe(7); // Full House
+      expect(result.bestFive).toHaveLength(5);
+      // Should be AAA-KK (best trip + best pair)
+      const ranks = result.bestFive.map(c => c.rank);
+      expect(ranks.filter(r => r === 'A')).toHaveLength(3);
+      expect(ranks.filter(r => r === 'K')).toHaveLength(2);
+    });
   });
 
 });

@@ -214,4 +214,29 @@ describe('Deck Module', () => {
     });
   });
 
+  describe('Input Validation', () => {
+    test('dealHoleCards should throw for invalid player count', () => {
+      const deck = shuffleDeck(createDeck());
+      expect(() => dealHoleCards(deck, 0)).toThrow();
+      expect(() => dealHoleCards(deck, 1)).toThrow();
+      expect(() => dealHoleCards(deck, 9)).toThrow();
+    });
+
+    test('dealHoleCards should throw for insufficient cards', () => {
+      const smallDeck = shuffleDeck(createDeck()).slice(0, 3); // Only 3 cards
+      expect(() => dealHoleCards(smallDeck, 2)).toThrow('Not enough cards');
+    });
+
+    test('dealCommunityCards should throw for invalid turn', () => {
+      const deck = shuffleDeck(createDeck());
+      expect(() => dealCommunityCards(deck, 0)).toThrow();
+      expect(() => dealCommunityCards(deck, 5)).toThrow();
+    });
+
+    test('dealCommunityCards should throw for insufficient cards', () => {
+      const smallDeck = shuffleDeck(createDeck()).slice(0, 2); // Only 2 cards
+      expect(() => dealCommunityCards(smallDeck, 1)).toThrow('Not enough cards');
+    });
+  });
+
 });
