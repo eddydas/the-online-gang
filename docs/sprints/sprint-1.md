@@ -23,7 +23,11 @@
   - ✅ Deck has 52 cards (13 ranks × 4 suits)
   - ✅ Shuffle randomizes order (no duplicates)
   - ✅ Deal 2 hole cards per player
-  - ✅ Deal 3/1/1 community cards per turn
+  - ✅ Deal community cards per turn:
+    - Turn 1: 0 cards (hole cards only, no community cards yet)
+    - Turn 2: 3 cards (the flop)
+    - Turn 3: 1 card (the turn - 4th community card)
+    - Turn 4: 1 card (the river - 5th community card)
   - ✅ Card back color randomized per game (blue or red)
 - **Implementation:**
   - 52-card deck creation

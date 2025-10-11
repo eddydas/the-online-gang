@@ -162,38 +162,38 @@ describe('Deck Module', () => {
   });
 
   describe('dealCommunityCards', () => {
-    test('should deal 3 cards for turn 1 (flop)', () => {
+    test('should deal 0 cards for turn 1 (hole cards only)', () => {
       const deck = shuffleDeck(createDeck());
       const result = dealCommunityCards(deck, 1);
+
+      expect(result.communityCards).toHaveLength(0);
+    });
+
+    test('should deal 3 cards for turn 2 (flop)', () => {
+      const deck = shuffleDeck(createDeck());
+      const result = dealCommunityCards(deck, 2);
 
       expect(result.communityCards).toHaveLength(3);
     });
 
-    test('should deal 1 card for turn 2 (turn)', () => {
-      const deck = shuffleDeck(createDeck());
-      const result = dealCommunityCards(deck, 2);
-
-      expect(result.communityCards).toHaveLength(1);
-    });
-
-    test('should deal 1 card for turn 3 (river)', () => {
+    test('should deal 1 card for turn 3 (turn)', () => {
       const deck = shuffleDeck(createDeck());
       const result = dealCommunityCards(deck, 3);
 
       expect(result.communityCards).toHaveLength(1);
     });
 
-    test('should deal 0 cards for turn 4 (no more community cards)', () => {
+    test('should deal 1 card for turn 4 (river)', () => {
       const deck = shuffleDeck(createDeck());
       const result = dealCommunityCards(deck, 4);
 
-      expect(result.communityCards).toHaveLength(0);
+      expect(result.communityCards).toHaveLength(1);
     });
 
     test('should return remaining deck without dealt cards', () => {
       const deck = shuffleDeck(createDeck());
       const originalLength = deck.length;
-      const result = dealCommunityCards(deck, 1);
+      const result = dealCommunityCards(deck, 2); // Turn 2 deals 3 cards
 
       expect(result.remainingDeck).toHaveLength(originalLength - 3);
     });
@@ -201,14 +201,14 @@ describe('Deck Module', () => {
     test('should not modify original deck', () => {
       const deck = shuffleDeck(createDeck());
       const originalLength = deck.length;
-      dealCommunityCards(deck, 1);
+      dealCommunityCards(deck, 2);
 
       expect(deck).toHaveLength(originalLength);
     });
 
     test('should deal unique cards', () => {
       const deck = shuffleDeck(createDeck());
-      const result = dealCommunityCards(deck, 1);
+      const result = dealCommunityCards(deck, 2); // Turn 2 deals 3 cards
 
       const uniqueCards = new Set(result.communityCards.map(card => `${card.rank}${card.suit}`));
       expect(uniqueCards.size).toBe(3);
@@ -236,7 +236,7 @@ describe('Deck Module', () => {
 
     test('dealCommunityCards should throw for insufficient cards', () => {
       const smallDeck = shuffleDeck(createDeck()).slice(0, 2); // Only 2 cards
-      expect(() => dealCommunityCards(smallDeck, 1)).toThrow('Not enough cards');
+      expect(() => dealCommunityCards(smallDeck, 2)).toThrow('Not enough cards'); // Turn 2 needs 3 cards
     });
   });
 

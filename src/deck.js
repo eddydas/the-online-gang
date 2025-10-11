@@ -109,10 +109,10 @@ function dealHoleCards(deck, playerCount) {
 
 /**
  * Deals community cards based on turn number
- * Turn 1: 3 cards (flop)
- * Turn 2: 1 card (turn)
- * Turn 3: 1 card (river)
- * Turn 4: 0 cards (no more dealing)
+ * Turn 1: 0 cards (hole cards only - no community cards yet)
+ * Turn 2: 3 cards (the flop)
+ * Turn 3: 1 card (the turn - 4th community card)
+ * Turn 4: 1 card (the river - 5th community card)
  * @param {Card[]} deck - The deck to deal from
  * @param {number} turn - Current turn number
  * @returns {DealCommunityCardsResult} Community cards and remaining deck
@@ -128,11 +128,11 @@ function dealCommunityCards(deck, turn) {
 
   let cardsToDeal = 0;
   if (turn === 1) {
-    cardsToDeal = 3; // Flop
-  } else if (turn === 2 || turn === 3) {
-    cardsToDeal = 1; // Turn or River
-  } else {
-    cardsToDeal = 0; // Turn 4, no more cards
+    cardsToDeal = 0; // Turn 1: Hole cards only, no community cards
+  } else if (turn === 2) {
+    cardsToDeal = 3; // Turn 2: The Flop (3 cards)
+  } else if (turn === 3 || turn === 4) {
+    cardsToDeal = 1; // Turn 3: The Turn, Turn 4: The River (1 card each)
   }
 
   for (let i = 0; i < cardsToDeal; i++) {
