@@ -127,11 +127,18 @@ npm test
 
 ## 📚 Documentation
 
-- **[REQUIREMENTS.md](REQUIREMENTS.md)** - Complete game requirements and specifications
-- **[TDD_MVP_PLAN.md](TDD_MVP_PLAN.md)** - 5-week sprint plan with TDD approach
-- **[TESTING.md](TESTING.md)** - Comprehensive testing guide
-- **[TYPE_SAFETY.md](TYPE_SAFETY.md)** - JSDoc type safety guide (TypeScript-like types without compilation)
-- **[TEST_SETUP_COMPLETE.md](TEST_SETUP_COMPLETE.md)** - Test infrastructure overview
+### Core Documentation
+- **[docs/REQUIREMENTS.md](docs/REQUIREMENTS.md)** - Complete game requirements and specifications
+- **[docs/TESTING.md](docs/TESTING.md)** - Comprehensive testing guide
+- **[docs/TYPE_SAFETY.md](docs/TYPE_SAFETY.md)** - JSDoc type safety guide (TypeScript-like types without compilation)
+
+### Sprint Planning
+- **[docs/sprints/README.md](docs/sprints/README.md)** - Sprint overview and index
+- **[docs/sprints/sprint-1.md](docs/sprints/sprint-1.md)** - Sprint 1: Core Engine (Week 1-2)
+- **[docs/sprints/sprint-2.md](docs/sprints/sprint-2.md)** - Sprint 2: Visual Design (Week 3)
+- **[docs/sprints/sprint-3.md](docs/sprints/sprint-3.md)** - Sprint 3: Animations (Week 4)
+- **[docs/sprints/sprint-4.md](docs/sprints/sprint-4.md)** - Sprint 4: Polish (Week 5)
+- **[docs/sprints/post-mvp.md](docs/sprints/post-mvp.md)** - Post-MVP features
 
 ## 🎨 Visual Demo
 
