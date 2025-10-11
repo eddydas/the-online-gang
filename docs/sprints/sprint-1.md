@@ -118,18 +118,20 @@
 #### 1.8 Game State Machine (TDD)
 - **Priority:** CRITICAL
 - **Estimate:** 10 hours
+- **Status:** ✅ COMPLETE
 - **Tests First:**
-  - ✅ State transitions: LOBBY → CARD_DEAL → READY_UP → TOKEN_TRADING → TURN_COMPLETE
+  - ✅ State transitions: LOBBY → READY_UP → TOKEN_TRADING → TURN_COMPLETE
   - ✅ Turn progression (1 → 2 → 3 → 4)
   - ✅ Ready-up logic (all players must ready)
   - ✅ Turn completion logic (all players proceed)
   - ✅ Game reset to lobby
 - **Implementation:**
   - State structure (players, deck, cards, tokens, turn, phase)
-  - Phase state machine
+  - Phase state machine (READY_UP combines card dealing + ready signaling)
   - Ready-up tracking
   - Turn advancement
   - State broadcast (host authority)
+- **Note:** CARD_DEAL phase was removed - cards are dealt instantly when entering READY_UP phase
 
 #### 1.9 Turn Flow
 - **Priority:** CRITICAL
