@@ -45,24 +45,14 @@ describe('Game State Machine', () => {
   });
 
   describe('Phase Transitions', () => {
-    test('should transition from LOBBY to CARD_DEAL on game start', () => {
+    test('should transition from LOBBY to READY_UP on game start', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
 
       state = startGame(state);
-
-      expect(state.phase).toBe('CARD_DEAL');
-      expect(state.turn).toBe(1);
-    });
-
-    test('should transition from CARD_DEAL to READY_UP after dealing', () => {
-      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
-      let state = createInitialState(players);
-      state = startGame(state);
-
-      state = advancePhase(state);
 
       expect(state.phase).toBe('READY_UP');
+      expect(state.turn).toBe(1);
       expect(state.readyStatus).toEqual({ p1: false, p2: false });
     });
 
@@ -70,7 +60,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // To READY_UP
 
       state = setPlayerReady(state, 'p1', true);
       expect(allPlayersReady(state)).toBe(false);
@@ -83,7 +72,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // To READY_UP
 
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
@@ -97,7 +85,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // To READY_UP
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // To TOKEN_TRADING
@@ -113,7 +100,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state); // Turn 1
-      state = advancePhase(state); // READY_UP
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
@@ -121,9 +107,9 @@ describe('Game State Machine', () => {
 
       expect(state.turn).toBe(1);
 
-      state = advancePhase(state); // Should go to CARD_DEAL for turn 2
+      state = advancePhase(state); // Should go to READY_UP for turn 2
 
-      expect(state.phase).toBe('CARD_DEAL');
+      expect(state.phase).toBe('READY_UP');
       expect(state.turn).toBe(2);
     });
 
@@ -134,13 +120,12 @@ describe('Game State Machine', () => {
 
       // Complete 4 turns
       for (let i = 1; i <= 4; i++) {
-        state = advancePhase(state); // READY_UP
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
         state = advancePhase(state); // TURN_COMPLETE
         if (i < 4) {
-          state = advancePhase(state); // CARD_DEAL for next turn
+          state = advancePhase(state); // READY_UP for next turn
         }
       }
 
@@ -158,13 +143,12 @@ describe('Game State Machine', () => {
       const turns = [];
       for (let i = 1; i <= 4; i++) {
         turns.push(state.turn);
-        state = advancePhase(state); // READY_UP
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
         state = advancePhase(state); // TURN_COMPLETE
         if (i < 4) {
-          state = advancePhase(state); // CARD_DEAL
+          state = advancePhase(state); // READY_UP
         }
       }
 
@@ -188,16 +172,14 @@ describe('Game State Machine', () => {
       let state = createInitialState(players);
       state = startGame(state); // Turn 1
 
-      state = advancePhase(state); // READY_UP
       expect(state.communityCards).toHaveLength(0); // Turn 1: no community cards
 
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
       state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // CARD_DEAL turn 2
+      state = advancePhase(state); // READY_UP turn 2
 
-      state = advancePhase(state); // READY_UP
       expect(state.communityCards).toHaveLength(3); // Turn 2: flop (3 cards)
     });
   });
@@ -222,7 +204,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // READY_UP
 
       expect(state.readyStatus).toEqual({ p1: false, p2: false });
       expect(allPlayersReady(state)).toBe(false);
@@ -232,7 +213,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // READY_UP
 
       state = setPlayerReady(state, 'p1', true);
 
@@ -245,7 +225,6 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // READY_UP
 
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
@@ -257,13 +236,10 @@ describe('Game State Machine', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
-      state = advancePhase(state); // READY_UP
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
       state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // CARD_DEAL turn 2
-
       state = advancePhase(state); // READY_UP turn 2
 
       expect(state.readyStatus).toEqual({ p1: false, p2: false });
@@ -278,20 +254,19 @@ describe('Game State Machine', () => {
 
       // Complete game to END_GAME
       for (let i = 1; i <= 4; i++) {
-        state = advancePhase(state); // READY_UP
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
         state = advancePhase(state); // TURN_COMPLETE
         if (i < 4) {
-          state = advancePhase(state); // CARD_DEAL
+          state = advancePhase(state); // READY_UP
         }
       }
       state = advancePhase(state); // END_GAME
 
       state = resetForNextGame(state);
 
-      expect(state.phase).toBe('CARD_DEAL');
+      expect(state.phase).toBe('READY_UP');
       expect(state.turn).toBe(1);
       expect(state.communityCards).toEqual([]);
       expect(state.players[0].id).toBe('p1'); // Same player IDs
@@ -311,7 +286,7 @@ describe('Game State Machine', () => {
       const newState = startGame(state);
 
       expect(state.phase).toBe(originalPhase);
-      expect(newState.phase).toBe('CARD_DEAL');
+      expect(newState.phase).toBe('READY_UP');
       expect(newState).not.toBe(state);
     });
   });

@@ -13,7 +13,7 @@ const { MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS } = require('./constants');
  */
 
 /**
- * @typedef {'LOBBY'|'CARD_DEAL'|'READY_UP'|'TOKEN_TRADING'|'TURN_COMPLETE'|'END_GAME'} GamePhase
+ * @typedef {'LOBBY'|'READY_UP'|'TOKEN_TRADING'|'TURN_COMPLETE'|'END_GAME'} GamePhase
  */
 
 /**
@@ -58,7 +58,8 @@ function createInitialState(players) {
 }
 
 /**
- * Starts the game (LOBBY → CARD_DEAL)
+ * Starts the game (LOBBY → READY_UP)
+ * Deals hole cards and community cards for turn 1
  * @param {GameState} state - Current state
  * @returns {GameState} Updated state
  */
@@ -75,14 +76,25 @@ function startGame(state) {
     holeCards: holeCards[i]
   }));
 
+  // Deal community cards for turn 1 (0 cards)
+  const { communityCards } = dealCommunityCards(remainingDeck, 1);
+
+  // Initialize ready status
+  /** @type {Object.<string, boolean>} */
+  const readyStatus = {};
+  playersWithCards.forEach(p => {
+    readyStatus[p.id] = false;
+  });
+
   return {
     ...state,
-    phase: 'CARD_DEAL',
+    phase: 'READY_UP',
     turn: 1,
     players: playersWithCards,
     deck: remainingDeck,
     tokens: generateTokens(state.players.length),
-    communityCards: []
+    communityCards,
+    readyStatus
   };
 }
 
@@ -96,25 +108,6 @@ function advancePhase(state) {
     case 'LOBBY':
       // Use startGame() instead
       return state;
-
-    case 'CARD_DEAL':
-      // Deal community cards for this turn
-      const { communityCards } = dealCommunityCards(state.deck, state.turn);
-      const allCommunityCards = [...state.communityCards, ...communityCards];
-
-      // Initialize ready status
-      /** @type {Object.<string, boolean>} */
-      const readyStatus = {};
-      state.players.forEach(p => {
-        readyStatus[p.id] = false;
-      });
-
-      return {
-        ...state,
-        phase: 'READY_UP',
-        communityCards: allCommunityCards,
-        readyStatus
-      };
 
     case 'READY_UP':
       // Only advance if all players ready
@@ -135,10 +128,23 @@ function advancePhase(state) {
     case 'TURN_COMPLETE':
       // Advance turn or end game
       if (state.turn < TOTAL_TURNS) {
+        // Deal community cards for next turn
+        const { communityCards } = dealCommunityCards(state.deck, state.turn + 1);
+        const allCommunityCards = [...state.communityCards, ...communityCards];
+
+        // Reset ready status for new turn
+        /** @type {Object.<string, boolean>} */
+        const readyStatus = {};
+        state.players.forEach(p => {
+          readyStatus[p.id] = false;
+        });
+
         return {
           ...state,
-          phase: 'CARD_DEAL',
-          turn: state.turn + 1
+          phase: 'READY_UP',
+          turn: state.turn + 1,
+          communityCards: allCommunityCards,
+          readyStatus
         };
       } else {
         return {
