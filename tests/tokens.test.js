@@ -55,8 +55,9 @@ describe('Token System', () => {
       const updatedTokens = applyTokenAction(tokens, action);
       const token2 = updatedTokens.find(t => t.number === 2);
 
-      expect(token2.ownerId).toBe('player1');
-      expect(token2.timestamp).toBe(1000);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player1');
+      expect(token2?.timestamp).toBe(1000);
     });
 
     test('should allow different players to select different tokens', () => {
@@ -79,8 +80,10 @@ describe('Token System', () => {
       const token1 = tokens.find(t => t.number === 1);
       const token3 = tokens.find(t => t.number === 3);
 
-      expect(token1.ownerId).toBe('player1');
-      expect(token3.ownerId).toBe('player2');
+      expect(token1).toBeDefined();
+      expect(token3).toBeDefined();
+      expect(token1?.ownerId).toBe('player1');
+      expect(token3?.ownerId).toBe('player2');
     });
 
     test('should not modify original tokens array', () => {
@@ -120,8 +123,9 @@ describe('Token System', () => {
       });
 
       const token2 = tokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player2');
-      expect(token2.timestamp).toBe(1500);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player2');
+      expect(token2?.timestamp).toBe(1500);
     });
 
     test('should allow stealing from unowned token (same as select)', () => {
@@ -135,7 +139,8 @@ describe('Token System', () => {
       });
 
       const token2 = updatedTokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player1');
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player1');
     });
 
     test('should handle multiple steals of same token', () => {
@@ -163,8 +168,9 @@ describe('Token System', () => {
       });
 
       const token2 = tokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player3');
-      expect(token2.timestamp).toBe(2000);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player3');
+      expect(token2?.timestamp).toBe(2000);
     });
   });
 
@@ -190,8 +196,9 @@ describe('Token System', () => {
       });
 
       const token2 = tokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player2');
-      expect(token2.timestamp).toBe(999);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player2');
+      expect(token2?.timestamp).toBe(999);
     });
 
     test('should reject later timestamp during conflict', () => {
@@ -213,8 +220,9 @@ describe('Token System', () => {
       });
 
       const token2 = tokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player1');
-      expect(token2.timestamp).toBe(1000);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player1');
+      expect(token2?.timestamp).toBe(1000);
     });
 
     test('should allow explicit stealing regardless of timestamp', () => {
@@ -236,8 +244,9 @@ describe('Token System', () => {
       });
 
       const token2 = tokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player2');
-      expect(token2.timestamp).toBe(1500);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player2');
+      expect(token2?.timestamp).toBe(1500);
     });
   });
 
@@ -311,8 +320,9 @@ describe('Token System', () => {
       });
 
       const token2 = tokens.find(t => t.number === 2);
-      expect(token2.ownerId).toBe('player1');
-      expect(token2.timestamp).toBe(1500);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBe('player1');
+      expect(token2?.timestamp).toBe(1500);
     });
 
     test('should handle player switching tokens', () => {
@@ -337,8 +347,10 @@ describe('Token System', () => {
       const token1 = tokens.find(t => t.number === 1);
       const token2 = tokens.find(t => t.number === 2);
 
-      expect(token1.ownerId).toBeNull(); // Token 1 released
-      expect(token2.ownerId).toBe('player1'); // Token 2 owned
+      expect(token1).toBeDefined();
+      expect(token2).toBeDefined();
+      expect(token1?.ownerId).toBeNull(); // Token 1 released
+      expect(token2?.ownerId).toBe('player1'); // Token 2 owned
     });
   });
 
