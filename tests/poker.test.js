@@ -1,5 +1,5 @@
 // @ts-check
-const { evaluateHand, compareHands } = require('../src/poker');
+import { evaluateHand, compareHands } from '../src/browser/poker.js';
 
 describe('Poker Hand Evaluation', () => {
 

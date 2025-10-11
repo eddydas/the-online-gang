@@ -1,6 +1,6 @@
 // @ts-check
-const { determineWinLoss, sortPlayersByHandStrength } = require('../src/winCondition');
-const { MAX_PLAYERS } = require('../src/constants');
+import { determineWinLoss, sortPlayersByHandStrength } from '../src/browser/winCondition.js';
+import { MAX_PLAYERS } from '../src/browser/constants.js';
 
 describe('Win/Loss Determination', () => {
 

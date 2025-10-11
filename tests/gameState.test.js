@@ -1,12 +1,11 @@
 // @ts-check
-const {
-  createInitialState,
+import { createInitialState,
   advancePhase,
   setPlayerReady,
   allPlayersReady,
   startGame,
   resetForNextGame
-} = require('../src/gameState');
+ } from '../src/browser/gameState.js';
 
 describe('Game State Machine', () => {
 

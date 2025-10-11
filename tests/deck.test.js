@@ -1,5 +1,5 @@
-const { createDeck, shuffleDeck, randomizeCardBackColor, dealHoleCards, dealCommunityCards, RANKS, SUITS } = require('../src/deck');
-const { MIN_PLAYERS, MAX_PLAYERS } = require('../src/constants');
+import { createDeck, shuffleDeck, randomizeCardBackColor, dealHoleCards, dealCommunityCards, RANKS, SUITS } from '../src/browser/deck.js';
+import { MIN_PLAYERS, MAX_PLAYERS } from '../src/browser/constants.js';
 
 describe('Deck Module', () => {
 

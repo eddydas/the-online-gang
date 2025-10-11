@@ -1,6 +1,6 @@
 // @ts-check
-const { generateTokens, applyTokenAction, initializePlayerTokenHistory, updateTokenHistory } = require('../src/tokens');
-const { MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS } = require('../src/constants');
+import { generateTokens, applyTokenAction, initializePlayerTokenHistory, updateTokenHistory } from '../src/browser/tokens.js';
+import { MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS } from '../src/browser/constants.js';
 
 describe('Token System', () => {
 
