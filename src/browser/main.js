@@ -229,10 +229,16 @@ async function initializeGame() {
     await gameController.initializeAsClient(peerIdFromUrl);
 
     // Update lobby UI with received state (will be sent by host)
-    gameController.updateLobbyUI = updateLobbyUI;
+    const originalUpdateLobbyUI = gameController.updateLobbyUI.bind(gameController);
+    gameController.updateLobbyUI = () => {
+      originalUpdateLobbyUI();
+      updateLobbyUI();
+    };
+
+    const originalUpdateGameUI = gameController.updateGameUI.bind(gameController);
     gameController.updateGameUI = () => {
       showGameScreen();
-      // TODO: Update game UI elements
+      originalUpdateGameUI();
     };
   } else {
     // Host mode - create new game
@@ -249,10 +255,16 @@ async function initializeGame() {
     }
 
     // Update lobby UI
-    gameController.updateLobbyUI = updateLobbyUI;
+    const originalUpdateLobbyUI = gameController.updateLobbyUI.bind(gameController);
+    gameController.updateLobbyUI = () => {
+      originalUpdateLobbyUI();
+      updateLobbyUI();
+    };
+
+    const originalUpdateGameUI = gameController.updateGameUI.bind(gameController);
     gameController.updateGameUI = () => {
       showGameScreen();
-      // TODO: Update game UI elements
+      originalUpdateGameUI();
     };
 
     updateLobbyUI();
