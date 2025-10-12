@@ -147,9 +147,6 @@ export function createTokenElement(token, turn = 1, interactive = false) {
       <!-- Inner circle (chip face) with gradient -->
       <circle cx="50" cy="50" r="37" fill="url(#chip-grad-${token.number}-${turn})" />
 
-      <!-- Highlight for 3D effect -->
-      <ellipse cx="50" cy="40" rx="28" ry="20" fill="rgba(255,255,255,0.1)" />
-
       <!-- Stars showing number -->
       ${stars}
 
