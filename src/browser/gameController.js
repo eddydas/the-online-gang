@@ -12,6 +12,11 @@ import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 
 /**
+ * @typedef {import('./winCondition.js').PlayerWithHand} PlayerWithHand
+ * @typedef {import('./poker.js').HandResult} HandResult
+ */
+
+/**
  * Main game controller that coordinates P2P, game state, and UI
  */
 export class GameController {
@@ -293,7 +298,7 @@ export class GameController {
 
     // Build players array with hand evaluation for determineWinLoss
     // Filter to only include players who have both a token and evaluated hand
-    /** @type {import('./winCondition.js').PlayerWithHand[]} */
+    /** @type {PlayerWithHand[]} */
     const playersWithHands = this.gameState.players
       .map((p) => {
         // Get current token from token list
@@ -306,12 +311,12 @@ export class GameController {
           name: p.name,
           holeCards: p.holeCards,
           currentToken: currentToken?.number,
-          hand: /** @type {import('./poker.js').HandResult | undefined} */ (undefined) // TODO: Get from evaluated hands
+          hand: /** @type {HandResult | undefined} */ (undefined) // TODO: Get from evaluated hands
         };
       })
       .filter((p) => p.currentToken !== undefined && p.hand !== undefined)
       // Type assertion after filtering ensures both fields are non-null
-      .map(p => /** @type {import('./winCondition.js').PlayerWithHand} */ (p));
+      .map(p => /** @type {PlayerWithHand} */ (p));
 
     // Determine win/loss
     const winLossResult = determineWinLoss(playersWithHands);
