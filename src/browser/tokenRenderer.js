@@ -33,31 +33,31 @@ function generateStarPattern(number) {
   const patterns = {
     1: [[50, 50]],
     2: [[35, 50], [65, 50]],
-    3: [[35, 40], [65, 40], [50, 60]],
+    3: [[50, 35], [40, 60], [60, 60]],
     4: [[35, 35], [65, 35], [35, 65], [65, 65]],
     5: [[50, 30], [30, 50], [70, 50], [38, 68], [62, 68]],
     6: [[30, 35], [50, 35], [70, 35], [30, 65], [50, 65], [70, 65]],
-    7: [[50, 25], [30, 40], [70, 40], [25, 60], [75, 60], [35, 75], [65, 75]],
+    7: [[50, 25], [30, 42], [70, 42], [25, 58], [75, 58], [38, 75], [62, 75]],
     8: [[30, 30], [50, 30], [70, 30], [30, 50], [70, 50], [30, 70], [50, 70], [70, 70]]
   };
 
   const positions = patterns[/** @type {1|2|3|4|5|6|7|8} */ (number)] || patterns[1];
 
   return positions.map(([cx, cy]) => {
-    const size = 5;
-    // 5-pointed star
+    const size = 6;
+    // 5-pointed star with better proportions
     return `
       <path d="M ${cx},${cy - size}
-               L ${cx + size * 0.3},${cy - size * 0.3}
+               L ${cx + size * 0.35},${cy - size * 0.35}
                L ${cx + size},${cy - size * 0.3}
-               L ${cx + size * 0.5},${cy + size * 0.3}
-               L ${cx + size * 0.7},${cy + size}
+               L ${cx + size * 0.5},${cy + size * 0.35}
+               L ${cx + size * 0.65},${cy + size}
                L ${cx},${cy + size * 0.5}
-               L ${cx - size * 0.7},${cy + size}
-               L ${cx - size * 0.5},${cy + size * 0.3}
+               L ${cx - size * 0.65},${cy + size}
+               L ${cx - size * 0.5},${cy + size * 0.35}
                L ${cx - size},${cy - size * 0.3}
-               L ${cx - size * 0.3},${cy - size * 0.3} Z"
-            fill="#fff" />
+               L ${cx - size * 0.35},${cy - size * 0.35} Z"
+            fill="#f39c12" stroke="#d68910" stroke-width="0.3" />
     `;
   }).join('');
 }
@@ -123,21 +123,38 @@ export function createTokenElement(token, turn = 1, interactive = false) {
 
   tokenEl.innerHTML = `
     <svg viewBox="0 0 100 100" class="token-svg">
-      <!-- Outer circle (border) -->
-      <circle cx="50" cy="50" r="49" fill="#2c3e50" />
+      <!-- 3D shadow layer -->
+      <ellipse cx="50" cy="52" rx="48" ry="46" fill="rgba(0,0,0,0.3)" />
+
+      <!-- Outer circle (border) with gradient -->
+      <defs>
+        <radialGradient id="border-grad-${token.number}-${turn}">
+          <stop offset="0%" stop-color="#1a1a1a" />
+          <stop offset="100%" stop-color="#0a0a0a" />
+        </radialGradient>
+        <radialGradient id="chip-grad-${token.number}-${turn}">
+          <stop offset="0%" stop-color="#3a4a5a" />
+          <stop offset="100%" stop-color="#2c3e50" />
+        </radialGradient>
+      </defs>
+
+      <circle cx="50" cy="50" r="49" fill="url(#border-grad-${token.number}-${turn})" />
 
       <!-- Colored stripe ring -->
-      <circle cx="50" cy="50" r="48" fill="#34495e" />
+      <circle cx="50" cy="50" r="47" fill="#34495e" />
       ${stripes}
 
-      <!-- Inner circle (chip face) -->
-      <circle cx="50" cy="50" r="37" fill="#2c3e50" />
+      <!-- Inner circle (chip face) with gradient -->
+      <circle cx="50" cy="50" r="37" fill="url(#chip-grad-${token.number}-${turn})" />
+
+      <!-- Highlight for 3D effect -->
+      <ellipse cx="50" cy="40" rx="28" ry="20" fill="rgba(255,255,255,0.1)" />
 
       <!-- Stars showing number -->
       ${stars}
 
-      <!-- Token number text -->
-      <text x="50" y="95" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">
+      <!-- Token number text (smaller, bottom) -->
+      <text x="50" y="94" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-weight="bold">
         ${token.number}
       </text>
     </svg>
@@ -181,11 +198,11 @@ export function addTokenStyles() {
   style.id = 'token-styles';
   style.textContent = `
     .token {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       display: inline-block;
       margin: 5px;
-      transition: transform 0.3s, filter 0.3s;
+      transition: transform 0.2s ease, filter 0.2s ease;
     }
 
     .token.interactive {
@@ -193,14 +210,18 @@ export function addTokenStyles() {
     }
 
     .token.interactive:hover {
-      transform: scale(1.1) translateY(-5px);
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+      transform: scale(1.1);
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5)) brightness(1.1);
+    }
+
+    .token.interactive:active {
+      transform: scale(1.05);
     }
 
     .token-svg {
       width: 100%;
       height: 100%;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
     }
 
     .token-pool {
@@ -209,34 +230,92 @@ export function addTokenStyles() {
       justify-content: center;
       align-items: center;
       padding: 20px;
-      gap: 10px;
+      gap: 12px;
     }
 
     .token.selected {
       transform: scale(1.15);
-      filter: drop-shadow(0 0 10px rgba(52, 152, 219, 0.8));
+      filter: drop-shadow(0 0 16px rgba(243, 156, 18, 0.8));
+    }
+
+    .token.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(50%);
+    }
+
+    .token.disabled:hover {
+      transform: none;
+      filter: grayscale(50%);
+    }
+
+    /* Mini tokens for player history */
+    .token.mini {
+      width: 40px;
+      height: 40px;
+      margin: 2px;
+    }
+
+    .token.mini .token-svg {
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
     }
 
     .player-tokens {
       display: flex;
       gap: 8px;
       margin: 10px 0;
+      align-items: center;
     }
 
     .player-token-slot {
-      width: 50px;
-      height: 50px;
+      width: 40px;
+      height: 40px;
       border: 2px dashed #555;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #888;
-      font-size: 12px;
+      font-size: 10px;
+      text-align: center;
+      position: relative;
     }
 
     .player-token-slot.filled {
       border: none;
+    }
+
+    .token-placeholder {
+      width: 40px;
+      height: 40px;
+      border: 2px dashed rgba(149, 165, 166, 0.5);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #7f8c8d;
+      text-align: center;
+      padding: 4px;
+    }
+
+    /* Responsive sizing */
+    @media (max-width: 768px) {
+      .token {
+        width: 60px;
+        height: 60px;
+        margin: 3px;
+      }
+
+      .token.mini {
+        width: 35px;
+        height: 35px;
+      }
+
+      .token-pool {
+        gap: 8px;
+        padding: 12px;
+      }
     }
   `;
 
