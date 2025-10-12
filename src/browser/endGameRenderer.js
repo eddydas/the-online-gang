@@ -6,6 +6,7 @@
 
 import { createCardElement } from './cardRenderer.js';
 import { createTokenElement } from './tokenRenderer.js';
+import { createAvatarElement } from './avatarManager.js';
 
 /**
  * @typedef {import('./deck.js').Card} Card
@@ -81,10 +82,21 @@ export function createEndGameTable(winLossResult, gameState) {
     rankCell.textContent = String(index + 1);
     row.appendChild(rankCell);
 
-    // Player name column
+    // Player name column (with avatar)
     const nameCell = document.createElement('td');
     nameCell.className = 'name-cell';
-    nameCell.textContent = player.name;
+
+    const playerDisplay = document.createElement('div');
+    playerDisplay.className = 'player-display';
+
+    const avatar = createAvatarElement(player, 'small');
+    playerDisplay.appendChild(avatar);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = player.name;
+    playerDisplay.appendChild(nameSpan);
+
+    nameCell.appendChild(playerDisplay);
     row.appendChild(nameCell);
 
     // Token columns (Turn 1-4)

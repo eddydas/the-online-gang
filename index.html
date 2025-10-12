@@ -429,6 +429,88 @@
         --table-height: 60vh;
       }
     }
+
+    /* === Avatar Styles === */
+
+    /* Avatar Container */
+    .player-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--avatar-color, #95a5a6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* Avatar Initials */
+    .avatar-initials {
+      font-size: 24px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Avatar Sizes */
+    .player-avatar.small {
+      width: 40px;
+      height: 40px;
+      border-width: 2px;
+    }
+
+    .player-avatar.small .avatar-initials {
+      font-size: 16px;
+    }
+
+    .player-avatar.large {
+      width: 80px;
+      height: 80px;
+      border-width: 4px;
+    }
+
+    .player-avatar.large .avatar-initials {
+      font-size: 32px;
+    }
+
+    /* Player Display (Avatar + Name) */
+    .player-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-name-label {
+      font-size: 16px;
+      font-weight: 500;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Avatar Mobile Responsive */
+    @media (max-width: 768px) {
+      .player-avatar {
+        width: 48px;
+        height: 48px;
+      }
+
+      .avatar-initials {
+        font-size: 18px;
+      }
+
+      .player-display {
+        gap: 8px;
+      }
+
+      .player-name-label {
+        font-size: 14px;
+      }
+    }
   </style>
 
   <script type="module" src="/src/browser/main.js"></script>

@@ -4,6 +4,7 @@ import { GameController } from './gameController.js';
 import { addTokenStyles } from './tokenRenderer.js';
 import { addEndGameStyles } from './endGameRenderer.js';
 import { addPlayerStyles } from './playerRenderer.js';
+import { createAvatarElement } from './avatarManager.js';
 
 /**
  * Main entry point - initializes the game
@@ -97,15 +98,40 @@ function updateLobbyUI() {
   const startGameButton = document.getElementById('start-game-button');
 
   if (playersContainer) {
-    playersContainer.innerHTML = gameController.lobbyState
-      .map(player => `
-        <div class="player-item ${player.isReady ? 'ready' : ''}">
-          <span class="player-name">${player.name}</span>
-          ${player.isHost ? '<span class="host-badge">HOST</span>' : ''}
-          ${player.isReady ? '<span class="ready-badge">✓</span>' : ''}
-        </div>
-      `)
-      .join('');
+    playersContainer.innerHTML = '';
+
+    gameController.lobbyState.forEach(player => {
+      const playerItem = document.createElement('div');
+      playerItem.className = `player-item ${player.isReady ? 'ready' : ''}`;
+
+      // Add avatar
+      const avatar = createAvatarElement(player, 'medium');
+      playerItem.appendChild(avatar);
+
+      // Add name
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'player-name';
+      nameSpan.textContent = player.name;
+      playerItem.appendChild(nameSpan);
+
+      // Add host badge
+      if (player.isHost) {
+        const hostBadge = document.createElement('span');
+        hostBadge.className = 'host-badge';
+        hostBadge.textContent = 'HOST';
+        playerItem.appendChild(hostBadge);
+      }
+
+      // Add ready badge
+      if (player.isReady) {
+        const readyBadge = document.createElement('span');
+        readyBadge.className = 'ready-badge';
+        readyBadge.textContent = '✓';
+        playerItem.appendChild(readyBadge);
+      }
+
+      playersContainer.appendChild(playerItem);
+    });
   }
 
   const readyCount = gameController.lobbyState.filter(p => p.isReady).length;

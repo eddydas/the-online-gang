@@ -1,5 +1,7 @@
 // @ts-check
 
+import { createAvatarElement } from './avatarManager.js';
+
 /**
  * @typedef {Object} PlayerInfo
  * @property {string} id - Player ID
@@ -19,7 +21,7 @@ export function renderPlayers(container, players) {
 
   players.forEach((player, index) => {
     const playerDiv = document.createElement('div');
-    playerDiv.className = 'player-avatar';
+    playerDiv.className = 'table-player';
     playerDiv.classList.add(`player-position-${index}`);
 
     if (player.isCurrentPlayer) {
@@ -30,9 +32,13 @@ export function renderPlayers(container, players) {
       playerDiv.classList.add('ready');
     }
 
+    // Add avatar
+    const avatar = createAvatarElement(player, 'large');
+    playerDiv.appendChild(avatar);
+
     // Player name
     const nameDiv = document.createElement('div');
-    nameDiv.className = 'player-name';
+    nameDiv.className = 'player-name-label';
     nameDiv.textContent = player.name;
     if (player.isCurrentPlayer) {
       nameDiv.textContent += ' (You)';
@@ -68,7 +74,7 @@ export function addPlayerStyles() {
   const style = document.createElement('style');
   style.id = 'player-styles';
   style.textContent = `
-    #player-avatars {
+    #player-positions {
       position: relative;
       display: flex;
       justify-content: space-around;
@@ -78,32 +84,22 @@ export function addPlayerStyles() {
       gap: 20px;
     }
 
-    .player-avatar {
-      background: #444;
-      border: 3px solid #666;
-      border-radius: 8px;
-      padding: 12px 16px;
-      min-width: 120px;
-      text-align: center;
+    .table-player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
       position: relative;
       transition: all 0.3s ease;
     }
 
-    .player-avatar.current-player {
+    .table-player.current-player .player-avatar {
       border-color: #3498db;
-      background: #2c3e50;
+      box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
     }
 
-    .player-avatar.ready {
+    .table-player.ready .player-avatar {
       border-color: #2ecc71;
-      background: #1e4d2b;
-    }
-
-    .player-name {
-      font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 4px;
-      color: #fff;
     }
 
     .player-ready-badge {
@@ -126,25 +122,25 @@ export function addPlayerStyles() {
 
     /* Position players around the table for better visual layout */
     @media (min-width: 768px) {
-      #player-avatars {
+      #player-positions {
         min-height: 100px;
       }
 
       /* 2 players: left and right */
-      .player-avatar.player-position-0 {
+      .table-player.player-position-0 {
         order: 0;
       }
 
-      .player-avatar.player-position-1 {
+      .table-player.player-position-1 {
         order: 1;
       }
 
       /* 3+ players: distributed around */
-      .player-avatar.player-position-2 {
+      .table-player.player-position-2 {
         order: 2;
       }
 
-      .player-avatar.player-position-3 {
+      .table-player.player-position-3 {
         order: 3;
       }
     }
