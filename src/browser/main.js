@@ -5,6 +5,7 @@ import { addTokenStyles } from './tokenRenderer.js';
 import { addEndGameStyles } from './endGameRenderer.js';
 import { addPlayerStyles } from './playerRenderer.js';
 import { createAvatarElement } from './avatarManager.js';
+import { createTokenElement } from './tokenRenderer.js';
 
 /**
  * Main entry point - initializes the game
@@ -86,7 +87,48 @@ function initializeLobbyUI() {
     <div id="lobby-status">
       <p id="players-ready-text">Players Ready: 0 out of 0</p>
     </div>
+    <div id="token-showcase">
+      <h3 style="color: #fff; margin-top: 30px; margin-bottom: 15px;">Token Design Showcase</h3>
+      <div id="token-showcase-grid"></div>
+    </div>
   `;
+
+  // Render token showcase
+  renderTokenShowcase();
+}
+
+/**
+ * Render token showcase grid
+ */
+function renderTokenShowcase() {
+  const showcaseGrid = document.getElementById('token-showcase-grid');
+  if (!showcaseGrid) return;
+
+  showcaseGrid.innerHTML = '';
+
+  const turnNames = ['Turn 1', 'Turn 2', 'Turn 3', 'Turn 4'];
+
+  // Create header row with turn labels
+  for (let turn = 1; turn <= 4; turn++) {
+    const headerCell = document.createElement('div');
+    headerCell.className = 'token-showcase-header';
+    headerCell.textContent = turnNames[turn - 1];
+    showcaseGrid.appendChild(headerCell);
+  }
+
+  // Create 8 rows (one for each token number)
+  for (let number = 1; number <= 8; number++) {
+    // Create all 4 turns for this token number
+    for (let turn = 1; turn <= 4; turn++) {
+      const tokenCell = document.createElement('div');
+      tokenCell.className = 'token-showcase-cell';
+
+      const token = createTokenElement({ number, ownerId: null, timestamp: 0 }, turn, false);
+      tokenCell.appendChild(token);
+
+      showcaseGrid.appendChild(tokenCell);
+    }
+  }
 }
 
 /**
