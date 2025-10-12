@@ -422,7 +422,7 @@ export class GameController {
     }
 
     // Update UI
-    this.updateUI();
+    this.updateGameUI();
   }
 
   /**
