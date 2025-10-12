@@ -177,14 +177,17 @@ function shuffleDeck(deck) { /* ... */ }
 4. Run test (confirm green)
 5. Refactor
 6. Run test (confirm still green)
-7. Commit
+7. **BEFORE COMMIT:** Run both verification commands:
+   - `npm test` - All tests must pass
+   - `npm run typecheck` - No TypeScript errors allowed
+8. Commit only when both pass
 
 **Test file location:** `tests/[module].test.js`
 
 **Example pattern:**
 ```javascript
 // tests/poker.test.js
-const { evaluateHand } = require('../src/poker');
+import { evaluateHand } from '../src/browser/poker.js';
 
 describe('Poker Hand Evaluation', () => {
   test('should recognize a pair of Aces', () => {
@@ -198,6 +201,14 @@ describe('Poker Hand Evaluation', () => {
     expect(result.rank).toBe(2);
   });
 });
+```
+
+**CRITICAL: Always verify before commit:**
+```bash
+npm test              # Must pass
+npm run typecheck     # Must have no errors
+git add ...
+git commit ...
 ```
 
 ## Implementation Rules
