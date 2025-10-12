@@ -181,7 +181,7 @@ describe('Integration Tests - Game Flow', () => {
       // P2 steals token 1
       /** @type {TokenAction} */
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'p2',
         tokenNumber: 1,
         timestamp: Date.now() + 1
@@ -566,7 +566,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Charlie steals token 1 from Alice
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'charlie',
         tokenNumber: 1,
         timestamp: Date.now() + 2
@@ -603,7 +603,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Bob steals token 3 from Alice
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'bob',
         tokenNumber: 3,
         timestamp: Date.now() + 10
@@ -613,7 +613,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Alice takes token 2
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'alice',
         tokenNumber: 2,
         timestamp: Date.now() + 11
@@ -649,7 +649,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // More token swapping
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'charlie',
         tokenNumber: 2,
         timestamp: Date.now() + 20
@@ -657,7 +657,7 @@ describe('Integration Tests - Game Flow', () => {
       state = handleTokenAction(state, action);
 
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'alice',
         tokenNumber: 1,
         timestamp: Date.now() + 21
@@ -698,7 +698,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Bob steals token 2 from Charlie
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'bob',
         tokenNumber: 2,
         timestamp: Date.now() + 30
@@ -707,7 +707,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Alice steals token 3 from Bob
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'alice',
         tokenNumber: 3,
         timestamp: Date.now() + 31
@@ -716,7 +716,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Charlie steals token 1 from Alice
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'charlie',
         tokenNumber: 1,
         timestamp: Date.now() + 32
@@ -750,11 +750,14 @@ describe('Integration Tests - Game Flow', () => {
         const tokenId = /** @type {'alice' | 'bob' | 'charlie'} */ (player.id);
         const token = finalTokens[tokenId];
 
+        /** @type {(number | null)[]} */
+        const history = [token ?? null, token ?? null, token ?? null, token ?? null];
+
         return {
           ...player,
           hand: evaluateHand(allCards),
           currentToken: state.tokens.find(t => t.ownerId === player.id)?.number || 0,
-          tokenHistory: [token, token, token, token]
+          tokenHistory: history
         };
       });
 
@@ -892,7 +895,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Some token swapping but keeping wrong order
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'bob',
         tokenNumber: 3,
         timestamp: Date.now() + 10
@@ -900,7 +903,7 @@ describe('Integration Tests - Game Flow', () => {
       state = handleTokenAction(state, action);
 
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'charlie',
         tokenNumber: 1,
         timestamp: Date.now() + 11
@@ -928,7 +931,7 @@ describe('Integration Tests - Game Flow', () => {
       state = advancePhase(state); // TOKEN_TRADING
 
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'alice',
         tokenNumber: 1,
         timestamp: Date.now() + 20
@@ -936,7 +939,7 @@ describe('Integration Tests - Game Flow', () => {
       state = handleTokenAction(state, action);
 
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'charlie',
         tokenNumber: 2,
         timestamp: Date.now() + 21
@@ -1012,11 +1015,14 @@ describe('Integration Tests - Game Flow', () => {
         const tokenId = /** @type {'alice' | 'bob' | 'charlie'} */ (player.id);
         const token = finalTokens[tokenId];
 
+        /** @type {(number | null)[]} */
+        const history = [token ?? null, token ?? null, token ?? null, token ?? null];
+
         return {
           ...player,
           hand: evaluateHand(allCards),
           currentToken: state.tokens.find(t => t.ownerId === player.id)?.number || 0,
-          tokenHistory: [token, token, token, token]
+          tokenHistory: history
         };
       });
 

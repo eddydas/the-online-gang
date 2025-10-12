@@ -425,6 +425,7 @@ describe('Token System', () => {
     });
 
     test('should work with empty token array', () => {
+      /** @type {import('../src/browser/tokens.js').Token[]} */
       const tokens = [];
       const resetTokensState = resetTokens(tokens);
 

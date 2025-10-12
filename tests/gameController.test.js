@@ -193,7 +193,7 @@ describe('GameController', () => {
       expect(updateGameUIMock).toHaveBeenCalledOnce();
 
       // Verify token ownership was updated
-      const token1 = controller.gameState.tokens.find(t => t.number === 1);
+      const token1 = controller.gameState?.tokens.find(t => t.number === 1);
       expect(token1?.ownerId).toBe('player-2');
     });
 
@@ -261,7 +261,7 @@ describe('GameController', () => {
       controller.handleTokenAction(tokenAction);
 
       // Token should remain unchanged (client doesn't process actions)
-      const token1 = controller.gameState.tokens.find(t => t.number === 1);
+      const token1 = controller.gameState?.tokens.find(t => t.number === 1);
       expect(token1?.ownerId).toBeNull();
     });
   });
