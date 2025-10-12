@@ -260,6 +260,7 @@ export class GameController {
 
     this.gameState.tokens = applyTokenAction(this.gameState.tokens, action);
     this.broadcastGameState();
+    this.updateGameUI();
   }
 
   /**
