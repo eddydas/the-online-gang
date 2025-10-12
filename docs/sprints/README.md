@@ -19,7 +19,7 @@
 **Goal:** Complete playable game with win/loss determination and basic end-game table
 
 **Key Deliverables:**
-- ✅ Test infrastructure (Jest)
+- ✅ Test infrastructure (Vitest)
 - ✅ Card system with poker hand evaluation
 - ✅ Token system with trading mechanics
 - ✅ Win/loss determination

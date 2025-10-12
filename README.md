@@ -80,7 +80,7 @@ theeddygang2/
 ├── tests/                 # Test files
 │   └── deck.test.js       # Deck module tests (example)
 ├── demo.html              # Visual mockup for presentations
-├── jest.config.js         # Jest test configuration
+├── vitest.config.js       # Vitest test configuration
 ├── package.json           # Dependencies and scripts
 ├── REQUIREMENTS.md        # Complete game requirements
 ├── TDD_MVP_PLAN.md       # Development sprint plan (5 weeks)
@@ -149,7 +149,7 @@ Open `demo.html` in Safari to see a visual mockup of the game (non-functional, f
 **Current Sprint:** Sprint 1 - Core Game Engine + End Game (Week 1-2)
 
 ### Completed
-- ✅ Test infrastructure setup (Jest)
+- ✅ Test infrastructure setup (Vitest)
 - ✅ Example deck module with 100% coverage
 - ✅ Project structure and documentation
 

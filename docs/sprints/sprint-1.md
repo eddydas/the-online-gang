@@ -9,7 +9,7 @@
 - **Priority:** CRITICAL
 - **Estimate:** 3 hours
 - **Tasks:**
-  - Set up testing framework (Jest or Mocha + Chai)
+  - Set up testing framework (Vitest)
   - Configure test runner
   - Create test file structure (tests/ directory)
   - Set up assertion library

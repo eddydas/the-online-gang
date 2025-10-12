@@ -3,7 +3,7 @@
 ## Test Infrastructure
 
 ### Framework
-- **Jest** - JavaScript testing framework with built-in assertions, mocking, and coverage
+- **Vitest** - Modern testing framework with native ES6 module support, built on Vite
 
 ### Directory Structure
 ```
@@ -12,7 +12,7 @@ theeddygang2/
 │   └── deck.js         # Example: Deck module
 ├── tests/              # Test files
 │   └── deck.test.js    # Example: Deck tests
-├── jest.config.js      # Jest configuration
+├── vitest.config.js    # Vitest configuration
 └── package.json        # npm scripts
 ```
 
@@ -40,7 +40,7 @@ npm run test:coverage
 - **Sprint 3:** >75% coverage (including animations)
 - **Sprint 4:** >90% overall coverage
 
-### Coverage Thresholds (configured in jest.config.js)
+### Coverage Thresholds (configured in vitest.config.js)
 - Branches: 80%
 - Functions: 80%
 - Lines: 80%
@@ -128,7 +128,7 @@ Tests will run automatically on:
 - Main branch push
 - Pre-deployment
 
-## Common Jest Matchers
+## Common Vitest Matchers
 
 ```javascript
 // Equality
@@ -156,8 +156,26 @@ expect(() => fn()).toThrow();
 expect(() => fn()).toThrow(Error);
 ```
 
+## Mocking with Vitest
+
+Vitest provides `vi` for mocking:
+
+```javascript
+// Mock functions
+const mockFn = vi.fn();
+
+// Mock implementation
+mockFn.mockReturnValue(42);
+mockFn.mockImplementation(() => 'result');
+
+// Assertions
+expect(mockFn).toHaveBeenCalled();
+expect(mockFn).toHaveBeenCalledWith(arg);
+```
+
 ## Next Steps
 
 1. Run `npm test` to verify setup
 2. Check test coverage: `npm run test:coverage`
-3. Begin TDD cycle for next feature (poker hand evaluation)
+3. Begin TDD cycle for next feature
+

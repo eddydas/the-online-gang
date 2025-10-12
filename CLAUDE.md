@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **Tech Stack:**
 - Vanilla JavaScript (ES6+) - no frameworks, no transpiling
 - peer.js for P2P WebRTC connections
-- Jest for testing
+- Vitest for testing
 - JSDoc + TypeScript for type safety (validation only, no compilation)
 - Target: Safari (iOS, macOS, Vision Pro)
 
@@ -22,10 +22,10 @@ npm run test:watch          # Watch mode (re-runs on file changes)
 npm run test:coverage       # Coverage report (80% threshold)
 
 # Run specific test file
-npx jest tests/deck.test.js
+npm test -- tests/deck.test.js
 
 # Run tests matching pattern
-npx jest --testNamePattern="should create a deck"
+npm test -- --testNamePattern="should create a deck"
 ```
 
 ### Type Checking
@@ -235,7 +235,7 @@ describe('Poker Hand Evaluation', () => {
 **Sprint 1:** Core Game Engine + End Game (Week 1-2)
 
 **Completed:**
-- ✅ Test infrastructure (Jest)
+- ✅ Test infrastructure (Vitest)
 - ✅ Type safety (JSDoc + TypeScript)
 - ✅ Deck module (100% coverage, fully typed)
 
@@ -251,7 +251,7 @@ describe('Poker Hand Evaluation', () => {
 ## Documentation
 
 - **Requirements:** `docs/REQUIREMENTS.md` - Complete game specifications
-- **Testing Guide:** `docs/TESTING.md` - TDD workflow and Jest patterns
+- **Testing Guide:** `docs/TESTING.md` - TDD workflow and Vitest patterns
 - **Type Safety:** `docs/TYPE_SAFETY.md` - JSDoc patterns and examples
 - **Sprint Planning:** `docs/sprints/README.md` - Sprint index and goals
 - **Current Sprint:** `docs/sprints/sprint-1.md` - Detailed tasks
