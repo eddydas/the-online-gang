@@ -23,7 +23,9 @@ export class ConnectionManager {
     this.peer = null;
     this.peerId = null;
     this.isHost = false;
+    /** @type {Array<*>} */
     this.connections = [];
+    /** @type {Array<Function>} */
     this._messageCallbacks = [];
   }
 
@@ -40,17 +42,17 @@ export class ConnectionManager {
       this.peer = this.peerFactory();
       this.isHost = true;
 
-      this.peer.on('open', (id) => {
+      this.peer.on('open', (/** @type {string} */ id) => {
         this.peerId = id;
         resolve(id);
       });
 
-      this.peer.on('error', (error) => {
+      this.peer.on('error', (/** @type {*} */ error) => {
         reject(error);
       });
 
       // Listen for incoming connections
-      this.peer.on('connection', (conn) => {
+      this.peer.on('connection', (/** @type {*} */ conn) => {
         this._setupConnection(conn);
       });
     });
@@ -70,7 +72,7 @@ export class ConnectionManager {
       this.peer = this.peerFactory();
       this.isHost = false;
 
-      this.peer.on('open', (id) => {
+      this.peer.on('open', (/** @type {string} */ id) => {
         this.peerId = id;
 
         // Connect to host
@@ -81,12 +83,12 @@ export class ConnectionManager {
           resolve();
         });
 
-        conn.on('error', (error) => {
+        conn.on('error', (/** @type {*} */ error) => {
           reject(error);
         });
       });
 
-      this.peer.on('error', (error) => {
+      this.peer.on('error', (/** @type {*} */ error) => {
         reject(error);
       });
     });
@@ -100,7 +102,7 @@ export class ConnectionManager {
   _setupConnection(conn) {
     this.connections.push(conn);
 
-    conn.on('data', (data) => {
+    conn.on('data', (/** @type {*} */ data) => {
       const message = deserializeMessage(data);
       if (message) {
         this._messageCallbacks.forEach(callback => callback(message));
@@ -123,7 +125,7 @@ export class ConnectionManager {
 
   /**
    * Send a message to connected peers
-   * @param {Object} message - Message object (already in protocol format)
+   * @param {*} message - Message object (already in protocol format)
    */
   sendMessage(message) {
     const serialized = serializeMessage(message);
