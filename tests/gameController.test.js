@@ -157,9 +157,10 @@ describe('GameController', () => {
       // Create minimal game state with tokens
       controller.gameState = /** @type {any} */ ({
         phase: 'TOKEN_TRADING',
+        turn: 1,
         players: [
-          { id: 'host-id', name: 'Host', holeCards: [] },
-          { id: 'player-2', name: 'Player 2', holeCards: [] }
+          { id: 'host-id', name: 'Host', holeCards: [], tokenHistory: [null, null, null, null] },
+          { id: 'player-2', name: 'Player 2', holeCards: [], tokenHistory: [null, null, null, null] }
         ],
         tokens: [
           { number: 1, ownerId: null, timestamp: 0 },
@@ -205,8 +206,9 @@ describe('GameController', () => {
       // Create minimal game state
       controller.gameState = /** @type {any} */ ({
         phase: 'TOKEN_TRADING',
+        turn: 1,
         players: [
-          { id: 'host-id', name: 'Host', holeCards: [] }
+          { id: 'host-id', name: 'Host', holeCards: [], tokenHistory: [null, null, null, null] }
         ],
         tokens: [
           { number: 1, ownerId: null, timestamp: 0 }
@@ -263,6 +265,146 @@ describe('GameController', () => {
       // Token should remain unchanged (client doesn't process actions)
       const token1 = controller.gameState?.tokens.find(t => t.number === 1);
       expect(token1?.ownerId).toBeNull();
+    });
+
+    test('host should update token history in real-time when token selected', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.myPlayerId = 'host-id';
+
+      controller.gameState = /** @type {any} */ ({
+        phase: 'TOKEN_TRADING',
+        turn: 2,
+        players: [
+          { id: 'player-1', name: 'Player 1', holeCards: [], tokenHistory: [3, null, null, null] },
+          { id: 'player-2', name: 'Player 2', holeCards: [], tokenHistory: [1, null, null, null] }
+        ],
+        tokens: [
+          { number: 1, ownerId: null, timestamp: 0 },
+          { number: 2, ownerId: null, timestamp: 0 }
+        ],
+        readyStatus: {},
+        communityCards: []
+      });
+
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+      controller.updateGameUI = vi.fn();
+
+      const tokenAction = {
+        type: /** @type {const} */ ('select'),
+        playerId: 'player-1',
+        tokenNumber: 2,
+        timestamp: Date.now()
+      };
+
+      controller.handleTokenAction(tokenAction);
+
+      // Verify token history was updated for turn 2
+      const player1 = controller.gameState?.players.find(p => p.id === 'player-1');
+      expect(player1?.tokenHistory).toEqual([3, 2, null, null]);
+    });
+
+    test('host should clear token history when token returned to unowned', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.myPlayerId = 'host-id';
+
+      controller.gameState = /** @type {any} */ ({
+        phase: 'TOKEN_TRADING',
+        turn: 1,
+        players: [
+          { id: 'player-1', name: 'Player 1', holeCards: [], tokenHistory: [2, null, null, null] }
+        ],
+        tokens: [
+          { number: 2, ownerId: 'player-1', timestamp: 1000 }
+        ],
+        readyStatus: {},
+        communityCards: []
+      });
+
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+      controller.updateGameUI = vi.fn();
+
+      // Player clicks their own token to return it
+      const tokenAction = {
+        type: /** @type {const} */ ('select'),
+        playerId: 'player-1',
+        tokenNumber: 2,
+        timestamp: Date.now()
+      };
+
+      controller.handleTokenAction(tokenAction);
+
+      // Token history should be cleared for turn 1
+      const player1 = controller.gameState?.players.find(p => p.id === 'player-1');
+      expect(player1?.tokenHistory).toEqual([null, null, null, null]);
+    });
+
+    test('host should handle multiple players selecting different tokens', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.myPlayerId = 'host-id';
+
+      controller.gameState = /** @type {any} */ ({
+        phase: 'TOKEN_TRADING',
+        turn: 3,
+        players: [
+          { id: 'player-1', name: 'Player 1', holeCards: [], tokenHistory: [1, 2, null, null] },
+          { id: 'player-2', name: 'Player 2', holeCards: [], tokenHistory: [3, 1, null, null] },
+          { id: 'player-3', name: 'Player 3', holeCards: [], tokenHistory: [2, 3, null, null] }
+        ],
+        tokens: [
+          { number: 1, ownerId: null, timestamp: 0 },
+          { number: 2, ownerId: null, timestamp: 0 },
+          { number: 3, ownerId: null, timestamp: 0 }
+        ],
+        readyStatus: {},
+        communityCards: []
+      });
+
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+      controller.updateGameUI = vi.fn();
+
+      // Player 1 selects token 3
+      controller.handleTokenAction({
+        type: /** @type {const} */ ('select'),
+        playerId: 'player-1',
+        tokenNumber: 3,
+        timestamp: Date.now()
+      });
+
+      // Player 2 selects token 2
+      controller.handleTokenAction({
+        type: /** @type {const} */ ('select'),
+        playerId: 'player-2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
+      // Player 3 selects token 1
+      controller.handleTokenAction({
+        type: /** @type {const} */ ('select'),
+        playerId: 'player-3',
+        tokenNumber: 1,
+        timestamp: Date.now() + 2
+      });
+
+      const player1 = controller.gameState?.players.find(p => p.id === 'player-1');
+      const player2 = controller.gameState?.players.find(p => p.id === 'player-2');
+      const player3 = controller.gameState?.players.find(p => p.id === 'player-3');
+
+      expect(player1?.tokenHistory).toEqual([1, 2, 3, null]);
+      expect(player2?.tokenHistory).toEqual([3, 1, 2, null]);
+      expect(player3?.tokenHistory).toEqual([2, 3, 1, null]);
     });
   });
 });

@@ -1,6 +1,7 @@
 // @ts-check
 import { describe, test, expect, vi } from 'vitest';
 import { createInitialState, startGame, advancePhase, setPlayerReady, handleTokenAction } from '../src/browser/gameState.js';
+import { applyTokenAction } from '../src/browser/tokens.js';
 import { broadcastState } from '../src/browser/p2pSync.js';
 import { determineWinLoss } from '../src/browser/winCondition.js';
 import { evaluateHand } from '../src/browser/poker.js';
@@ -1202,6 +1203,236 @@ describe('Integration Tests - Game Flow', () => {
 
       state = advancePhase(state);
       expect(state.cardBackColor).toBe(initialColor);
+    });
+  });
+
+  describe('Token History Integration', () => {
+    test('should track token selections across all 4 turns', () => {
+      const players = [
+        { id: 'p1', name: 'Alice', isHost: true },
+        { id: 'p2', name: 'Bob', isHost: false }
+      ];
+
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Turn 1: Alice picks 1, Bob picks 2
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // READY_UP -> TOKEN_TRADING
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: 1000
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: 1001
+      });
+
+      state = advancePhase(state); // TOKEN_TRADING -> TURN_COMPLETE
+
+      // Verify turn 1 history
+      expect(state.players[0].tokenHistory).toEqual([1, null, null, null]);
+      expect(state.players[1].tokenHistory).toEqual([2, null, null, null]);
+
+      // Turn 2: Alice picks 2, Bob picks 1
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // TURN_COMPLETE -> READY_UP
+      state = advancePhase(state); // READY_UP -> TOKEN_TRADING
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 2,
+        timestamp: 2000
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 1,
+        timestamp: 2001
+      });
+
+      state = advancePhase(state); // TOKEN_TRADING -> TURN_COMPLETE
+
+      // Verify turn 1 and 2 history
+      expect(state.players[0].tokenHistory).toEqual([1, 2, null, null]);
+      expect(state.players[1].tokenHistory).toEqual([2, 1, null, null]);
+    });
+
+    test('should display correct token history for all players', () => {
+      const players = [
+        { id: 'p1', name: 'P1', isHost: true },
+        { id: 'p2', name: 'P2', isHost: false },
+        { id: 'p3', name: 'P3', isHost: false }
+      ];
+
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Complete turn 1
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = setPlayerReady(state, 'p3', true);
+      state = advancePhase(state);
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: 1000
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: 1001
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p3',
+        tokenNumber: 3,
+        timestamp: 1002
+      });
+
+      state = advancePhase(state);
+
+      // Verify all players have correct history for turn 1
+      expect(state.players.find(p => p.id === 'p1')?.tokenHistory?.[0]).toBe(1);
+      expect(state.players.find(p => p.id === 'p2')?.tokenHistory?.[0]).toBe(2);
+      expect(state.players.find(p => p.id === 'p3')?.tokenHistory?.[0]).toBe(3);
+    });
+
+    test('should handle token stealing and history updates', () => {
+      const players = [
+        { id: 'p1', name: 'P1', isHost: true },
+        { id: 'p2', name: 'P2', isHost: false }
+      ];
+
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state);
+
+      // P1 selects token 1, P2 selects token 2
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: 1000
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: 1001
+      });
+
+      // P2 steals token 1 from P1 (automatically releases token 2)
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 1,
+        timestamp: 1002
+      });
+
+      // P1 picks up the released token 2
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 2,
+        timestamp: 1003
+      });
+
+      // At this point in TOKEN_TRADING phase - both players have tokens
+      const token1 = state.tokens.find(t => t.number === 1);
+      const token2 = state.tokens.find(t => t.number === 2);
+
+      expect(token1?.ownerId).toBe('p2'); // P2 has token 1
+      expect(token2?.ownerId).toBe('p1'); // P1 has token 2
+
+      state = advancePhase(state);
+
+      // After advancing, history is recorded based on final token ownership
+      const p1History = state.players.find(p => p.id === 'p1')?.tokenHistory?.[0];
+      const p2History = state.players.find(p => p.id === 'p2')?.tokenHistory?.[0];
+
+      // P1 ended with token 2, P2 ended with token 1 (after stealing)
+      expect(p1History).toBe(2);
+      expect(p2History).toBe(1);
+    });
+
+    test('should preserve history when advancing through turns', () => {
+      const players = [
+        { id: 'p1', name: 'P1', isHost: true },
+        { id: 'p2', name: 'P2', isHost: false }
+      ];
+
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Turn 1
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state);
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: 1000
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: 1001
+      });
+
+      state = advancePhase(state);
+
+      const turn1History = state.players[0].tokenHistory?.slice();
+
+      // Turn 2
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state);
+      state = advancePhase(state);
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 2,
+        timestamp: 2000
+      });
+
+      state.tokens = applyTokenAction(state.tokens, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 1,
+        timestamp: 2001
+      });
+
+      state = advancePhase(state);
+
+      // Turn 1 history should be preserved
+      expect(state.players[0].tokenHistory?.[0]).toBe(turn1History?.[0]);
+      // Turn 2 history should be added
+      expect(state.players[0].tokenHistory?.[1]).toBe(2);
     });
   });
 });

@@ -302,7 +302,7 @@ async function initializeGame() {
     // Show share link
     const shareLinkContainer = document.getElementById('share-link-container');
     if (shareLinkContainer) {
-      shareLinkContainer.style.display = 'block';
+      shareLinkContainer.style.display = 'flex';
     }
 
     updateLobbyUI();
