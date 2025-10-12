@@ -39,8 +39,8 @@ function generateTokens(playerCount) {
 
 /**
  * Applies a token selection with conflict resolution
- * Always takes the token (like a steal). Later timestamp wins.
- * If timestamps are equal, lower player ID wins (lexicographical comparison).
+ * Clicking your own token returns it to unowned.
+ * Later timestamp wins conflicts. If timestamps equal, lower player ID wins.
  * @param {Token[]} tokens - Current token state
  * @param {TokenAction} action - Selection action
  * @returns {Token[]} Updated token state (new array)
@@ -53,6 +53,13 @@ function applyTokenAction(tokens, action) {
     throw new Error(`Token ${action.tokenNumber} not found`);
   }
 
+  // If clicking your own token, return it to unowned
+  if (token.ownerId === action.playerId) {
+    token.ownerId = null;
+    token.timestamp = 0;
+    return tokensCopy;
+  }
+
   // Release any token currently owned by this player
   const currentToken = tokensCopy.find(t => t.ownerId === action.playerId);
   if (currentToken && currentToken.number !== action.tokenNumber) {
@@ -60,12 +67,11 @@ function applyTokenAction(tokens, action) {
     currentToken.timestamp = 0;
   }
 
-  // Always take the token (like steal), with conflict resolution:
+  // Take the token with conflict resolution:
   // - Later timestamp wins
   // - If timestamps equal, lower player ID wins (lexicographical)
   const shouldTakeToken =
     token.ownerId === null || // Token is unowned
-    token.ownerId === action.playerId || // Same player refreshing
     action.timestamp > token.timestamp || // Later timestamp wins
     (action.timestamp === token.timestamp && action.playerId < token.ownerId); // Tie-breaker
 

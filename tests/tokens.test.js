@@ -105,6 +105,31 @@ describe('Token System', () => {
   });
 
   describe('Token Stealing', () => {
+    test('should return token to unowned when clicking own token', () => {
+      let tokens = generateTokens(3);
+
+      // Player1 selects token 2
+      tokens = applyTokenAction(tokens, {
+        type: 'select',
+        playerId: 'player1',
+        tokenNumber: 2,
+        timestamp: 1000
+      });
+
+      // Player1 clicks their own token 2 to return it
+      tokens = applyTokenAction(tokens, {
+        type: 'select',
+        playerId: 'player1',
+        tokenNumber: 2,
+        timestamp: 1500
+      });
+
+      const token2 = tokens.find(t => t.number === 2);
+      expect(token2).toBeDefined();
+      expect(token2?.ownerId).toBeNull();
+      expect(token2?.timestamp).toBe(0);
+    });
+
     test('should transfer token from one player to another', () => {
       let tokens = generateTokens(3);
 
@@ -303,7 +328,7 @@ describe('Token System', () => {
   });
 
   describe('Edge Cases', () => {
-    test('should handle player selecting same token they already own', () => {
+    test('should return token to unowned when player clicks same token they already own', () => {
       let tokens = generateTokens(3);
 
       tokens = applyTokenAction(tokens, {
@@ -313,7 +338,7 @@ describe('Token System', () => {
         timestamp: 1000
       });
 
-      // Same player selects again (should update timestamp)
+      // Same player clicks again (should return to unowned)
       tokens = applyTokenAction(tokens, {
         type: 'select',
         playerId: 'player1',
@@ -323,8 +348,8 @@ describe('Token System', () => {
 
       const token2 = tokens.find(t => t.number === 2);
       expect(token2).toBeDefined();
-      expect(token2?.ownerId).toBe('player1');
-      expect(token2?.timestamp).toBe(1500);
+      expect(token2?.ownerId).toBeNull();
+      expect(token2?.timestamp).toBe(0);
     });
 
     test('should handle player switching tokens', () => {

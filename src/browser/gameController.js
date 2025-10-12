@@ -200,14 +200,16 @@ export class GameController {
 
   /**
    * Handle player ready for turn (READY_UP phase)
+   * Toggles ready state - clicking again will un-ready
    * @param {string} playerId
    */
   handleTurnReady(playerId) {
     if (!this.isHost) return;
     if (!this.gameState) return;
 
-    // Mark player as ready
-    this.gameState = setPlayerReady(this.gameState, playerId, true);
+    // Toggle ready state
+    const currentReadyState = this.gameState.readyStatus?.[playerId] ?? false;
+    this.gameState = setPlayerReady(this.gameState, playerId, !currentReadyState);
 
     // Check if all players ready, then advance phase
     if (allPlayersReady(this.gameState)) {
