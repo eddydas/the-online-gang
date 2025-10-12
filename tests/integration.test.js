@@ -733,6 +733,236 @@ describe('Integration Tests - Game Flow', () => {
         console.log(`  ${i + 1}. ${p.name}: ${p.hand.name} (Token: ${p.currentToken})`);
       });
     });
+
+    test('should simulate full game with incorrect tokens resulting in LOSS', () => {
+      // Setup: 3 players
+      const players = [
+        { id: 'alice', name: 'Alice' },
+        { id: 'bob', name: 'Bob' },
+        { id: 'charlie', name: 'Charlie' }
+      ];
+
+      let state = createInitialState(players);
+      expect(state.phase).toBe('LOBBY');
+
+      // Start game
+      state = startGame(state);
+      expect(state.phase).toBe('READY_UP');
+      expect(state.turn).toBe(1);
+      expect(state.communityCards).toHaveLength(0);
+
+      // Override with predetermined cards for deterministic test
+      // Alice: A♠ A♥ → will make Four of a Kind (AAAA) - strongest
+      // Bob: K♠ K♥ → will make Full House (KKK AA) - middle
+      // Charlie: Q♠ J♠ → will make Two Pair (QQ JJ) - weakest
+      state.players[0].holeCards = [
+        { rank: 'A', suit: '♠' },
+        { rank: 'A', suit: '♥' }
+      ];
+      state.players[1].holeCards = [
+        { rank: 'K', suit: '♠' },
+        { rank: 'K', suit: '♥' }
+      ];
+      state.players[2].holeCards = [
+        { rank: 'Q', suit: '♠' },
+        { rank: 'J', suit: '♠' }
+      ];
+
+      // Community: A♦, A♣, K♦, Q♥, J♥
+      const predeterminedCommunity = [
+        { rank: 'A', suit: '♦' },
+        { rank: 'A', suit: '♣' },
+        { rank: 'K', suit: '♦' },
+        { rank: 'Q', suit: '♥' },
+        { rank: 'J', suit: '♥' }
+      ];
+
+      // === TURN 1 ===
+      state = setPlayerReady(state, 'alice', true);
+      state = setPlayerReady(state, 'bob', true);
+      state = setPlayerReady(state, 'charlie', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      // Token selections (will be wrong at the end)
+      /** @type {TokenAction} */
+      let action = {
+        type: 'select',
+        playerId: 'alice',
+        tokenNumber: 2,
+        timestamp: Date.now()
+      };
+      state = handleTokenAction(state, action);
+
+      action = {
+        type: 'select',
+        playerId: 'bob',
+        tokenNumber: 1,
+        timestamp: Date.now() + 1
+      };
+      state = handleTokenAction(state, action);
+
+      action = {
+        type: 'select',
+        playerId: 'charlie',
+        tokenNumber: 3,
+        timestamp: Date.now() + 2
+      };
+      state = handleTokenAction(state, action);
+
+      state = advancePhase(state); // TURN_COMPLETE
+      state = advancePhase(state); // READY_UP turn 2
+
+      // Override community cards with flop
+      state.communityCards = predeterminedCommunity.slice(0, 3);
+
+      // === TURN 2 ===
+      state = setPlayerReady(state, 'alice', true);
+      state = setPlayerReady(state, 'bob', true);
+      state = setPlayerReady(state, 'charlie', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      // Some token swapping but keeping wrong order
+      action = {
+        type: 'steal',
+        playerId: 'bob',
+        tokenNumber: 3,
+        timestamp: Date.now() + 10
+      };
+      state = handleTokenAction(state, action);
+
+      action = {
+        type: 'steal',
+        playerId: 'charlie',
+        tokenNumber: 1,
+        timestamp: Date.now() + 11
+      };
+      state = handleTokenAction(state, action);
+
+      state = advancePhase(state); // TURN_COMPLETE
+      state = advancePhase(state); // READY_UP turn 3
+
+      // Override with turn card
+      state.communityCards = predeterminedCommunity.slice(0, 4);
+
+      // === TURN 3 ===
+      state = setPlayerReady(state, 'alice', true);
+      state = setPlayerReady(state, 'bob', true);
+      state = setPlayerReady(state, 'charlie', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      action = {
+        type: 'steal',
+        playerId: 'alice',
+        tokenNumber: 1,
+        timestamp: Date.now() + 20
+      };
+      state = handleTokenAction(state, action);
+
+      action = {
+        type: 'steal',
+        playerId: 'charlie',
+        tokenNumber: 2,
+        timestamp: Date.now() + 21
+      };
+      state = handleTokenAction(state, action);
+
+      state = advancePhase(state); // TURN_COMPLETE
+      state = advancePhase(state); // READY_UP turn 4
+
+      // Override with river card
+      state.communityCards = predeterminedCommunity.slice(0, 5);
+
+      // === TURN 4 (Final Turn) ===
+      state = setPlayerReady(state, 'alice', true);
+      state = setPlayerReady(state, 'bob', true);
+      state = setPlayerReady(state, 'charlie', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      // Final token selections - WRONG ORDER for LOSS
+      // Alice has Four of a Kind (strongest) but gets token 1 (should be 3) ❌
+      // Bob has Full House (middle) and gets token 3 (should be 2) ❌
+      // Charlie has Two Pair (weakest) and gets token 2 (should be 1) ❌
+
+      // Current: Alice=1, Bob=3, Charlie=2
+      // Keep these wrong assignments
+
+      // Verify final token ownership (wrong order)
+      expect(state.tokens.find(t => t.number === 1)?.ownerId).toBe('alice');
+      expect(state.tokens.find(t => t.number === 3)?.ownerId).toBe('bob');
+      expect(state.tokens.find(t => t.number === 2)?.ownerId).toBe('charlie');
+
+      // Record final token ownership
+      const finalTokens = {
+        alice: state.tokens.find(t => t.ownerId === 'alice')?.number,
+        bob: state.tokens.find(t => t.ownerId === 'bob')?.number,
+        charlie: state.tokens.find(t => t.ownerId === 'charlie')?.number
+      };
+
+      state = advancePhase(state); // TURN_COMPLETE
+      state = advancePhase(state); // END_GAME
+
+      expect(state.phase).toBe('END_GAME');
+      expect(state.turn).toBe(4);
+
+      // === WIN/LOSS EVALUATION ===
+      const playersWithHands = state.players.map(player => {
+        const holeCards = player.holeCards || [];
+        const allCards = [...holeCards, ...state.communityCards];
+        const tokenId = /** @type {'alice' | 'bob' | 'charlie'} */ (player.id);
+        const token = finalTokens[tokenId];
+
+        return {
+          ...player,
+          hand: evaluateHand(allCards),
+          currentToken: state.tokens.find(t => t.ownerId === player.id)?.number || 0,
+          tokenHistory: [token, token, token, token]
+        };
+      });
+
+      const result = determineWinLoss(playersWithHands);
+
+      // Verify result structure
+      expect(result).toHaveProperty('isWin');
+      expect(result).toHaveProperty('sortedPlayers');
+      expect(result.sortedPlayers).toHaveLength(3);
+
+      // Verify players are sorted by hand strength
+      const player1 = result.sortedPlayers[0];
+      const player2 = result.sortedPlayers[1];
+      const player3 = result.sortedPlayers[2];
+
+      expect(player1.hand).toBeDefined();
+      expect(player2.hand).toBeDefined();
+      expect(player3.hand).toBeDefined();
+
+      // Alice: Four of a Kind but has token 1 (should be 3) ❌
+      // Bob: Full House but has token 3 (should be 2) ❌
+      // Charlie: Two Pair but has token 2 (should be 1) ❌
+      // Tokens are WRONG, so this should be a LOSS
+      expect(result.isWin).toBe(false);
+
+      // Verify exact hand rankings
+      expect(player1.id).toBe('alice');
+      expect(player1.hand.name).toBe('Four of a Kind');
+      expect(player1.currentToken).toBe(1); // Wrong! Should be 3
+
+      expect(player2.id).toBe('bob');
+      expect(player2.hand.name).toBe('Full House');
+      expect(player2.currentToken).toBe(3); // Wrong! Should be 2
+
+      expect(player3.id).toBe('charlie');
+      expect(player3.hand.name).toBe('Two Pair');
+      expect(player3.currentToken).toBe(2); // Wrong! Should be 1
+
+      // Log the results
+      console.log('Game Result:', result.isWin ? 'WIN' : 'LOSS');
+      console.log('Player Rankings:');
+      result.sortedPlayers.forEach((p, i) => {
+        const expectedToken = 3 - i; // 3, 2, 1
+        const isCorrect = p.currentToken === expectedToken;
+        console.log(`  ${i + 1}. ${p.name}: ${p.hand.name} (Token: ${p.currentToken}) ${isCorrect ? '✓' : '❌'}`);
+      });
+    });
   });
 
   describe('Card Back Color Consistency', () => {
