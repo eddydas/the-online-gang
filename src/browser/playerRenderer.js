@@ -75,27 +75,61 @@ export function addPlayerStyles() {
   style.id = 'player-styles';
   style.textContent = `
     #player-positions {
-      position: relative;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 20px;
-      flex-wrap: wrap;
-      gap: 20px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
 
     .table-player {
+      position: absolute;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      position: relative;
       transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+
+    /* Current player - bottom center */
+    .table-player.current-player {
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .table-player.current-player .player-avatar {
       border-color: #3498db;
       box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
+    }
+
+    /* Other players positioned around table */
+    /* Position 0 (if not current player): top left */
+    .table-player.player-position-0:not(.current-player) {
+      top: 60px;
+      left: 15%;
+    }
+
+    /* Position 1 (if not current player): top right */
+    .table-player.player-position-1:not(.current-player) {
+      top: 60px;
+      right: 15%;
+    }
+
+    /* Position 2: left side */
+    .table-player.player-position-2 {
+      top: 50%;
+      left: 10%;
+      transform: translateY(-50%);
+    }
+
+    /* Position 3: right side */
+    .table-player.player-position-3 {
+      top: 50%;
+      right: 10%;
+      transform: translateY(-50%);
     }
 
     .table-player.ready .player-avatar {
@@ -120,28 +154,30 @@ export function addPlayerStyles() {
       display: inline-block;
     }
 
-    /* Position players around the table for better visual layout */
-    @media (min-width: 768px) {
-      #player-positions {
-        min-height: 100px;
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .table-player.current-player {
+        bottom: 10px;
       }
 
-      /* 2 players: left and right */
-      .table-player.player-position-0 {
-        order: 0;
+      .table-player.player-position-0:not(.current-player) {
+        top: 40px;
+        left: 10%;
       }
 
-      .table-player.player-position-1 {
-        order: 1;
+      .table-player.player-position-1:not(.current-player) {
+        top: 40px;
+        right: 10%;
       }
 
-      /* 3+ players: distributed around */
       .table-player.player-position-2 {
-        order: 2;
+        top: 40%;
+        left: 5%;
       }
 
       .table-player.player-position-3 {
-        order: 3;
+        top: 40%;
+        right: 5%;
       }
     }
   `;
