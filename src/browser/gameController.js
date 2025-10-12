@@ -98,6 +98,11 @@ export class GameController {
   handlePeerMessage(message) {
     console.log('Received P2P message:', message.type, message.payload);
 
+    // Host assigns server timestamp to all incoming messages for consistency
+    if (this.isHost) {
+      message.timestamp = Date.now();
+    }
+
     switch (message.type) {
       case 'JOIN_REQUEST':
         if (this.isHost) {
@@ -254,14 +259,14 @@ export class GameController {
   sendMessage(message) {
     if (!this.connectionManager) return;
 
-    // Add timestamp if not present
-    const messageWithTimestamp = {
-      ...message,
-      timestamp: message.timestamp || Date.now()
-    };
+    // Only host adds timestamps (for messages it's broadcasting)
+    // Clients send messages without timestamps; host assigns them on receipt
+    if (this.isHost && !message.timestamp) {
+      message.timestamp = Date.now();
+    }
 
-    console.log('Sending message:', messageWithTimestamp);
-    this.connectionManager.sendMessage(messageWithTimestamp);
+    console.log('Sending message:', message);
+    this.connectionManager.sendMessage(message);
   }
 
   /**

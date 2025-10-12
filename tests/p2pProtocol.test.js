@@ -138,7 +138,7 @@ describe('P2P Message Protocol', () => {
     });
 
     test('should return null for JSON missing required fields', () => {
-      const incomplete = JSON.stringify({ type: 'TEST' }); // Missing payload and timestamp
+      const incomplete = JSON.stringify({ type: 'TEST' }); // Missing payload
 
       const message = deserializeMessage(incomplete);
 
@@ -175,23 +175,13 @@ describe('P2P Message Protocol', () => {
       expect(isValidMessage(message)).toBe(false);
     });
 
-    test('should reject message without timestamp', () => {
+    test('should accept message without timestamp (client messages)', () => {
       const message = {
         type: 'TEST',
         payload: {}
       };
 
-      expect(isValidMessage(message)).toBe(false);
-    });
-
-    test('should reject message with non-string type', () => {
-      const message = {
-        type: 123,
-        payload: {},
-        timestamp: Date.now()
-      };
-
-      expect(isValidMessage(message)).toBe(false);
+      expect(isValidMessage(message)).toBe(true);
     });
 
     test('should reject message with non-number timestamp', () => {

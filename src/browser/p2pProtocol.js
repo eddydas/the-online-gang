@@ -91,7 +91,8 @@ export function isValidMessage(message) {
     return false;
   }
 
-  if (typeof message.timestamp !== 'number') {
+  // Timestamp is optional - host will assign it on receipt for client messages
+  if ('timestamp' in message && typeof message.timestamp !== 'number') {
     return false;
   }
 

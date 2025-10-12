@@ -4,8 +4,38 @@ import { GameController } from '../src/browser/gameController.js';
 
 describe('GameController', () => {
   describe('sendMessage', () => {
-    test('should add timestamp to messages without timestamp', () => {
+    test('host should add timestamp to messages without timestamp', () => {
       const controller = new GameController();
+      controller.isHost = true;
+
+      // Mock connection manager
+      const mockSendMessage = vi.fn();
+      controller.connectionManager = {
+        sendMessage: mockSendMessage,
+        getConnections: vi.fn(() => [])
+      };
+
+      const messageWithoutTimestamp = {
+        type: 'LOBBY_UPDATE',
+        payload: { lobbyState: [] }
+      };
+
+      controller.sendMessage(messageWithoutTimestamp);
+
+      // Verify sendMessage was called with timestamp added
+      expect(mockSendMessage).toHaveBeenCalledOnce();
+      const sentMessage = mockSendMessage.mock.calls[0][0];
+
+      expect(sentMessage).toHaveProperty('type', 'LOBBY_UPDATE');
+      expect(sentMessage).toHaveProperty('payload');
+      expect(sentMessage).toHaveProperty('timestamp');
+      expect(typeof sentMessage.timestamp).toBe('number');
+      expect(sentMessage.timestamp).toBeGreaterThan(0);
+    });
+
+    test('client should NOT add timestamp to outgoing messages', () => {
+      const controller = new GameController();
+      controller.isHost = false;
 
       // Mock connection manager
       const mockSendMessage = vi.fn();
@@ -21,19 +51,18 @@ describe('GameController', () => {
 
       controller.sendMessage(messageWithoutTimestamp);
 
-      // Verify sendMessage was called with timestamp added
+      // Verify message was sent WITHOUT timestamp (host will assign it)
       expect(mockSendMessage).toHaveBeenCalledOnce();
       const sentMessage = mockSendMessage.mock.calls[0][0];
 
       expect(sentMessage).toHaveProperty('type', 'JOIN_REQUEST');
       expect(sentMessage).toHaveProperty('payload');
-      expect(sentMessage).toHaveProperty('timestamp');
-      expect(typeof sentMessage.timestamp).toBe('number');
-      expect(sentMessage.timestamp).toBeGreaterThan(0);
+      expect(sentMessage).not.toHaveProperty('timestamp');
     });
 
     test('should preserve existing timestamp if present', () => {
       const controller = new GameController();
+      controller.isHost = true;
 
       // Mock connection manager
       const mockSendMessage = vi.fn();
@@ -71,33 +100,44 @@ describe('GameController', () => {
     });
   });
 
-  describe('message validation', () => {
-    test('all message types should include timestamp', () => {
+  describe('handlePeerMessage', () => {
+    test('host should assign timestamp to incoming client messages', () => {
       const controller = new GameController();
+      controller.isHost = true;
+      controller.lobbyState = [];
 
-      const mockSendMessage = vi.fn();
-      controller.connectionManager = {
-        sendMessage: mockSendMessage,
-        getConnections: vi.fn(() => [])
+      const messageWithoutTimestamp = {
+        type: 'JOIN_REQUEST',
+        payload: { playerId: 'client-1', playerName: 'Client 1' }
       };
 
-      // Test various message types
-      const messageTypes = [
-        { type: 'JOIN_REQUEST', payload: { playerId: 'p1', playerName: 'Player 1' } },
-        { type: 'LOBBY_UPDATE', payload: { lobbyState: [] } },
-        { type: 'PLAYER_READY', payload: { playerId: 'p1', isReady: true } },
-        { type: 'TOKEN_ACTION', payload: { type: 'select', playerId: 'p1', tokenNumber: 1 } },
-        { type: 'PROCEED_TURN', payload: { playerId: 'p1' } }
-      ];
+      // Message should not have timestamp initially
+      expect(messageWithoutTimestamp).not.toHaveProperty('timestamp');
 
-      messageTypes.forEach((message) => {
-        mockSendMessage.mockClear();
-        controller.sendMessage(message);
+      controller.handlePeerMessage(messageWithoutTimestamp);
 
-        const sentMessage = mockSendMessage.mock.calls[0][0];
-        expect(sentMessage).toHaveProperty('timestamp');
-        expect(typeof sentMessage.timestamp).toBe('number');
-      });
+      // After handling, message should have timestamp assigned by host
+      expect(messageWithoutTimestamp.timestamp).toBeDefined();
+      expect(typeof messageWithoutTimestamp.timestamp).toBe('number');
+      expect(messageWithoutTimestamp.timestamp).toBeGreaterThan(0);
+    });
+
+    test('client should not modify incoming message timestamps', () => {
+      const controller = new GameController();
+      controller.isHost = false;
+      controller.updateLobbyUI = vi.fn();
+
+      const existingTimestamp = 1234567890;
+      const messageFromHost = {
+        type: 'LOBBY_UPDATE',
+        payload: { lobbyState: [] },
+        timestamp: existingTimestamp
+      };
+
+      controller.handlePeerMessage(messageFromHost);
+
+      // Timestamp should remain unchanged
+      expect(messageFromHost.timestamp).toBe(existingTimestamp);
     });
   });
 });
