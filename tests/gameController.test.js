@@ -147,4 +147,122 @@ describe('GameController', () => {
       expect(delegateMock.onLobbyStateChange).toHaveBeenCalled();
     });
   });
+
+  describe('handleTokenAction', () => {
+    test('host should update UI after handling token action', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.myPlayerId = 'host-id';
+
+      // Create minimal game state with tokens
+      controller.gameState = /** @type {any} */ ({
+        phase: 'TOKEN_TRADING',
+        players: [
+          { id: 'host-id', name: 'Host', holeCards: [] },
+          { id: 'player-2', name: 'Player 2', holeCards: [] }
+        ],
+        tokens: [
+          { number: 1, ownerId: null, timestamp: 0 },
+          { number: 2, ownerId: null, timestamp: 0 }
+        ],
+        readyStatus: {},
+        communityCards: []
+      });
+
+      // Mock connection manager
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+
+      // Mock updateGameUI to avoid DOM calls
+      const updateGameUIMock = vi.fn();
+      controller.updateGameUI = updateGameUIMock;
+
+      // Simulate token action
+      const tokenAction = {
+        type: /** @type {const} */ ('select'),
+        playerId: 'player-2',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+
+      controller.handleTokenAction(tokenAction);
+
+      // Verify updateGameUI was called
+      expect(updateGameUIMock).toHaveBeenCalledOnce();
+
+      // Verify token ownership was updated
+      const token1 = controller.gameState.tokens.find(t => t.number === 1);
+      expect(token1?.ownerId).toBe('player-2');
+    });
+
+    test('host should broadcast state after handling token action', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.myPlayerId = 'host-id';
+
+      // Create minimal game state
+      controller.gameState = /** @type {any} */ ({
+        phase: 'TOKEN_TRADING',
+        players: [
+          { id: 'host-id', name: 'Host', holeCards: [] }
+        ],
+        tokens: [
+          { number: 1, ownerId: null, timestamp: 0 }
+        ],
+        readyStatus: {},
+        communityCards: []
+      });
+
+      // Mock connection manager
+      const mockConnection = { send: vi.fn() };
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [mockConnection])
+      });
+
+      // Mock updateGameUI to avoid DOM calls
+      controller.updateGameUI = vi.fn();
+
+      // Simulate token action
+      const tokenAction = {
+        type: /** @type {const} */ ('select'),
+        playerId: 'host-id',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+
+      controller.handleTokenAction(tokenAction);
+
+      // Verify state was broadcast
+      expect(mockConnection.send).toHaveBeenCalled();
+    });
+
+    test('client should not handle token actions', () => {
+      const controller = new GameController();
+      controller.isHost = false;
+
+      // Create minimal game state
+      controller.gameState = /** @type {any} */ ({
+        tokens: [
+          { number: 1, ownerId: null, timestamp: 0 }
+        ]
+      });
+
+      // Simulate token action
+      const tokenAction = {
+        type: /** @type {const} */ ('select'),
+        playerId: 'client-id',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+
+      controller.handleTokenAction(tokenAction);
+
+      // Token should remain unchanged (client doesn't process actions)
+      const token1 = controller.gameState.tokens.find(t => t.number === 1);
+      expect(token1?.ownerId).toBeNull();
+    });
+  });
 });
