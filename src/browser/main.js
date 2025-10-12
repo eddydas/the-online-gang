@@ -1,7 +1,6 @@
 // @ts-check
 
 import { GameController } from './gameController.js';
-import { addCardStyles } from './cardRenderer.js';
 import { addTokenStyles } from './tokenRenderer.js';
 import { addEndGameStyles } from './endGameRenderer.js';
 import { addPlayerStyles } from './playerRenderer.js';
@@ -12,8 +11,7 @@ import { addPlayerStyles } from './playerRenderer.js';
 
 let gameController = new GameController();
 
-// Add styles on load
-addCardStyles();
+// Add styles on load (card styles are now in index.html)
 addTokenStyles();
 addEndGameStyles();
 addPlayerStyles();

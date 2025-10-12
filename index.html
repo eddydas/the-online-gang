@@ -15,27 +15,36 @@
 
     <!-- Game Screen -->
     <div id="game-screen" style="display: none;">
-      <!-- Phase Indicator -->
-      <div id="phase-indicator">
-        <div id="phase-text"></div>
-      </div>
+      <!-- Poker Table Container -->
+      <div class="poker-table-container">
+        <!-- Dark Border -->
+        <div class="poker-table-border">
+          <!-- Green Felt Table -->
+          <div class="poker-table">
+            <!-- Phase Indicator -->
+            <div id="phase-indicator">
+              <div id="phase-text"></div>
+            </div>
 
-      <!-- Player Avatars -->
-      <div id="player-avatars"></div>
+            <!-- Player Positions (dynamically positioned) -->
+            <div id="player-positions"></div>
 
-      <!-- Game Board Area -->
-      <div id="game-board">
-        <div id="community-cards"></div>
-        <div id="player-cards"></div>
-      </div>
+            <!-- Community Cards (center of table) -->
+            <div id="community-cards"></div>
 
-      <!-- Token Trading Area -->
-      <div id="token-area"></div>
+            <!-- Token Trading Area (center of table) -->
+            <div id="token-area"></div>
 
-      <!-- Ready/Action Buttons -->
-      <div id="action-buttons">
-        <button id="ready-button" style="display: none;">Ready</button>
-        <button id="proceed-button" style="display: none;">Proceed to Next Turn</button>
+            <!-- Player's Hole Cards (bottom) -->
+            <div id="player-cards"></div>
+
+            <!-- Ready/Action Buttons -->
+            <div id="action-buttons">
+              <button id="ready-button" style="display: none;">Ready</button>
+              <button id="proceed-button" style="display: none;">Proceed to Next Turn</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -43,25 +52,52 @@
     <div id="end-game-screen" style="display: none;"></div>
   </div>
   <style>
+    /* === CSS Variables === */
+    :root {
+      /* Colors - Based on Reference Design */
+      --poker-green: #1a5c2e;
+      --table-border: #1a1a1a;
+      --background-dark: #0a0a0a;
+      --text-white: #fff;
+      --text-gold: #d4af37;
+      --card-red: #e63946;
+      --card-black: #1a1a1a;
+      --card-back-pattern: #4a4a4a;
+
+      /* Table Dimensions */
+      --table-width: 90vw;
+      --table-height: 70vh;
+      --border-width: 16px;
+      --padding: 20px;
+    }
+
+    /* === Base Styles === */
     body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #333;
-      color: #fff;
+      background: var(--background-dark);
+      color: var(--text-white);
     }
 
     #app {
-      max-width: 1200px;
-      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 30px;
+      margin: 20px 0;
     }
 
-    /* Lobby Styles */
+    /* === Lobby Styles === */
+    #lobby-screen {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
     #lobby-content {
       background: #444;
       padding: 20px;
@@ -146,25 +182,252 @@
       font-size: 18px;
     }
 
-    /* Game Styles */
+    /* === Poker Table Layout === */
+    #game-screen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--padding);
+      background: var(--background-dark);
+      position: relative;
+    }
+
+    .poker-table-container {
+      width: var(--table-width);
+      max-width: 1200px;
+      height: var(--table-height);
+      max-height: 800px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .poker-table-border {
+      width: 100%;
+      height: 100%;
+      background: var(--table-border);
+      border-radius: 50%;
+      padding: var(--border-width);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+    }
+
+    .poker-table {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--poker-green) 0%, #156624 100%);
+      border-radius: 50%;
+      position: relative;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    /* === Phase Indicator === */
     #phase-indicator {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       text-align: center;
-      padding: 20px;
+      z-index: 10;
+    }
+
+    #phase-text {
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* === Community Cards (center) === */
+    #community-cards {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      gap: 8px;
+      z-index: 5;
+    }
+
+    /* === Player Cards (bottom center) === */
+    #player-cards {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 5;
+    }
+
+    /* === Token Area (center) === */
+    #token-area {
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 80%;
+      z-index: 5;
+    }
+
+    /* === Action Buttons === */
+    #action-buttons {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    /* === Card Styles === */
+    .card {
+      width: 70px;
+      height: 98px;
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Card Rank and Suit */
+    .card-rank {
       font-size: 24px;
       font-weight: bold;
+      line-height: 1;
+      margin-bottom: 4px;
     }
 
-    #game-board {
-      background: #2d5016;
-      min-height: 400px;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
+    .card-suit.large {
+      font-size: 36px;
+      line-height: 1;
     }
 
-    #action-buttons {
-      text-align: center;
-      margin: 20px 0;
+    /* Red and Black Suits */
+    .card.red-suit {
+      color: var(--card-red);
+    }
+
+    .card.black-suit {
+      color: var(--card-black);
+    }
+
+    /* Card Back */
+    .card.card-back {
+      background: var(--card-back-pattern);
+      border: 2px solid #666;
+    }
+
+    /* Best Five Highlight */
+    .card.best-five {
+      box-shadow: 0 0 16px rgba(212, 175, 55, 0.8);
+      border: 2px solid var(--text-gold);
+    }
+
+    /* Mini Cards */
+    .card.mini {
+      width: 35px;
+      height: 49px;
+      padding: 2px;
+    }
+
+    .card.mini .card-rank {
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+
+    .card.mini .card-suit.large {
+      font-size: 18px;
+    }
+
+    /* === Responsive Design === */
+
+    /* Mobile (≤768px) */
+    @media (max-width: 768px) {
+      :root {
+        --table-width: 95vw;
+        --table-height: 80vh;
+        --border-width: 10px;
+        --padding: 10px;
+      }
+
+      #phase-text {
+        font-size: 14px;
+      }
+
+      .card {
+        width: 45px;
+        height: 63px;
+        padding: 2px;
+      }
+
+      .card-rank {
+        font-size: 16px;
+        margin-bottom: 2px;
+      }
+
+      .card-suit.large {
+        font-size: 24px;
+      }
+
+      #community-cards {
+        gap: 4px;
+      }
+
+      #player-cards {
+        gap: 4px;
+        bottom: 50px;
+      }
+
+      #token-area {
+        gap: 6px;
+      }
+    }
+
+    /* Tablet (768px - 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      :root {
+        --table-width: 85vw;
+        --table-height: 70vh;
+      }
+
+      .card {
+        width: 60px;
+        height: 84px;
+      }
+
+      .card-rank {
+        font-size: 20px;
+      }
+
+      .card-suit.large {
+        font-size: 30px;
+      }
+    }
+
+    /* Desktop (≥1024px) */
+    @media (min-width: 1024px) {
+      :root {
+        --table-width: 80vw;
+        --table-height: 60vh;
+      }
     }
   </style>
 
