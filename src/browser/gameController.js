@@ -11,6 +11,7 @@ import { renderTokens } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
+import { evaluateHand } from './poker.js';
 
 /**
  * @typedef {import('./winCondition.js').PlayerWithHand} PlayerWithHand
@@ -355,21 +356,24 @@ export class GameController {
     if (lobbyScreen) lobbyScreen.style.display = 'none';
 
     // Build players array with hand evaluation for determineWinLoss
-    // Filter to only include players who have both a token and evaluated hand
     /** @type {PlayerWithHand[]} */
     const playersWithHands = this.gameState.players
       .map((p) => {
         // Get current token from token list
         const currentToken = this.gameState?.tokens.find(t => t.ownerId === p.id);
 
+        // Evaluate hand using poker.js
+        const allCards = [...(p.holeCards || []), ...(this.gameState?.communityCards || [])];
+        const hand = evaluateHand(allCards);
+
         // Create player with required fields
-        // Note: hand should be evaluated by poker.js evaluateHand before END_GAME phase
         return {
           id: p.id,
           name: p.name,
           holeCards: p.holeCards,
           currentToken: currentToken?.number,
-          hand: /** @type {HandResult | undefined} */ (undefined) // Hand should be evaluated by poker.js before END_GAME phase
+          tokenHistory: p.tokenHistory || [null, null, null, null],
+          hand
         };
       })
       .filter((p) => p.currentToken !== undefined && p.hand !== undefined)

@@ -25,6 +25,7 @@ import {  MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS  } from "./constants.js";
  * @property {string} id - Player ID
  * @property {string} name - Player name
  * @property {Card[]} [holeCards] - Player's hole cards (2 cards)
+ * @property {(number|null)[]} [tokenHistory] - Token numbers for each turn [turn1, turn2, turn3, turn4]
  */
 
 /**
@@ -77,7 +78,8 @@ function startGame(state) {
 
   const playersWithCards = state.players.map((p, i) => ({
     ...p,
-    holeCards: holeCards[i]
+    holeCards: holeCards[i],
+    tokenHistory: [null, null, null, null] // Initialize empty history for 4 turns
   }));
 
   // Deal community cards for turn 1 (0 cards)
@@ -112,6 +114,27 @@ function allTokensOwned(state) {
 }
 
 /**
+ * Records current token ownership in player token history
+ * @param {Player[]} players - Current players
+ * @param {Token[]} tokens - Current tokens
+ * @param {number} turn - Current turn (1-4)
+ * @returns {Player[]} Updated players with token history recorded
+ */
+function recordTokenHistory(players, tokens, turn) {
+  return players.map(player => {
+    const ownedToken = tokens.find(t => t.ownerId === player.id);
+    const tokenHistory = player.tokenHistory || [null, null, null, null];
+    const updatedHistory = [...tokenHistory];
+    updatedHistory[turn - 1] = ownedToken ? ownedToken.number : null;
+
+    return {
+      ...player,
+      tokenHistory: updatedHistory
+    };
+  });
+}
+
+/**
  * Advances to the next phase
  * @param {GameState} state - Current state
  * @returns {GameState} Updated state
@@ -138,6 +161,9 @@ function advancePhase(state) {
         return state;
       }
 
+      // Record token ownership history for current turn
+      const playersWithHistory = recordTokenHistory(state.players, state.tokens, state.turn);
+
       // Advance turn or end game directly from TOKEN_TRADING
       if (state.turn < TOTAL_TURNS) {
         // Deal community cards for next turn
@@ -156,6 +182,7 @@ function advancePhase(state) {
 
         return {
           ...state,
+          players: playersWithHistory,
           phase: 'READY_UP',
           turn: state.turn + 1,
           communityCards: allCommunityCards,
@@ -165,6 +192,7 @@ function advancePhase(state) {
       } else {
         return {
           ...state,
+          players: playersWithHistory,
           phase: 'END_GAME'
         };
       }
