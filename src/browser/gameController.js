@@ -8,6 +8,8 @@ import { updatePhaseUI } from './turnFlow.js';
 import { addPlayer, updatePlayerReady, canStartGame } from './lobby.js';
 import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
 import { renderTokens } from './tokenRenderer.js';
+import { determineWinLoss } from './winCondition.js';
+import { createEndGameTable } from './endGameRenderer.js';
 
 /**
  * Main game controller that coordinates P2P, game state, and UI
@@ -255,6 +257,12 @@ export class GameController {
   updateGameUI() {
     if (!this.gameState) return;
 
+    // Check if game is over
+    if (this.gameState.phase === 'END_GAME') {
+      this.showEndGameScreen();
+      return;
+    }
+
     // Update phase UI
     updatePhaseUI(this.gameState.phase);
 
@@ -265,6 +273,64 @@ export class GameController {
     this.renderTokensUI();
 
     console.log('Game state:', this.gameState);
+  }
+
+  /**
+   * Show end game screen with results
+   */
+  showEndGameScreen() {
+    if (!this.gameState) return;
+
+    const endGameScreen = document.getElementById('end-game-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const lobbyScreen = document.getElementById('lobby-screen');
+
+    if (!endGameScreen) return;
+
+    // Hide other screens
+    if (gameScreen) gameScreen.style.display = 'none';
+    if (lobbyScreen) lobbyScreen.style.display = 'none';
+
+    // Build players array with hand evaluation for determineWinLoss
+    const playersWithHands = this.gameState.players
+      .map((p) => {
+        // Get current token from token list
+        const currentToken = this.gameState?.tokens.find(t => t.ownerId === p.id);
+
+        return {
+          ...p,
+          currentToken: currentToken?.number || null,
+          hand: /** @type {any} */ (p.holeCards) ? null : null // Placeholder - hand should be evaluated
+        };
+      })
+      .filter(p => p.currentToken !== null); // Only include players with tokens
+
+    // Determine win/loss
+    const winLossResult = determineWinLoss(/** @type {any} */ (playersWithHands));
+
+    // Create end game table
+    const endGameTable = createEndGameTable(winLossResult, this.gameState);
+
+    // Clear and show end game screen
+    endGameScreen.innerHTML = '';
+    endGameScreen.appendChild(endGameTable);
+    endGameScreen.style.display = 'block';
+
+    // Set up "Next Game" button handler
+    const nextGameButton = document.getElementById('next-game-button');
+    if (nextGameButton) {
+      nextGameButton.addEventListener('click', () => {
+        this.onNextGameClick();
+      });
+    }
+  }
+
+  /**
+   * Handle "Next Game" button click
+   */
+  onNextGameClick() {
+    // TODO: Implement next game logic
+    console.log('Next game clicked');
   }
 
   /**
