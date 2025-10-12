@@ -151,8 +151,16 @@ describe('P2P Connection Manager', () => {
     test('should send message to all connections (host)', async () => {
       /** @type {Function | undefined} */
       let connectionCallback;
+      /** @type {Function | undefined} */
+      let openCallback;
+
       const mockConnection = {
-        on: vi.fn(),
+        peer: 'client-id',
+        on: vi.fn((event, callback) => {
+          if (event === 'open') {
+            openCallback = callback;
+          }
+        }),
         send: vi.fn()
       };
 
@@ -175,6 +183,9 @@ describe('P2P Connection Manager', () => {
 
       // Simulate incoming connection
       connectionCallback?.(mockConnection);
+
+      // Trigger connection open event
+      openCallback?.();
 
       manager.sendMessage({ type: 'TEST', payload: {} });
 

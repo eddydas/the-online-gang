@@ -142,6 +142,11 @@ export class ConnectionManager {
   sendMessage(message) {
     const serialized = serializeMessage(message);
 
+    if (this.connections.length === 0) {
+      console.warn('No active connections to send message to');
+      return;
+    }
+
     this.connections.forEach(conn => {
       try {
         conn.send(serialized);
