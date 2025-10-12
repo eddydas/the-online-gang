@@ -18,7 +18,7 @@ describe('Turn Flow UI', () => {
     });
 
     test('should return correct text for TOKEN_TRADING phase', () => {
-      expect(getPhaseText('TOKEN_TRADING')).toBe('Select or steal a token');
+      expect(getPhaseText('TOKEN_TRADING')).toBe('Select or steal a token. Press Proceed when done.');
     });
 
     test('should return correct text for TURN_COMPLETE phase', () => {
@@ -39,10 +39,10 @@ describe('Turn Flow UI', () => {
       expect(shouldShowReadyButton('END_GAME')).toBe(false);
     });
 
-    test('should show proceed button only in TURN_COMPLETE phase', () => {
+    test('should show proceed button in TOKEN_TRADING and TURN_COMPLETE phases', () => {
       expect(shouldShowProceedButton('LOBBY')).toBe(false);
       expect(shouldShowProceedButton('READY_UP')).toBe(false);
-      expect(shouldShowProceedButton('TOKEN_TRADING')).toBe(false);
+      expect(shouldShowProceedButton('TOKEN_TRADING')).toBe(true);
       expect(shouldShowProceedButton('TURN_COMPLETE')).toBe(true);
       expect(shouldShowProceedButton('END_GAME')).toBe(false);
     });
@@ -84,10 +84,10 @@ describe('Turn Flow UI', () => {
       expect(mockProceedButton.style.display).toBe('none');
     });
 
-    test('should hide ready button in TOKEN_TRADING phase', () => {
+    test('should show proceed button in TOKEN_TRADING phase', () => {
       updatePhaseUI('TOKEN_TRADING');
       expect(mockReadyButton.style.display).toBe('none');
-      expect(mockProceedButton.style.display).toBe('none');
+      expect(mockProceedButton.style.display).toBe('block');
     });
 
     test('should show proceed button in TURN_COMPLETE phase', () => {

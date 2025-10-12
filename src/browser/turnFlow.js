@@ -16,7 +16,7 @@ function getPhaseText(phase) {
     case 'READY_UP':
       return 'Press Ready when you\'re ready to see your cards';
     case 'TOKEN_TRADING':
-      return 'Select or steal a token';
+      return 'Select or steal a token. Press Proceed when done.';
     case 'TURN_COMPLETE':
       return 'Press Proceed to continue to the next turn';
     case 'END_GAME':
@@ -41,7 +41,7 @@ function shouldShowReadyButton(phase) {
  * @returns {boolean} True if proceed button should show
  */
 function shouldShowProceedButton(phase) {
-  return phase === 'TURN_COMPLETE';
+  return phase === 'TURN_COMPLETE' || phase === 'TOKEN_TRADING';
 }
 
 /**
