@@ -26,16 +26,6 @@ function getPeerIdFromUrl() {
 }
 
 /**
- * Update URL with peer ID (for host)
- * @param {string} peerId
- */
-function updateUrlWithPeerId(peerId) {
-  const url = new URL(window.location.href);
-  url.searchParams.set('peer', peerId);
-  window.history.replaceState({}, '', url.toString());
-}
-
-/**
  * Get shareable link for host
  * @param {string} peerId
  * @returns {string}
@@ -223,27 +213,25 @@ async function initializeGame() {
   showLobbyScreen();
   initializeLobbyUI();
 
+  // Set up delegate to handle state changes
+  gameController.setDelegate({
+    onLobbyStateChange: () => {
+      updateLobbyUI();
+    },
+    onGameStateChange: () => {
+      showGameScreen();
+      gameController.updateGameUI();
+    }
+  });
+
   if (peerIdFromUrl) {
     // Client mode - join existing game
     console.log('Joining game as client:', peerIdFromUrl);
     await gameController.initializeAsClient(peerIdFromUrl);
-
-    // Update lobby UI with received state (will be sent by host)
-    const originalUpdateLobbyUI = gameController.updateLobbyUI.bind(gameController);
-    gameController.updateLobbyUI = () => {
-      originalUpdateLobbyUI();
-      updateLobbyUI();
-    };
-
-    const originalUpdateGameUI = gameController.updateGameUI.bind(gameController);
-    gameController.updateGameUI = () => {
-      showGameScreen();
-      originalUpdateGameUI();
-    };
   } else {
     // Host mode - create new game
     console.log('Creating game as host');
-    const peerId = await gameController.initializeAsHost();
+    await gameController.initializeAsHost();
 
     // Don't update URL - this prevents host from trying to join their own old session on reload
     // The shareable link will still include the peer ID for clients to join
@@ -253,19 +241,6 @@ async function initializeGame() {
     if (shareLinkContainer) {
       shareLinkContainer.style.display = 'block';
     }
-
-    // Update lobby UI
-    const originalUpdateLobbyUI = gameController.updateLobbyUI.bind(gameController);
-    gameController.updateLobbyUI = () => {
-      originalUpdateLobbyUI();
-      updateLobbyUI();
-    };
-
-    const originalUpdateGameUI = gameController.updateGameUI.bind(gameController);
-    gameController.updateGameUI = () => {
-      showGameScreen();
-      originalUpdateGameUI();
-    };
 
     updateLobbyUI();
   }

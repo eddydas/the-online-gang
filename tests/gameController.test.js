@@ -126,7 +126,10 @@ describe('GameController', () => {
     test('client should not modify incoming message timestamps', () => {
       const controller = new GameController();
       controller.isHost = false;
-      controller.updateLobbyUI = vi.fn();
+
+      // Set up delegate to track if it's called
+      const delegateMock = { onLobbyStateChange: vi.fn() };
+      controller.setDelegate(delegateMock);
 
       const existingTimestamp = 1234567890;
       const messageFromHost = {
@@ -139,6 +142,9 @@ describe('GameController', () => {
 
       // Timestamp should remain unchanged
       expect(messageFromHost.timestamp).toBe(existingTimestamp);
+
+      // Delegate should have been called
+      expect(delegateMock.onLobbyStateChange).toHaveBeenCalled();
     });
   });
 });

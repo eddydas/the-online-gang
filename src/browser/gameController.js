@@ -17,6 +17,12 @@ import { createEndGameTable } from './endGameRenderer.js';
  */
 
 /**
+ * @typedef {Object} GameControllerDelegate
+ * @property {() => void} [onLobbyStateChange] - Called when lobby state changes
+ * @property {() => void} [onGameStateChange] - Called when game state changes
+ */
+
+/**
  * Main game controller that coordinates P2P, game state, and UI
  */
 export class GameController {
@@ -35,6 +41,17 @@ export class GameController {
 
     /** @type {Array<{id: string, name: string, isReady: boolean, isHost: boolean}>} */
     this.lobbyState = [];
+
+    /** @type {GameControllerDelegate | null} */
+    this.delegate = null;
+  }
+
+  /**
+   * Set the delegate to receive state change notifications
+   * @param {GameControllerDelegate} delegate
+   */
+  setDelegate(delegate) {
+    this.delegate = delegate;
   }
 
   /**
@@ -114,14 +131,14 @@ export class GameController {
       case 'LOBBY_UPDATE':
         if (!this.isHost) {
           this.lobbyState = message.payload.lobbyState;
-          this.updateLobbyUI();
+          this.delegate?.onLobbyStateChange?.();
         }
         break;
 
       case 'STATE_UPDATE':
         if (!this.isHost) {
           this.gameState = message.payload;
-          this.updateGameUI();
+          this.delegate?.onGameStateChange?.();
         }
         break;
 
@@ -195,8 +212,8 @@ export class GameController {
       }
     });
 
-    // Update host's own UI
-    this.updateLobbyUI();
+    // Notify delegate
+    this.delegate?.onLobbyStateChange?.();
   }
 
   /**
@@ -281,15 +298,7 @@ export class GameController {
   }
 
   /**
-   * Update lobby UI
-   */
-  updateLobbyUI() {
-    // TODO: Implement lobby UI updates
-    console.log('Lobby state:', this.lobbyState);
-  }
-
-  /**
-   * Update game UI
+   * Update game UI - renders cards, tokens, and phase indicator
    */
   updateGameUI() {
     if (!this.gameState) return;
@@ -310,6 +319,9 @@ export class GameController {
     this.renderTokensUI();
 
     console.log('Game state:', this.gameState);
+
+    // Notify delegate
+    this.delegate?.onGameStateChange?.();
   }
 
   /**
