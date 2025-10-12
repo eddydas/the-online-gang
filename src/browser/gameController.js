@@ -292,21 +292,29 @@ export class GameController {
     if (lobbyScreen) lobbyScreen.style.display = 'none';
 
     // Build players array with hand evaluation for determineWinLoss
+    // Filter to only include players who have both a token and evaluated hand
+    /** @type {import('./winCondition.js').PlayerWithHand[]} */
     const playersWithHands = this.gameState.players
       .map((p) => {
         // Get current token from token list
         const currentToken = this.gameState?.tokens.find(t => t.ownerId === p.id);
 
+        // Create player with required fields
+        // Note: hand should be evaluated by poker.js evaluateHand before END_GAME phase
         return {
-          ...p,
-          currentToken: currentToken?.number || null,
-          hand: /** @type {any} */ (p.holeCards) ? null : null // Placeholder - hand should be evaluated
+          id: p.id,
+          name: p.name,
+          holeCards: p.holeCards,
+          currentToken: currentToken?.number,
+          hand: /** @type {import('./poker.js').HandResult | undefined} */ (undefined) // TODO: Get from evaluated hands
         };
       })
-      .filter(p => p.currentToken !== null); // Only include players with tokens
+      .filter((p) => p.currentToken !== undefined && p.hand !== undefined)
+      // Type assertion after filtering ensures both fields are non-null
+      .map(p => /** @type {import('./winCondition.js').PlayerWithHand} */ (p));
 
     // Determine win/loss
-    const winLossResult = determineWinLoss(/** @type {any} */ (playersWithHands));
+    const winLossResult = determineWinLoss(playersWithHands);
 
     // Create end game table
     const endGameTable = createEndGameTable(winLossResult, this.gameState);
