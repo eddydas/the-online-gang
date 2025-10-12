@@ -388,8 +388,7 @@ describe('Integration Tests - Game Flow', () => {
         timestamp: Date.now() + 1
       });
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 2
+      state = advancePhase(state); // Move to turn 2
 
       expect(state.turn).toBe(2);
       expect(state.communityCards).toHaveLength(3); // Flop
@@ -413,8 +412,7 @@ describe('Integration Tests - Game Flow', () => {
         timestamp: Date.now() + 1
       });
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 3
+      state = advancePhase(state); // Move to turn 3
 
       expect(state.turn).toBe(3);
       expect(state.communityCards).toHaveLength(4); // Turn
@@ -438,8 +436,7 @@ describe('Integration Tests - Game Flow', () => {
         timestamp: Date.now() + 1
       });
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 4
+      state = advancePhase(state); // Move to turn 4
 
       expect(state.turn).toBe(4);
       expect(state.communityCards).toHaveLength(5); // River
@@ -474,14 +471,13 @@ describe('Integration Tests - Game Flow', () => {
           timestamp: Date.now() + 1
         });
 
-        state = advancePhase(state); // TURN_COMPLETE
 
         if (turn < 4) {
           state = advancePhase(state); // Next READY_UP
         }
       }
 
-      // After turn 4 TURN_COMPLETE, advance to END_GAME
+      // After turn 4, advance to END_GAME
       state = advancePhase(state);
       expect(state.phase).toBe('END_GAME');
       expect(state.turn).toBe(4);
@@ -588,13 +584,8 @@ describe('Integration Tests - Game Flow', () => {
       state = handleTokenAction(state, action);
       expect(state.tokens.find(t => t.number === 3)?.ownerId).toBe('alice');
 
-      // Advance to TURN_COMPLETE
-      state = advancePhase(state);
-      expect(state.phase).toBe('TURN_COMPLETE');
+      state = advancePhase(state); // Move to turn 2
 
-      // Advance to READY_UP for turn 2
-      state = advancePhase(state);
-      expect(state.phase).toBe('READY_UP');
       expect(state.turn).toBe(2);
 
       // Override community cards with predetermined flop
@@ -641,8 +632,8 @@ describe('Integration Tests - Game Flow', () => {
       state = handleTokenAction(state, action);
       expect(state.tokens.find(t => t.number === 1)?.ownerId).toBe('charlie');
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 3
+      state = advancePhase(state); // Move to turn 3
+
       expect(state.turn).toBe(3);
 
       // Override community cards with turn card
@@ -682,8 +673,8 @@ describe('Integration Tests - Game Flow', () => {
       };
       state = handleTokenAction(state, action);
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 4
+      state = advancePhase(state); // Move to turn 4
+
       expect(state.turn).toBe(4);
 
       // Override community cards with river card
@@ -744,7 +735,6 @@ describe('Integration Tests - Game Flow', () => {
         charlie: state.tokens.find(t => t.ownerId === 'charlie')?.number
       };
 
-      state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // END_GAME
 
       expect(state.phase).toBe('END_GAME');
@@ -889,8 +879,7 @@ describe('Integration Tests - Game Flow', () => {
       };
       state = handleTokenAction(state, action);
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 2
+      state = advancePhase(state); // Move to turn 2
 
       // Override community cards with flop
       state.communityCards = predeterminedCommunity.slice(0, 3);
@@ -927,8 +916,7 @@ describe('Integration Tests - Game Flow', () => {
       };
       state = handleTokenAction(state, action);
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 3
+      state = advancePhase(state); // Move to turn 3
 
       // Override with turn card
       state.communityCards = predeterminedCommunity.slice(0, 4);
@@ -964,8 +952,7 @@ describe('Integration Tests - Game Flow', () => {
       };
       state = handleTokenAction(state, action);
 
-      state = advancePhase(state); // TURN_COMPLETE
-      state = advancePhase(state); // READY_UP turn 4
+      state = advancePhase(state); // Move to turn 4
 
       // Override with river card
       state.communityCards = predeterminedCommunity.slice(0, 5);
@@ -1013,7 +1000,6 @@ describe('Integration Tests - Game Flow', () => {
         charlie: state.tokens.find(t => t.ownerId === 'charlie')?.number
       };
 
-      state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // END_GAME
 
       expect(state.phase).toBe('END_GAME');
@@ -1141,7 +1127,7 @@ describe('Integration Tests - Game Flow', () => {
       // Now advance should succeed
       const advancedState = advancePhase(state);
 
-      expect(advancedState.phase).toBe('TURN_COMPLETE'); // Should advance successfully
+      expect(advancedState.phase).toBe('READY_UP'); // Should advance successfully to next turn
       expect(advancedState).not.toBe(state); // Should be a new state
     });
 
@@ -1183,7 +1169,7 @@ describe('Integration Tests - Game Flow', () => {
 
       // Now advance should succeed
       attemptedState = advancePhase(state);
-      expect(attemptedState.phase).toBe('TURN_COMPLETE');
+      expect(attemptedState.phase).toBe('READY_UP');
     });
   });
 

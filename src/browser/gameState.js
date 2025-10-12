@@ -137,12 +137,40 @@ function advancePhase(state) {
       if (!allTokensOwned(state)) {
         return state;
       }
-      return {
-        ...state,
-        phase: 'TURN_COMPLETE'
-      };
+
+      // Advance turn or end game directly from TOKEN_TRADING
+      if (state.turn < TOTAL_TURNS) {
+        // Deal community cards for next turn
+        const { communityCards } = dealCommunityCards(state.deck, state.turn + 1);
+        const allCommunityCards = [...state.communityCards, ...communityCards];
+
+        // Reset ready status for new turn
+        /** @type {Object.<string, boolean>} */
+        const readyStatus = {};
+        state.players.forEach(p => {
+          readyStatus[p.id] = false;
+        });
+
+        // Reset tokens - return all to center (unowned)
+        const resetTokensState = resetTokens(state.tokens);
+
+        return {
+          ...state,
+          phase: 'READY_UP',
+          turn: state.turn + 1,
+          communityCards: allCommunityCards,
+          readyStatus,
+          tokens: resetTokensState
+        };
+      } else {
+        return {
+          ...state,
+          phase: 'END_GAME'
+        };
+      }
 
     case 'TURN_COMPLETE':
+      // Legacy support - should not be used anymore
       // Advance turn or end game
       if (state.turn < TOTAL_TURNS) {
         // Deal community cards for next turn

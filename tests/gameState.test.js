@@ -85,10 +85,12 @@ describe('Game State Machine', () => {
       expect(state.phase).toBe('TOKEN_TRADING');
     });
 
-    test('should transition from TOKEN_TRADING to TURN_COMPLETE', () => {
+    test('should transition from TOKEN_TRADING to next turn directly', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state);
+      expect(state.turn).toBe(1);
+
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // To TOKEN_TRADING
@@ -109,7 +111,9 @@ describe('Game State Machine', () => {
 
       state = advancePhase(state);
 
-      expect(state.phase).toBe('TURN_COMPLETE');
+      // Should skip TURN_COMPLETE and go directly to next turn's READY_UP
+      expect(state.phase).toBe('READY_UP');
+      expect(state.turn).toBe(2);
     });
 
     test('should not transition from TOKEN_TRADING if not all tokens are owned', () => {
@@ -136,7 +140,7 @@ describe('Game State Machine', () => {
   });
 
   describe('Turn Progression', () => {
-    test('should advance turn from TURN_COMPLETE if turn < 4', () => {
+    test('should advance turn directly from TOKEN_TRADING if turn < 4', () => {
       const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
       let state = createInitialState(players);
       state = startGame(state); // Turn 1
@@ -158,11 +162,9 @@ describe('Game State Machine', () => {
         timestamp: Date.now() + 1
       });
 
-      state = advancePhase(state); // TURN_COMPLETE
-
       expect(state.turn).toBe(1);
 
-      state = advancePhase(state); // Should go to READY_UP for turn 2
+      state = advancePhase(state); // Should go directly to READY_UP for turn 2
 
       expect(state.phase).toBe('READY_UP');
       expect(state.turn).toBe(2);
