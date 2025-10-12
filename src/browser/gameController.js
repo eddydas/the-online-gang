@@ -158,6 +158,12 @@ export class GameController {
           this.handleProceedTurn(message.payload.playerId);
         }
         break;
+
+      case 'NEXT_GAME_READY':
+        if (this.isHost) {
+          this.handleNextGameReady(message.payload.playerId);
+        }
+        break;
     }
   }
 
@@ -285,6 +291,29 @@ export class GameController {
   }
 
   /**
+   * Handle "Next Game Ready" click (host only)
+   * @param {string} playerId
+   */
+  handleNextGameReady(playerId) {
+    if (!this.isHost) return;
+    if (!this.gameState) return;
+    if (this.gameState.phase !== 'END_GAME') return;
+
+    // Mark player as ready for next game
+    this.gameState = setPlayerReady(this.gameState, playerId, true);
+
+    // Check if all players are ready for next game
+    if (allPlayersReady(this.gameState)) {
+      // Reset for next game
+      this.gameState = resetForNextGame(this.gameState);
+    }
+
+    // Broadcast updated state
+    this.broadcastGameState();
+    this.updateGameUI();
+  }
+
+  /**
    * Send message to all peers
    * @param {any} message
    */
@@ -406,23 +435,18 @@ export class GameController {
   onNextGameClick() {
     if (!this.gameState) return;
 
-    // Reset game state for next round
-    this.gameState = resetForNextGame(this.gameState);
-
-    // Hide end game screen, show game screen
-    const endGameScreen = document.getElementById('end-game-screen');
-    const gameScreen = document.getElementById('game-screen');
-
-    if (endGameScreen) endGameScreen.style.display = 'none';
-    if (gameScreen) gameScreen.style.display = 'block';
-
-    // Broadcast new state to all clients
-    if (this.isHost && this.connectionManager) {
-      broadcastState(this.gameState, this.connectionManager.getConnections());
+    if (this.isHost) {
+      // Host: directly mark self as ready
+      this.handleNextGameReady(this.myPlayerId || '');
+    } else {
+      // Client: send ready message to host
+      this.sendMessage({
+        type: 'NEXT_GAME_READY',
+        payload: {
+          playerId: this.myPlayerId
+        }
+      });
     }
-
-    // Update UI
-    this.updateGameUI();
   }
 
   /**

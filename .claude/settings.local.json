@@ -8,7 +8,8 @@
       "Bash(npm run test:coverage:*)",
       "Bash(npm test:*)",
       "Bash(cat:*)",
-      "Bash(jobs)"
+      "Bash(jobs)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

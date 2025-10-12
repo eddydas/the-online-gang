@@ -169,10 +169,19 @@ export function createEndGameTable(winLossResult, gameState) {
   table.appendChild(tbody);
   container.appendChild(table);
 
-  // "Ready for Next Game" button
+  // "Ready for Next Game" button with ready status display
   const buttonContainer = document.createElement('div');
   buttonContainer.className = 'end-game-actions';
+
+  // Show ready status
+  const readyStatus = gameState.readyStatus || {};
+  const readyPlayers = Object.values(readyStatus).filter(r => r === true).length;
+  const totalPlayers = gameState.players.length;
+
   buttonContainer.innerHTML = `
+    <div id="ready-status" class="ready-status">
+      Players Ready: ${readyPlayers} / ${totalPlayers}
+    </div>
     <button id="next-game-button" class="next-game-btn">Ready for Next Game</button>
   `;
   container.appendChild(buttonContainer);
@@ -354,6 +363,17 @@ export function addEndGameStyles() {
     .end-game-actions {
       text-align: center;
       margin-top: 30px;
+    }
+
+    .ready-status {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ecf0f1;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: rgba(52, 152, 219, 0.2);
+      border-radius: 8px;
+      display: inline-block;
     }
 
     .next-game-btn {
