@@ -1,7 +1,7 @@
 // @ts-check
 
 import { ConnectionManager } from './p2pConnection.js';
-import { createInitialState, startGame, advancePhase, setPlayerReady, allPlayersReady } from './gameState.js';
+import { createInitialState, startGame, advancePhase, setPlayerReady, allPlayersReady, resetForNextGame } from './gameState.js';
 import { applyTokenAction } from './tokens.js';
 import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
@@ -404,7 +404,25 @@ export class GameController {
    * Handle "Next Game" button click
    */
   onNextGameClick() {
-    // Next game logic to be implemented
+    if (!this.gameState) return;
+
+    // Reset game state for next round
+    this.gameState = resetForNextGame(this.gameState);
+
+    // Hide end game screen, show game screen
+    const endGameScreen = document.getElementById('end-game-screen');
+    const gameScreen = document.getElementById('game-screen');
+
+    if (endGameScreen) endGameScreen.style.display = 'none';
+    if (gameScreen) gameScreen.style.display = 'block';
+
+    // Broadcast new state to all clients
+    if (this.isHost && this.connectionManager) {
+      broadcastState(this.gameState, this.connectionManager.getConnections());
+    }
+
+    // Update UI
+    this.updateUI();
   }
 
   /**
