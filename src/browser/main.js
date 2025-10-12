@@ -220,7 +220,6 @@ async function initializeGame() {
     },
     onGameStateChange: () => {
       showGameScreen();
-      gameController.updateGameUI();
     }
   });
 

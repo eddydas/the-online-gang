@@ -113,6 +113,7 @@ export class GameController {
    * @param {any} message
    */
   handlePeerMessage(message) {
+    console.log('[DEBUG] handlePeerMessage received:', message.type);
     console.log('Received P2P message:', message.type, message.payload);
 
     // Host assigns server timestamp to all incoming messages for consistency
@@ -136,15 +137,23 @@ export class GameController {
         break;
 
       case 'STATE_UPDATE':
+        console.log('[DEBUG] STATE_UPDATE received, phase:', message.payload.phase);
         if (!this.isHost) {
           this.gameState = message.payload;
-          this.delegate?.onGameStateChange?.();
+          this.updateGameUI();
         }
         break;
 
       case 'PLAYER_READY':
         if (this.isHost) {
           this.handlePlayerReady(message.payload.playerId, message.payload.isReady);
+        }
+        break;
+
+      case 'TURN_READY':
+        console.log('[DEBUG] TURN_READY received from:', message.payload.playerId);
+        if (this.isHost) {
+          this.handleTurnReady(message.payload.playerId);
         }
         break;
 
@@ -155,6 +164,7 @@ export class GameController {
         break;
 
       case 'PROCEED_TURN':
+        console.log('[DEBUG] PROCEED_TURN received from:', message.payload.playerId);
         if (this.isHost) {
           this.handleProceedTurn(message.payload.playerId);
         }
@@ -195,6 +205,30 @@ export class GameController {
 
     this.lobbyState = updatePlayerReady(this.lobbyState, playerId, isReady);
     this.broadcastLobbyState();
+  }
+
+  /**
+   * Handle player ready for turn (READY_UP phase)
+   * @param {string} playerId
+   */
+  handleTurnReady(playerId) {
+    if (!this.isHost) return;
+    if (!this.gameState) return;
+
+    console.log('[DEBUG] handleTurnReady called for player:', playerId);
+
+    // Mark player as ready
+    this.gameState = setPlayerReady(this.gameState, playerId, true);
+
+    // Check if all players ready, then advance phase
+    if (allPlayersReady(this.gameState)) {
+      console.log('[DEBUG] All players ready, advancing phase from:', this.gameState.phase);
+      this.gameState = advancePhase(this.gameState);
+      console.log('[DEBUG] Phase advanced to:', this.gameState.phase);
+    }
+
+    this.broadcastGameState();
+    this.updateGameUI();
   }
 
   /**
@@ -255,6 +289,7 @@ export class GameController {
    * @param {string} playerId
    */
   handleProceedTurn(playerId) {
+    console.log('[DEBUG] handleProceedTurn called for player:', playerId);
     if (!this.isHost) return;
     if (!this.gameState) return;
 
@@ -263,10 +298,13 @@ export class GameController {
 
     // Check if all players ready, then advance phase
     if (allPlayersReady(this.gameState)) {
+      console.log('[DEBUG] All players ready, advancing phase from:', this.gameState.phase);
       this.gameState = advancePhase(this.gameState);
+      console.log('[DEBUG] Phase advanced to:', this.gameState.phase);
     }
 
     this.broadcastGameState();
+    this.updateGameUI();
   }
 
   /**
@@ -290,6 +328,7 @@ export class GameController {
    * Broadcast current game state to all clients
    */
   broadcastGameState() {
+    console.log('[DEBUG] broadcastGameState called');
     if (!this.isHost) return;
     if (!this.connectionManager) return;
     if (!this.gameState) return;
@@ -301,6 +340,8 @@ export class GameController {
    * Update game UI - renders cards, tokens, and phase indicator
    */
   updateGameUI() {
+    console.log('[DEBUG] updateGameUI called, stack:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
+
     if (!this.gameState) return;
 
     // Check if game is over
@@ -321,7 +362,9 @@ export class GameController {
     console.log('Game state:', this.gameState);
 
     // Notify delegate
+    console.log('[DEBUG] About to call delegate.onGameStateChange');
     this.delegate?.onGameStateChange?.();
+    console.log('[DEBUG] Finished calling delegate.onGameStateChange');
   }
 
   /**
@@ -442,28 +485,19 @@ export class GameController {
   }
 
   /**
-   * Player clicks ready button
+   * Player clicks ready button (during READY_UP phase)
    */
   onReadyClick() {
     if (!this.gameState) return;
 
     if (this.isHost) {
-      this.gameState = setPlayerReady(this.gameState, this.myPlayerId || '', true);
-
-      // Check if all ready, advance phase
-      if (allPlayersReady(this.gameState)) {
-        this.gameState = advancePhase(this.gameState);
-      }
-
-      this.broadcastGameState();
-      this.updateGameUI();
+      this.handleTurnReady(this.myPlayerId || '');
     } else {
-      // Client sends ready state to host
+      // Client sends turn ready to host
       this.sendMessage({
-        type: 'PLAYER_READY',
+        type: 'TURN_READY',
         payload: {
-          playerId: this.myPlayerId,
-          isReady: true
+          playerId: this.myPlayerId
         }
       });
     }
