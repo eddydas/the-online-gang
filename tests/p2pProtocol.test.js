@@ -217,7 +217,6 @@ describe('P2P Message Protocol', () => {
         'PLAYER_READY',
         'TURN_READY',
         'TOKEN_SELECT',
-        'TOKEN_STEAL',
         'PHASE_ADVANCE',
         'GAME_START',
         'GAME_RESET',

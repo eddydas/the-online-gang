@@ -118,7 +118,7 @@ describe('Token System', () => {
 
       // Player2 steals token 2
       tokens = applyTokenAction(tokens, {
-        type: 'steal',
+        type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
         timestamp: 1500
@@ -134,7 +134,7 @@ describe('Token System', () => {
       const tokens = generateTokens(3);
 
       const updatedTokens = applyTokenAction(tokens, {
-        type: 'steal',
+        type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
         timestamp: 1000
@@ -156,14 +156,14 @@ describe('Token System', () => {
       });
 
       tokens = applyTokenAction(tokens, {
-        type: 'steal',
+        type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
         timestamp: 1500
       });
 
       tokens = applyTokenAction(tokens, {
-        type: 'steal',
+        type: 'select',
         playerId: 'player3',
         tokenNumber: 2,
         timestamp: 2000
@@ -177,7 +177,7 @@ describe('Token System', () => {
   });
 
   describe('Conflict Resolution', () => {
-    test('should keep earlier timestamp when conflict occurs', () => {
+    test('should reject earlier timestamp (later timestamp wins)', () => {
       let tokens = generateTokens(3);
 
       // Player1 selects at 1000
@@ -189,7 +189,7 @@ describe('Token System', () => {
       });
 
       // Player2 tries to select same token at 999 (earlier)
-      // This should override since earlier timestamp wins
+      // This should NOT override since later timestamp wins
       tokens = applyTokenAction(tokens, {
         type: 'select',
         playerId: 'player2',
@@ -199,11 +199,11 @@ describe('Token System', () => {
 
       const token2 = tokens.find(t => t.number === 2);
       expect(token2).toBeDefined();
-      expect(token2?.ownerId).toBe('player2');
-      expect(token2?.timestamp).toBe(999);
+      expect(token2?.ownerId).toBe('player1');
+      expect(token2?.timestamp).toBe(1000);
     });
 
-    test('should reject later timestamp during conflict', () => {
+    test('should allow later timestamp to override', () => {
       let tokens = generateTokens(3);
 
       tokens = applyTokenAction(tokens, {
@@ -213,7 +213,7 @@ describe('Token System', () => {
         timestamp: 1000
       });
 
-      // Later timestamp should not override
+      // Later timestamp should override
       tokens = applyTokenAction(tokens, {
         type: 'select',
         playerId: 'player2',
@@ -223,11 +223,11 @@ describe('Token System', () => {
 
       const token2 = tokens.find(t => t.number === 2);
       expect(token2).toBeDefined();
-      expect(token2?.ownerId).toBe('player1');
-      expect(token2?.timestamp).toBe(1000);
+      expect(token2?.ownerId).toBe('player2');
+      expect(token2?.timestamp).toBe(1001);
     });
 
-    test('should allow explicit stealing regardless of timestamp', () => {
+    test('should allow taking token with later timestamp (always takes)', () => {
       let tokens = generateTokens(3);
 
       tokens = applyTokenAction(tokens, {
@@ -237,9 +237,9 @@ describe('Token System', () => {
         timestamp: 1000
       });
 
-      // Explicit steal should work even with later timestamp
+      // Later select always takes the token
       tokens = applyTokenAction(tokens, {
-        type: 'steal',
+        type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
         timestamp: 1500

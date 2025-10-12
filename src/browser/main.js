@@ -4,6 +4,7 @@ import { GameController } from './gameController.js';
 import { addCardStyles } from './cardRenderer.js';
 import { addTokenStyles } from './tokenRenderer.js';
 import { addEndGameStyles } from './endGameRenderer.js';
+import { addPlayerStyles } from './playerRenderer.js';
 
 /**
  * Main entry point - initializes the game
@@ -15,6 +16,7 @@ let gameController = new GameController();
 addCardStyles();
 addTokenStyles();
 addEndGameStyles();
+addPlayerStyles();
 
 /**
  * Parse peer ID from URL

@@ -11,7 +11,7 @@ import {  TOTAL_TURNS  } from "./constants.js";
 
 /**
  * @typedef {Object} TokenAction
- * @property {'select'|'steal'} type - Action type
+ * @property {'select'} type - Action type (always 'select')
  * @property {string} playerId - Player performing action
  * @property {number} tokenNumber - Token number
  * @property {number} timestamp - Action timestamp
@@ -38,9 +38,11 @@ function generateTokens(playerCount) {
 }
 
 /**
- * Applies a token action (select or steal) with conflict resolution
+ * Applies a token selection with conflict resolution
+ * Always takes the token (like a steal). Later timestamp wins.
+ * If timestamps are equal, lower player ID wins (lexicographical comparison).
  * @param {Token[]} tokens - Current token state
- * @param {TokenAction} action - Selection or steal action
+ * @param {TokenAction} action - Selection action
  * @returns {Token[]} Updated token state (new array)
  */
 function applyTokenAction(tokens, action) {
@@ -58,20 +60,16 @@ function applyTokenAction(tokens, action) {
     currentToken.timestamp = 0;
   }
 
-  // Handle conflict resolution
-  if (action.type === 'select') {
-    // If same player owns the token, always update timestamp
-    if (token.ownerId === action.playerId) {
-      token.timestamp = action.timestamp;
-    }
-    // For 'select', earlier timestamp wins (conflict resolution)
-    else if (token.ownerId === null || action.timestamp < token.timestamp) {
-      token.ownerId = action.playerId;
-      token.timestamp = action.timestamp;
-    }
-    // If different player and later timestamp, keep existing owner
-  } else if (action.type === 'steal') {
-    // For 'steal', always take the token (explicit steal)
+  // Always take the token (like steal), with conflict resolution:
+  // - Later timestamp wins
+  // - If timestamps equal, lower player ID wins (lexicographical)
+  const shouldTakeToken =
+    token.ownerId === null || // Token is unowned
+    token.ownerId === action.playerId || // Same player refreshing
+    action.timestamp > token.timestamp || // Later timestamp wins
+    (action.timestamp === token.timestamp && action.playerId < token.ownerId); // Tie-breaker
+
+  if (shouldTakeToken) {
     token.ownerId = action.playerId;
     token.timestamp = action.timestamp;
   }

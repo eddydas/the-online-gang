@@ -373,7 +373,7 @@ describe('Game State Machine', () => {
       // P2 steals token 1
       /** @type {TokenAction} */
       action = {
-        type: 'steal',
+        type: 'select',
         playerId: 'p2',
         tokenNumber: 1,
         timestamp: Date.now() + 1

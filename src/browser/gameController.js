@@ -10,6 +10,7 @@ import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
 import { renderTokens } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
+import { renderPlayers } from './playerRenderer.js';
 
 /**
  * @typedef {import('./winCondition.js').PlayerWithHand} PlayerWithHand
@@ -353,6 +354,9 @@ export class GameController {
     // Update phase UI
     updatePhaseUI(this.gameState.phase);
 
+    // Render player avatars
+    this.renderPlayersUI();
+
     // Render cards
     this.renderCards();
 
@@ -434,6 +438,35 @@ export class GameController {
   }
 
   /**
+   * Render player avatars
+   */
+  renderPlayersUI() {
+    if (!this.gameState) return;
+
+    const playerAvatarsContainer = document.getElementById('player-avatars');
+    if (!playerAvatarsContainer) return;
+
+    // Build player info array
+    const playerInfos = this.gameState.players.map(player => {
+      // Find player's current token
+      const token = this.gameState?.tokens.find(t => t.ownerId === player.id);
+
+      // Check ready status
+      const isReady = this.gameState?.readyStatus?.[player.id] ?? false;
+
+      return {
+        id: player.id,
+        name: player.name,
+        isReady: isReady,
+        tokenNumber: token?.number,
+        isCurrentPlayer: player.id === this.myPlayerId
+      };
+    });
+
+    renderPlayers(playerAvatarsContainer, playerInfos);
+  }
+
+  /**
    * Render player cards and community cards
    */
   renderCards() {
@@ -504,10 +537,14 @@ export class GameController {
   }
 
   /**
-   * Player selects a token
+   * Player clicks on a token
    * @param {number} tokenNumber
    */
   onTokenSelect(tokenNumber) {
+    if (!this.gameState) return;
+
+    // All token clicks are 'select' actions
+    // The token logic handles conflict resolution automatically
     const action = {
       type: /** @type {const} */ ('select'),
       playerId: this.myPlayerId || '',
