@@ -29,8 +29,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
-          npm list vite
+          npm ci --loglevel verbose
+          npm list vite || echo "Vite check failed but continuing..."
+          which vite || echo "vite not in PATH"
+          ls -la node_modules/.bin/ | grep vite || echo "No vite in node_modules/.bin"
 
       - name: Build
         run: npm run build
