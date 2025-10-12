@@ -1,0 +1,160 @@
+// @ts-check
+import Peer from 'peerjs';
+import { serializeMessage, deserializeMessage } from './p2pProtocol.js';
+
+/**
+ * Default peer factory (creates real Peer instance)
+ * @returns {Peer} Peer instance
+ */
+function defaultPeerFactory() {
+  return new Peer();
+}
+
+/**
+ * ConnectionManager handles P2P connections using PeerJS
+ * Supports both host (server) and client modes
+ */
+export class ConnectionManager {
+  /**
+   * @param {Function} [peerFactory] - Factory function for creating Peer (for testing)
+   */
+  constructor(peerFactory = defaultPeerFactory) {
+    this.peerFactory = peerFactory;
+    this.peer = null;
+    this.peerId = null;
+    this.isHost = false;
+    this.connections = [];
+    this._messageCallbacks = [];
+  }
+
+  /**
+   * Initialize as host (creates a peer and waits for connections)
+   * @returns {Promise<string>} Host's peer ID
+   */
+  async createHost() {
+    if (this.peer) {
+      throw new Error('Already initialized');
+    }
+
+    return new Promise((resolve, reject) => {
+      this.peer = this.peerFactory();
+      this.isHost = true;
+
+      this.peer.on('open', (id) => {
+        this.peerId = id;
+        resolve(id);
+      });
+
+      this.peer.on('error', (error) => {
+        reject(error);
+      });
+
+      // Listen for incoming connections
+      this.peer.on('connection', (conn) => {
+        this._setupConnection(conn);
+      });
+    });
+  }
+
+  /**
+   * Initialize as client and connect to host
+   * @param {string} hostPeerId - Host's peer ID to connect to
+   * @returns {Promise<void>}
+   */
+  async joinAsClient(hostPeerId) {
+    if (this.peer) {
+      throw new Error('Already initialized');
+    }
+
+    return new Promise((resolve, reject) => {
+      this.peer = this.peerFactory();
+      this.isHost = false;
+
+      this.peer.on('open', (id) => {
+        this.peerId = id;
+
+        // Connect to host
+        const conn = this.peer.connect(hostPeerId);
+        this._setupConnection(conn);
+
+        conn.on('open', () => {
+          resolve();
+        });
+
+        conn.on('error', (error) => {
+          reject(error);
+        });
+      });
+
+      this.peer.on('error', (error) => {
+        reject(error);
+      });
+    });
+  }
+
+  /**
+   * Sets up event handlers for a connection
+   * @private
+   * @param {*} conn - PeerJS connection
+   */
+  _setupConnection(conn) {
+    this.connections.push(conn);
+
+    conn.on('data', (data) => {
+      const message = deserializeMessage(data);
+      if (message) {
+        this._messageCallbacks.forEach(callback => callback(message));
+      }
+    });
+
+    conn.on('close', () => {
+      // Remove connection from list
+      this.connections = this.connections.filter(c => c !== conn);
+    });
+  }
+
+  /**
+   * Register a callback for received messages
+   * @param {Function} callback - Function to call when message received
+   */
+  onMessage(callback) {
+    this._messageCallbacks.push(callback);
+  }
+
+  /**
+   * Send a message to connected peers
+   * @param {Object} message - Message object (already in protocol format)
+   */
+  sendMessage(message) {
+    const serialized = serializeMessage(message);
+
+    this.connections.forEach(conn => {
+      try {
+        conn.send(serialized);
+      } catch (error) {
+        console.warn('Failed to send message to connection:', error);
+      }
+    });
+  }
+
+  /**
+   * Get all active connections
+   * @returns {Array<*>} Array of connections
+   */
+  getConnections() {
+    return [...this.connections];
+  }
+
+  /**
+   * Clean up and destroy peer
+   */
+  destroy() {
+    if (this.peer) {
+      this.peer.destroy();
+      this.peer = null;
+    }
+    this.connections = [];
+    this.peerId = null;
+    this.isHost = false;
+  }
+}
