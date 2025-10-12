@@ -7,6 +7,36 @@
 </head>
 <body>
   <div id="app">
+    <!-- Lobby Screen -->
+    <div id="lobby-screen" style="display: none;">
+      <h1>The Online Gang</h1>
+      <div id="lobby-content"></div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" style="display: none;">
+      <!-- Phase Indicator -->
+      <div id="phase-indicator">
+        <div id="phase-text"></div>
+      </div>
+
+      <!-- Game Board Area -->
+      <div id="game-board">
+        <div id="community-cards"></div>
+        <div id="player-cards"></div>
+      </div>
+
+      <!-- Token Trading Area -->
+      <div id="token-area"></div>
+
+      <!-- Ready/Action Buttons -->
+      <div id="action-buttons">
+        <button id="ready-button" style="display: none;">Ready</button>
+        <button id="proceed-button" style="display: none;">Proceed to Next Turn</button>
+      </div>
+    </div>
+
+    <!-- End Game Screen -->
     <div id="end-game-screen" style="display: none;"></div>
   </div>
   <script type="module" src="/src/main.js"></script>
