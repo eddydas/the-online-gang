@@ -1,12 +1,18 @@
 // @ts-check
 
 import { GameController } from './gameController.js';
+import { addCardStyles } from './cardRenderer.js';
+import { addTokenStyles } from './tokenRenderer.js';
 
 /**
  * Main entry point - initializes the game
  */
 
 let gameController = new GameController();
+
+// Add styles on load
+addCardStyles();
+addTokenStyles();
 
 /**
  * Parse peer ID from URL

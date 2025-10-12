@@ -6,6 +6,8 @@ import { applyTokenAction } from './tokens.js';
 import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
 import { addPlayer, updatePlayerReady, canStartGame } from './lobby.js';
+import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
+import { renderTokens } from './tokenRenderer.js';
 
 /**
  * Main game controller that coordinates P2P, game state, and UI
@@ -256,8 +258,64 @@ export class GameController {
     // Update phase UI
     updatePhaseUI(this.gameState.phase);
 
-    // TODO: Implement game UI updates (cards, tokens, etc.)
+    // Render cards
+    this.renderCards();
+
+    // Render tokens
+    this.renderTokensUI();
+
     console.log('Game state:', this.gameState);
+  }
+
+  /**
+   * Render player cards and community cards
+   */
+  renderCards() {
+    if (!this.gameState) return;
+
+    const playerCardsContainer = document.getElementById('player-cards');
+    const communityCardsContainer = document.getElementById('community-cards');
+
+    if (!playerCardsContainer || !communityCardsContainer) return;
+
+    // Find current player
+    const currentPlayer = this.gameState.players.find(p => p.id === this.myPlayerId);
+
+    // Render player's hole cards (face up for them, face down for others in future)
+    if (currentPlayer && currentPlayer.holeCards && currentPlayer.holeCards.length > 0) {
+      renderHoleCards(playerCardsContainer, currentPlayer.holeCards, false);
+    } else {
+      playerCardsContainer.innerHTML = '';
+    }
+
+    // Render community cards
+    if (this.gameState.communityCards.length > 0) {
+      renderCommunityCards(communityCardsContainer, this.gameState.communityCards);
+    } else {
+      communityCardsContainer.innerHTML = '';
+    }
+  }
+
+  /**
+   * Render tokens
+   */
+  renderTokensUI() {
+    if (!this.gameState) return;
+
+    const tokenArea = document.getElementById('token-area');
+    if (!tokenArea) return;
+
+    const interactive = this.gameState.phase === 'TOKEN_TRADING';
+
+    renderTokens(
+      tokenArea,
+      this.gameState.tokens,
+      this.gameState.turn,
+      interactive,
+      (/** @type {number} */ tokenNumber) => {
+        this.onTokenSelect(tokenNumber);
+      }
+    );
   }
 
   /**
