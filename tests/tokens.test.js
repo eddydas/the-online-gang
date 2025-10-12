@@ -1,5 +1,5 @@
 // @ts-check
-import { generateTokens, applyTokenAction, initializePlayerTokenHistory, updateTokenHistory } from '../src/browser/tokens.js';
+import { generateTokens, applyTokenAction, initializePlayerTokenHistory, updateTokenHistory, resetTokens } from '../src/browser/tokens.js';
 import { MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS } from '../src/browser/constants.js';
 
 describe('Token System', () => {
@@ -353,6 +353,93 @@ describe('Token System', () => {
       expect(token2).toBeDefined();
       expect(token1?.ownerId).toBeNull(); // Token 1 released
       expect(token2?.ownerId).toBe('player1'); // Token 2 owned
+    });
+  });
+
+  describe('Token Reset', () => {
+    test('should reset all tokens to unowned state', () => {
+      let tokens = generateTokens(3);
+
+      // Assign tokens to players
+      tokens = applyTokenAction(tokens, {
+        type: 'select',
+        playerId: 'player1',
+        tokenNumber: 1,
+        timestamp: 1000
+      });
+
+      tokens = applyTokenAction(tokens, {
+        type: 'select',
+        playerId: 'player2',
+        tokenNumber: 2,
+        timestamp: 1001
+      });
+
+      tokens = applyTokenAction(tokens, {
+        type: 'select',
+        playerId: 'player3',
+        tokenNumber: 3,
+        timestamp: 1002
+      });
+
+      // Verify tokens are owned
+      expect(tokens[0].ownerId).toBe('player1');
+      expect(tokens[1].ownerId).toBe('player2');
+      expect(tokens[2].ownerId).toBe('player3');
+
+      // Reset tokens
+      const resetTokensState = resetTokens(tokens);
+
+      // Verify all tokens are unowned
+      expect(resetTokensState[0].ownerId).toBeNull();
+      expect(resetTokensState[1].ownerId).toBeNull();
+      expect(resetTokensState[2].ownerId).toBeNull();
+
+      // Verify timestamps are reset
+      expect(resetTokensState[0].timestamp).toBe(0);
+      expect(resetTokensState[1].timestamp).toBe(0);
+      expect(resetTokensState[2].timestamp).toBe(0);
+
+      // Verify token numbers are preserved
+      expect(resetTokensState[0].number).toBe(1);
+      expect(resetTokensState[1].number).toBe(2);
+      expect(resetTokensState[2].number).toBe(3);
+    });
+
+    test('should not modify original tokens array', () => {
+      let tokens = generateTokens(2);
+
+      tokens = applyTokenAction(tokens, {
+        type: 'select',
+        playerId: 'player1',
+        tokenNumber: 1,
+        timestamp: 1000
+      });
+
+      const resetTokensState = resetTokens(tokens);
+
+      // Original tokens should still have owners
+      expect(tokens[0].ownerId).toBe('player1');
+      // Reset tokens should not have owners
+      expect(resetTokensState[0].ownerId).toBeNull();
+    });
+
+    test('should work with empty token array', () => {
+      const tokens = [];
+      const resetTokensState = resetTokens(tokens);
+
+      expect(resetTokensState).toEqual([]);
+    });
+
+    test('should work with already unowned tokens', () => {
+      const tokens = generateTokens(3);
+      const resetTokensState = resetTokens(tokens);
+
+      // All should still be unowned
+      resetTokensState.forEach(token => {
+        expect(token.ownerId).toBeNull();
+        expect(token.timestamp).toBe(0);
+      });
     });
   });
 

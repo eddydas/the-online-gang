@@ -201,6 +201,83 @@ describe('Game State Machine', () => {
       expect(state.tokens).toHaveLength(3);
       expect(state.tokens.map(t => t.number)).toEqual([1, 2, 3]);
     });
+
+    test('should reset tokens to unowned when advancing to next turn', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state); // Turn 1
+
+      // Advance to TOKEN_TRADING
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      // Simulate token selection using handleTokenAction
+      const action = {
+        type: /** @type {const} */ ('select'),
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+      state = handleTokenAction(state, action);
+
+      // Verify token is owned
+      const token1Turn1 = state.tokens.find(t => t.number === 1);
+      expect(token1Turn1?.ownerId).toBe('p1');
+      expect(token1Turn1?.timestamp).toBeGreaterThan(0);
+
+      // Advance to TURN_COMPLETE then to next turn
+      state = advancePhase(state); // TURN_COMPLETE
+      state = advancePhase(state); // READY_UP turn 2
+
+      // Verify all tokens are reset (unowned)
+      expect(state.turn).toBe(2);
+      state.tokens.forEach(token => {
+        expect(token.ownerId).toBeNull();
+        expect(token.timestamp).toBe(0);
+      });
+
+      // Verify token numbers are preserved
+      expect(state.tokens.map(t => t.number)).toEqual([1, 2]);
+    });
+
+    test('should reset tokens between all turns', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      for (let turn = 1; turn <= 3; turn++) {
+        // Ready up
+        state = setPlayerReady(state, 'p1', true);
+        state = setPlayerReady(state, 'p2', true);
+        state = advancePhase(state); // TOKEN_TRADING
+
+        // Assign token
+        const action = {
+          type: /** @type {const} */ ('select'),
+          playerId: 'p1',
+          tokenNumber: 1,
+          timestamp: Date.now()
+        };
+        state = handleTokenAction(state, action);
+
+        // Verify token is owned
+        expect(state.tokens[0].ownerId).toBe('p1');
+
+        // Advance phases
+        state = advancePhase(state); // TURN_COMPLETE
+
+        if (turn < 3) {
+          state = advancePhase(state); // READY_UP next turn
+
+          // Verify tokens are reset
+          state.tokens.forEach(token => {
+            expect(token.ownerId).toBeNull();
+            expect(token.timestamp).toBe(0);
+          });
+        }
+      }
+    });
   });
 
   describe('Ready-Up Logic', () => {

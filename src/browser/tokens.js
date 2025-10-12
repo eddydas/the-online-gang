@@ -98,9 +98,23 @@ function updateTokenHistory(history, turn, tokenNumber) {
   return historyCopy;
 }
 
+/**
+ * Resets all tokens to unowned state
+ * @param {Token[]} tokens - Current token array
+ * @returns {Token[]} Tokens with all owners cleared (new array)
+ */
+function resetTokens(tokens) {
+  return tokens.map(token => ({
+    ...token,
+    ownerId: null,
+    timestamp: 0
+  }));
+}
+
 export {
   generateTokens,
   applyTokenAction,
   initializePlayerTokenHistory,
-  updateTokenHistory
+  updateTokenHistory,
+  resetTokens
 };

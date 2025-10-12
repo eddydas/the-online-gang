@@ -883,8 +883,25 @@ describe('Integration Tests - Game Flow', () => {
       // Bob has Full House (middle) and gets token 3 (should be 2) ❌
       // Charlie has Two Pair (weakest) and gets token 2 (should be 1) ❌
 
-      // Current: Alice=1, Bob=3, Charlie=2
-      // Keep these wrong assignments
+      // Assign tokens (wrong order)
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'alice',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'bob',
+        tokenNumber: 3,
+        timestamp: Date.now() + 1
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'charlie',
+        tokenNumber: 2,
+        timestamp: Date.now() + 2
+      });
 
       // Verify final token ownership (wrong order)
       expect(state.tokens.find(t => t.number === 1)?.ownerId).toBe('alice');

@@ -1,7 +1,7 @@
 // @ts-check
 
 import {  createDeck, shuffleDeck, dealHoleCards, dealCommunityCards, randomizeCardBackColor  } from "./deck.js";
-import {  generateTokens, applyTokenAction  } from "./tokens.js";
+import {  generateTokens, applyTokenAction, resetTokens  } from "./tokens.js";
 import {  MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS  } from "./constants.js";
 
 /**
@@ -143,12 +143,16 @@ function advancePhase(state) {
           readyStatus[p.id] = false;
         });
 
+        // Reset tokens - return all to center (unowned)
+        const resetTokensState = resetTokens(state.tokens);
+
         return {
           ...state,
           phase: 'READY_UP',
           turn: state.turn + 1,
           communityCards: allCommunityCards,
-          readyStatus
+          readyStatus,
+          tokens: resetTokensState
         };
       } else {
         return {
