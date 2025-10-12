@@ -373,6 +373,21 @@ describe('Integration Tests - Game Flow', () => {
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
+
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 2
 
@@ -383,6 +398,21 @@ describe('Integration Tests - Game Flow', () => {
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
+
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 3
 
@@ -393,6 +423,21 @@ describe('Integration Tests - Game Flow', () => {
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
+
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 4
 
@@ -414,6 +459,21 @@ describe('Integration Tests - Game Flow', () => {
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
+
+        // Assign all tokens
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p1',
+          tokenNumber: 1,
+          timestamp: Date.now()
+        });
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p2',
+          tokenNumber: 2,
+          timestamp: Date.now() + 1
+        });
+
         state = advancePhase(state); // TURN_COMPLETE
 
         if (turn < 4) {
@@ -560,7 +620,7 @@ describe('Integration Tests - Game Flow', () => {
       state = handleTokenAction(state, action);
       expect(state.tokens.find(t => t.number === 3)?.ownerId).toBe('bob');
 
-      // Alice takes token 2 from Bob
+      // Alice takes token 2
       action = {
         type: 'steal',
         playerId: 'alice',
@@ -569,6 +629,17 @@ describe('Integration Tests - Game Flow', () => {
       };
       state = handleTokenAction(state, action);
       expect(state.tokens.find(t => t.number === 2)?.ownerId).toBe('alice');
+
+      // Charlie still has token 1 from stealing in turn 1 - but tokens were reset!
+      // So Charlie needs to take token 1
+      action = {
+        type: 'select',
+        playerId: 'charlie',
+        tokenNumber: 1,
+        timestamp: Date.now() + 12
+      };
+      state = handleTokenAction(state, action);
+      expect(state.tokens.find(t => t.number === 1)?.ownerId).toBe('charlie');
 
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 3
@@ -599,6 +670,15 @@ describe('Integration Tests - Game Flow', () => {
         playerId: 'alice',
         tokenNumber: 1,
         timestamp: Date.now() + 21
+      };
+      state = handleTokenAction(state, action);
+
+      // Bob still needs token 3
+      action = {
+        type: 'select',
+        playerId: 'bob',
+        tokenNumber: 3,
+        timestamp: Date.now() + 22
       };
       state = handleTokenAction(state, action);
 
@@ -838,6 +918,15 @@ describe('Integration Tests - Game Flow', () => {
       };
       state = handleTokenAction(state, action);
 
+      // Alice needs token 2
+      action = {
+        type: 'select',
+        playerId: 'alice',
+        tokenNumber: 2,
+        timestamp: Date.now() + 12
+      };
+      state = handleTokenAction(state, action);
+
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 3
 
@@ -863,6 +952,15 @@ describe('Integration Tests - Game Flow', () => {
         playerId: 'charlie',
         tokenNumber: 2,
         timestamp: Date.now() + 21
+      };
+      state = handleTokenAction(state, action);
+
+      // Bob needs token 3
+      action = {
+        type: 'select',
+        playerId: 'bob',
+        tokenNumber: 3,
+        timestamp: Date.now() + 22
       };
       state = handleTokenAction(state, action);
 
@@ -979,6 +1077,113 @@ describe('Integration Tests - Game Flow', () => {
         const isCorrect = p.currentToken === expectedToken;
         console.log(`  ${i + 1}. ${p.name}: ${p.hand.name} (Token: ${p.currentToken}) ${isCorrect ? '✓' : '❌'}`);
       });
+    });
+  });
+
+  describe('Token Ownership Validation', () => {
+    test('should block phase advancement when not all tokens are owned', () => {
+      const players = [
+        { id: 'p1', name: 'Player 1' },
+        { id: 'p2', name: 'Player 2' },
+        { id: 'p3', name: 'Player 3' }
+      ];
+
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Advance to TOKEN_TRADING
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = setPlayerReady(state, 'p3', true);
+      state = advancePhase(state);
+
+      expect(state.phase).toBe('TOKEN_TRADING');
+      expect(state.turn).toBe(1);
+
+      // Only assign 2 out of 3 tokens (incomplete)
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
+      // Verify token 3 is still unowned
+      const token3 = state.tokens.find(t => t.number === 3);
+      expect(token3?.ownerId).toBeNull();
+
+      // Try to advance phase - should fail and remain in TOKEN_TRADING
+      const newState = advancePhase(state);
+
+      expect(newState.phase).toBe('TOKEN_TRADING'); // Should NOT advance
+      expect(newState.turn).toBe(1); // Should remain in turn 1
+      expect(newState).toBe(state); // Should return same state (no change)
+
+      // Now assign the last token
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p3',
+        tokenNumber: 3,
+        timestamp: Date.now() + 2
+      });
+
+      // Verify all tokens are now owned
+      state.tokens.forEach(token => {
+        expect(token.ownerId).not.toBeNull();
+      });
+
+      // Now advance should succeed
+      const advancedState = advancePhase(state);
+
+      expect(advancedState.phase).toBe('TURN_COMPLETE'); // Should advance successfully
+      expect(advancedState).not.toBe(state); // Should be a new state
+    });
+
+    test('should allow advancement only after all tokens distributed across multiple attempts', () => {
+      const players = [
+        { id: 'alice', name: 'Alice' },
+        { id: 'bob', name: 'Bob' }
+      ];
+
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Advance to TOKEN_TRADING
+      state = setPlayerReady(state, 'alice', true);
+      state = setPlayerReady(state, 'bob', true);
+      state = advancePhase(state);
+
+      expect(state.phase).toBe('TOKEN_TRADING');
+
+      // First attempt: Only alice selects
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'alice',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+
+      // Try to advance - should fail
+      let attemptedState = advancePhase(state);
+      expect(attemptedState.phase).toBe('TOKEN_TRADING');
+
+      // Bob selects token 2
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'bob',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
+      // Now advance should succeed
+      attemptedState = advancePhase(state);
+      expect(attemptedState.phase).toBe('TURN_COMPLETE');
     });
   });
 

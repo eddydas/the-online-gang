@@ -103,6 +103,15 @@ function startGame(state) {
 }
 
 /**
+ * Checks if all tokens are owned
+ * @param {GameState} state - Current state
+ * @returns {boolean} True if all tokens have owners
+ */
+function allTokensOwned(state) {
+  return state.tokens.every(token => token.ownerId !== null);
+}
+
+/**
  * Advances to the next phase
  * @param {GameState} state - Current state
  * @returns {GameState} Updated state
@@ -124,6 +133,10 @@ function advancePhase(state) {
       };
 
     case 'TOKEN_TRADING':
+      // Only advance if all tokens are owned
+      if (!allTokensOwned(state)) {
+        return state;
+      }
       return {
         ...state,
         phase: 'TURN_COMPLETE'
@@ -242,6 +255,7 @@ export {
   advancePhase,
   setPlayerReady,
   allPlayersReady,
+  allTokensOwned,
   handleTokenAction,
   resetForNextGame
 };

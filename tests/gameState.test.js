@@ -93,9 +93,45 @@ describe('Game State Machine', () => {
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // To TOKEN_TRADING
 
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state);
 
       expect(state.phase).toBe('TURN_COMPLETE');
+    });
+
+    test('should not transition from TOKEN_TRADING if not all tokens are owned', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state);
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // To TOKEN_TRADING
+
+      // Only assign one token (not all)
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+
+      state = advancePhase(state);
+
+      // Should remain in TOKEN_TRADING
+      expect(state.phase).toBe('TOKEN_TRADING');
     });
   });
 
@@ -107,6 +143,21 @@ describe('Game State Machine', () => {
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
+
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state); // TURN_COMPLETE
 
       expect(state.turn).toBe(1);
@@ -127,6 +178,21 @@ describe('Game State Machine', () => {
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
+
+        // Assign all tokens
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p1',
+          tokenNumber: 1,
+          timestamp: Date.now()
+        });
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p2',
+          tokenNumber: 2,
+          timestamp: Date.now() + 1
+        });
+
         state = advancePhase(state); // TURN_COMPLETE
         if (i < 4) {
           state = advancePhase(state); // READY_UP for next turn
@@ -150,6 +216,21 @@ describe('Game State Machine', () => {
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
+
+        // Assign all tokens
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p1',
+          tokenNumber: 1,
+          timestamp: Date.now()
+        });
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p2',
+          tokenNumber: 2,
+          timestamp: Date.now() + 1
+        });
+
         state = advancePhase(state); // TURN_COMPLETE
         if (i < 4) {
           state = advancePhase(state); // READY_UP
@@ -181,6 +262,21 @@ describe('Game State Machine', () => {
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
+
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 2
 
@@ -221,6 +317,14 @@ describe('Game State Machine', () => {
       };
       state = handleTokenAction(state, action);
 
+      // Assign token 2 to p2
+      state = handleTokenAction(state, {
+        type: /** @type {const} */ ('select'),
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       // Verify token is owned
       const token1Turn1 = state.tokens.find(t => t.number === 1);
       expect(token1Turn1?.ownerId).toBe('p1');
@@ -252,7 +356,7 @@ describe('Game State Machine', () => {
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
 
-        // Assign token
+        // Assign all tokens
         const action = {
           type: /** @type {const} */ ('select'),
           playerId: 'p1',
@@ -260,6 +364,13 @@ describe('Game State Machine', () => {
           timestamp: Date.now()
         };
         state = handleTokenAction(state, action);
+
+        state = handleTokenAction(state, {
+          type: /** @type {const} */ ('select'),
+          playerId: 'p2',
+          tokenNumber: 2,
+          timestamp: Date.now() + 1
+        });
 
         // Verify token is owned
         expect(state.tokens[0].ownerId).toBe('p1');
@@ -320,6 +431,21 @@ describe('Game State Machine', () => {
       state = setPlayerReady(state, 'p1', true);
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
+
+      // Assign all tokens
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 2
 
@@ -338,6 +464,21 @@ describe('Game State Machine', () => {
         state = setPlayerReady(state, 'p1', true);
         state = setPlayerReady(state, 'p2', true);
         state = advancePhase(state); // TOKEN_TRADING
+
+        // Assign all tokens
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p1',
+          tokenNumber: 1,
+          timestamp: Date.now()
+        });
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p2',
+          tokenNumber: 2,
+          timestamp: Date.now() + 1
+        });
+
         state = advancePhase(state); // TURN_COMPLETE
         if (i < 4) {
           state = advancePhase(state); // READY_UP
