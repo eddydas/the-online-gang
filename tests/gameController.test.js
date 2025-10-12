@@ -1,5 +1,5 @@
 // @ts-check
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 import { GameController } from '../src/browser/gameController.js';
 
 describe('GameController', () => {
@@ -10,10 +10,10 @@ describe('GameController', () => {
 
       // Mock connection manager
       const mockSendMessage = vi.fn();
-      controller.connectionManager = {
+      controller.connectionManager = /** @type {any} */ ({
         sendMessage: mockSendMessage,
         getConnections: vi.fn(() => [])
-      };
+      });
 
       const messageWithoutTimestamp = {
         type: 'LOBBY_UPDATE',
@@ -39,10 +39,10 @@ describe('GameController', () => {
 
       // Mock connection manager
       const mockSendMessage = vi.fn();
-      controller.connectionManager = {
+      controller.connectionManager = /** @type {any} */ ({
         sendMessage: mockSendMessage,
         getConnections: vi.fn(() => [])
-      };
+      });
 
       const messageWithoutTimestamp = {
         type: 'JOIN_REQUEST',
@@ -66,10 +66,10 @@ describe('GameController', () => {
 
       // Mock connection manager
       const mockSendMessage = vi.fn();
-      controller.connectionManager = {
+      controller.connectionManager = /** @type {any} */ ({
         sendMessage: mockSendMessage,
         getConnections: vi.fn(() => [])
-      };
+      });
 
       const existingTimestamp = 1234567890;
       const messageWithTimestamp = {
@@ -106,6 +106,7 @@ describe('GameController', () => {
       controller.isHost = true;
       controller.lobbyState = [];
 
+      /** @type {any} */
       const messageWithoutTimestamp = {
         type: 'JOIN_REQUEST',
         payload: { playerId: 'client-1', playerName: 'Client 1' }
