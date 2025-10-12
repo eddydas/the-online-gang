@@ -144,6 +144,26 @@ All messages follow this standard structure:
 
 ### Phase Control
 
+#### `NEXT_GAME_READY`
+**Purpose:** Player signals they are ready to start the next game after END_GAME
+
+**Sent by:** Any player (client or host)
+
+**Payload:**
+```javascript
+{
+  playerId: string  // ID of player marking ready for next game
+}
+```
+
+**When:**
+- Player clicks "Ready for Next Game" button during END_GAME phase
+- Game only resets when ALL players have sent this message
+
+**Note:** Similar to PLAYER_READY but specifically for END_GAME → next game transition
+
+---
+
 #### `PHASE_ADVANCE`
 **Purpose:** Request to advance to next game phase
 

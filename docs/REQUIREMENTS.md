@@ -42,11 +42,11 @@ The game consists of 4 turns total:
 - Best 5-card poker hand is made from any combination of player's 2 hole cards + 5 community cards
 
 ### Game Conclusion & Continuation
-- **No End Screen:** Game does not have a traditional "game over" screen
-- **Immediate Transition:** After cards are revealed and win/loss is determined
+- **End Game Summary Table:** After cards are revealed, an end game summary table displays all player results
 - **"Ready for Next Game" Button:** All players see a "Ready for Next Game" button
-  - Each player clicks to indicate readiness for another round
-  - Last player to click triggers immediate start of new game
+  - **Cooperative Ready-Up:** ALL players must click "Ready for Next Game" before proceeding
+  - Each player's ready status is displayed (e.g., "Players Ready: 2 / 4")
+  - Game only starts when everyone has clicked ready
   - No return to lobby - seamless continuous play
 - **Continuous Play Loop:** Players can play multiple consecutive games without interruption
 
