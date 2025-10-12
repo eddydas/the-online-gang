@@ -95,7 +95,7 @@ export function addPlayerStyles() {
 
     /* Current player - bottom center */
     .table-player.current-player {
-      bottom: 20px;
+      bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
     }
