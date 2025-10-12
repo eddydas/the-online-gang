@@ -14,7 +14,7 @@ function getPhaseText(phase) {
     case 'LOBBY':
       return 'Waiting for players...';
     case 'READY_UP':
-      return 'Press Ready when you\'re ready to see your cards';
+      return 'Press Ready when you\'re ready to start taking tokens';
     case 'TOKEN_TRADING':
       return 'Select or steal a token. Press Proceed when done.';
     case 'TURN_COMPLETE':

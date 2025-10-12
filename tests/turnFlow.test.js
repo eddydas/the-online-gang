@@ -14,7 +14,7 @@ describe('Turn Flow UI', () => {
     });
 
     test('should return correct text for READY_UP phase', () => {
-      expect(getPhaseText('READY_UP')).toBe('Press Ready when you\'re ready to see your cards');
+      expect(getPhaseText('READY_UP')).toBe('Press Ready when you\'re ready to start taking tokens');
     });
 
     test('should return correct text for TOKEN_TRADING phase', () => {
@@ -101,7 +101,7 @@ describe('Turn Flow UI', () => {
 
     test('should update phase text for READY_UP', () => {
       updatePhaseUI('READY_UP');
-      expect(mockPhaseText.textContent).toBe('Press Ready when you\'re ready to see your cards');
+      expect(mockPhaseText.textContent).toBe('Press Ready when you\'re ready to start taking tokens');
     });
 
     test('should show ready button in READY_UP phase', () => {

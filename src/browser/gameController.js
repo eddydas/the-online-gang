@@ -509,12 +509,26 @@ export class GameController {
 
   /**
    * Render tokens - split between center (unowned) and player positions (owned)
+   * Tokens are hidden during READY_UP phase
    */
   renderTokensUI() {
     if (!this.gameState) return;
 
     const tokenArea = document.getElementById('token-area');
     if (!tokenArea) return;
+
+    // Hide tokens during READY_UP phase
+    if (this.gameState.phase === 'READY_UP') {
+      tokenArea.innerHTML = '';
+      // Also clear any player token containers
+      this.gameState.players.forEach(player => {
+        const container = document.getElementById(`player-token-${player.id}`);
+        if (container) {
+          container.innerHTML = '';
+        }
+      });
+      return;
+    }
 
     const interactive = this.gameState.phase === 'TOKEN_TRADING';
 
