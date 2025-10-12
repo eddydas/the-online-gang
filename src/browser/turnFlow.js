@@ -38,17 +38,29 @@ function shouldShowReadyButton(phase) {
 /**
  * Determines if proceed button should be visible
  * @param {GamePhase} phase - Current game phase
+ * @param {import('./tokens.js').Token[]} [tokens] - Token array (optional, required for TOKEN_TRADING phase)
  * @returns {boolean} True if proceed button should show
  */
-function shouldShowProceedButton(phase) {
-  return phase === 'TURN_COMPLETE' || phase === 'TOKEN_TRADING';
+function shouldShowProceedButton(phase, tokens) {
+  if (phase === 'TURN_COMPLETE') {
+    return true;
+  }
+
+  if (phase === 'TOKEN_TRADING') {
+    // Only show proceed button if all tokens are owned
+    if (!tokens) return false;
+    return tokens.every(t => t.ownerId !== null);
+  }
+
+  return false;
 }
 
 /**
  * Updates the phase UI based on current game phase
  * @param {GamePhase} phase - Current game phase
+ * @param {import('./tokens.js').Token[]} [tokens] - Token array (optional, needed for TOKEN_TRADING phase)
  */
-function updatePhaseUI(phase) {
+function updatePhaseUI(phase, tokens) {
   const phaseTextEl = document.getElementById('phase-text');
   const readyButtonEl = document.getElementById('ready-button');
   const proceedButtonEl = document.getElementById('proceed-button');
@@ -62,7 +74,7 @@ function updatePhaseUI(phase) {
   }
 
   if (proceedButtonEl) {
-    proceedButtonEl.style.display = shouldShowProceedButton(phase) ? 'block' : 'none';
+    proceedButtonEl.style.display = shouldShowProceedButton(phase, tokens) ? 'block' : 'none';
   }
 }
 

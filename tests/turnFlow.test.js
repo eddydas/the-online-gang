@@ -42,9 +42,35 @@ describe('Turn Flow UI', () => {
     test('should show proceed button in TOKEN_TRADING and TURN_COMPLETE phases', () => {
       expect(shouldShowProceedButton('LOBBY')).toBe(false);
       expect(shouldShowProceedButton('READY_UP')).toBe(false);
-      expect(shouldShowProceedButton('TOKEN_TRADING')).toBe(true);
       expect(shouldShowProceedButton('TURN_COMPLETE')).toBe(true);
       expect(shouldShowProceedButton('END_GAME')).toBe(false);
+    });
+
+    test('should show proceed button in TOKEN_TRADING only when all tokens owned', () => {
+      const allOwned = [
+        { number: 1, ownerId: 'player1', timestamp: 100 },
+        { number: 2, ownerId: 'player2', timestamp: 200 }
+      ];
+      const someUnowned = [
+        { number: 1, ownerId: 'player1', timestamp: 100 },
+        { number: 2, ownerId: null, timestamp: 0 }
+      ];
+      const allUnowned = [
+        { number: 1, ownerId: null, timestamp: 0 },
+        { number: 2, ownerId: null, timestamp: 0 }
+      ];
+
+      // Should show when all tokens are owned
+      expect(shouldShowProceedButton('TOKEN_TRADING', allOwned)).toBe(true);
+
+      // Should hide when some tokens are unowned
+      expect(shouldShowProceedButton('TOKEN_TRADING', someUnowned)).toBe(false);
+
+      // Should hide when all tokens are unowned
+      expect(shouldShowProceedButton('TOKEN_TRADING', allUnowned)).toBe(false);
+
+      // Should hide when tokens array is missing
+      expect(shouldShowProceedButton('TOKEN_TRADING')).toBe(false);
     });
   });
 
@@ -85,9 +111,25 @@ describe('Turn Flow UI', () => {
     });
 
     test('should show proceed button in TOKEN_TRADING phase', () => {
-      updatePhaseUI('TOKEN_TRADING');
+      const allOwned = [
+        { number: 1, ownerId: 'player1', timestamp: 100 },
+        { number: 2, ownerId: 'player2', timestamp: 200 }
+      ];
+
+      updatePhaseUI('TOKEN_TRADING', allOwned);
       expect(mockReadyButton.style.display).toBe('none');
       expect(mockProceedButton.style.display).toBe('block');
+    });
+
+    test('should hide proceed button in TOKEN_TRADING when tokens not all owned', () => {
+      const someUnowned = [
+        { number: 1, ownerId: 'player1', timestamp: 100 },
+        { number: 2, ownerId: null, timestamp: 0 }
+      ];
+
+      updatePhaseUI('TOKEN_TRADING', someUnowned);
+      expect(mockReadyButton.style.display).toBe('none');
+      expect(mockProceedButton.style.display).toBe('none');
     });
 
     test('should show proceed button in TURN_COMPLETE phase', () => {

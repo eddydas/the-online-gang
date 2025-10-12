@@ -32,9 +32,22 @@ export function renderPlayers(container, players) {
       playerDiv.classList.add('ready');
     }
 
-    // Add avatar
+    // Avatar wrapper with ready badge overlay
+    const avatarWrapper = document.createElement('div');
+    avatarWrapper.className = 'player-avatar-wrapper';
+
     const avatar = createAvatarElement(player, 'large');
-    playerDiv.appendChild(avatar);
+    avatarWrapper.appendChild(avatar);
+
+    // Ready indicator - positioned at corner of avatar
+    if (player.isReady) {
+      const readyBadge = document.createElement('div');
+      readyBadge.className = 'player-ready-badge';
+      readyBadge.textContent = '✓';
+      avatarWrapper.appendChild(readyBadge);
+    }
+
+    playerDiv.appendChild(avatarWrapper);
 
     // Player name
     const nameDiv = document.createElement('div');
@@ -44,14 +57,6 @@ export function renderPlayers(container, players) {
       nameDiv.textContent += ' (You)';
     }
     playerDiv.appendChild(nameDiv);
-
-    // Ready indicator
-    if (player.isReady) {
-      const readyBadge = document.createElement('div');
-      readyBadge.className = 'player-ready-badge';
-      readyBadge.textContent = '✓';
-      playerDiv.appendChild(readyBadge);
-    }
 
     // Token indicator
     if (player.tokenNumber !== undefined) {
@@ -136,11 +141,27 @@ export function addPlayerStyles() {
       border-color: #2ecc71;
     }
 
+    .player-avatar-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
     .player-ready-badge {
-      color: #2ecc71;
-      font-size: 18px;
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      background: #2ecc71;
+      color: white;
+      font-size: 16px;
       font-weight: bold;
-      margin-top: 4px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .player-token-badge {
