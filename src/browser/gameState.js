@@ -190,10 +190,18 @@ function advancePhase(state) {
           tokens: resetTokensState
         };
       } else {
+        // Reset ready status for end game
+        /** @type {Object.<string, boolean>} */
+        const readyStatus = {};
+        state.players.forEach(p => {
+          readyStatus[p.id] = false;
+        });
+
         return {
           ...state,
           players: playersWithHistory,
-          phase: 'END_GAME'
+          phase: 'END_GAME',
+          readyStatus
         };
       }
 
@@ -224,9 +232,17 @@ function advancePhase(state) {
           tokens: resetTokensState
         };
       } else {
+        // Reset ready status for end game
+        /** @type {Object.<string, boolean>} */
+        const readyStatus = {};
+        state.players.forEach(p => {
+          readyStatus[p.id] = false;
+        });
+
         return {
           ...state,
-          phase: 'END_GAME'
+          phase: 'END_GAME',
+          readyStatus
         };
       }
 
