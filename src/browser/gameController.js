@@ -47,11 +47,14 @@ export class GameController {
     this.isHost = true;
     this.myPlayerId = peerId;
 
+    console.log('Host initialized with peer ID:', peerId);
+
     // Add self to lobby
     this.lobbyState = addPlayer(this.lobbyState, peerId, 'Player 1', true);
 
     // Listen for incoming connections
     this.connectionManager.onMessage((/** @type {any} */ message) => {
+      console.log('Host received message:', message);
       this.handlePeerMessage(message);
     });
 
@@ -69,12 +72,16 @@ export class GameController {
     this.isHost = false;
     this.myPlayerId = this.connectionManager.peerId;
 
+    console.log('Client connected with peer ID:', this.myPlayerId);
+
     // Listen for messages from host
     this.connectionManager.onMessage((/** @type {any} */ message) => {
+      console.log('Client received message:', message);
       this.handlePeerMessage(message);
     });
 
     // Send join request to host
+    console.log('Sending JOIN_REQUEST to host');
     this.sendMessage({
       type: 'JOIN_REQUEST',
       payload: {
@@ -89,9 +96,12 @@ export class GameController {
    * @param {any} message
    */
   handlePeerMessage(message) {
+    console.log('Received P2P message:', message.type, message.payload);
+
     switch (message.type) {
       case 'JOIN_REQUEST':
         if (this.isHost) {
+          console.log('Host handling JOIN_REQUEST from:', message.payload.playerId);
           this.handleJoinRequest(message.payload);
         }
         break;
@@ -137,6 +147,8 @@ export class GameController {
   handleJoinRequest(payload) {
     if (!this.isHost) return;
 
+    console.log('Adding player to lobby:', payload);
+
     // Add player to lobby
     this.lobbyState = addPlayer(
       this.lobbyState,
@@ -144,6 +156,8 @@ export class GameController {
       payload.playerName,
       false
     );
+
+    console.log('Updated lobby state:', this.lobbyState);
 
     // Broadcast updated lobby state
     this.broadcastLobbyState();
@@ -167,12 +181,17 @@ export class GameController {
   broadcastLobbyState() {
     if (!this.isHost) return;
 
+    console.log('Broadcasting lobby state to all clients');
+
     this.sendMessage({
       type: 'LOBBY_UPDATE',
       payload: {
         lobbyState: this.lobbyState
       }
     });
+
+    // Update host's own UI
+    this.updateLobbyUI();
   }
 
   /**
@@ -234,7 +253,15 @@ export class GameController {
    */
   sendMessage(message) {
     if (!this.connectionManager) return;
-    this.connectionManager.sendMessage(message);
+
+    // Add timestamp if not present
+    const messageWithTimestamp = {
+      ...message,
+      timestamp: message.timestamp || Date.now()
+    };
+
+    console.log('Sending message:', messageWithTimestamp);
+    this.connectionManager.sendMessage(messageWithTimestamp);
   }
 
   /**

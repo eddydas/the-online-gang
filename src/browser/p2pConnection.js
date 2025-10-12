@@ -100,18 +100,30 @@ export class ConnectionManager {
    * @param {*} conn - PeerJS connection
    */
   _setupConnection(conn) {
-    this.connections.push(conn);
+    console.log('Setting up connection:', conn.peer);
+
+    conn.on('open', () => {
+      console.log('Connection opened with peer:', conn.peer);
+      this.connections.push(conn);
+    });
 
     conn.on('data', (/** @type {*} */ data) => {
+      console.log('Raw data received:', data);
       const message = deserializeMessage(data);
+      console.log('Deserialized message:', message);
       if (message) {
         this._messageCallbacks.forEach(callback => callback(message));
       }
     });
 
     conn.on('close', () => {
+      console.log('Connection closed with peer:', conn.peer);
       // Remove connection from list
       this.connections = this.connections.filter(c => c !== conn);
+    });
+
+    conn.on('error', (/** @type {*} */ error) => {
+      console.error('Connection error with peer:', conn.peer, error);
     });
   }
 
