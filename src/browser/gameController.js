@@ -267,7 +267,23 @@ export class GameController {
     if (!this.isHost) return;
     if (!this.gameState) return;
 
+    // Apply token action
     this.gameState.tokens = applyTokenAction(this.gameState.tokens, action);
+
+    // Update player token history in real-time
+    this.gameState.players = this.gameState.players.map(player => {
+      const ownedToken = this.gameState?.tokens.find(t => t.ownerId === player.id);
+      const tokenHistory = player.tokenHistory || [null, null, null, null];
+      const updatedHistory = [...tokenHistory];
+      const currentTurn = this.gameState?.turn || 1;
+      updatedHistory[currentTurn - 1] = ownedToken ? ownedToken.number : null;
+
+      return {
+        ...player,
+        tokenHistory: updatedHistory
+      };
+    });
+
     this.broadcastGameState();
     this.updateGameUI();
   }
@@ -473,11 +489,22 @@ export class GameController {
         name: player.name,
         isReady: isReady,
         tokenNumber: token?.number,
-        isCurrentPlayer: player.id === this.myPlayerId
+        isCurrentPlayer: player.id === this.myPlayerId,
+        tokenHistory: player.tokenHistory,
+        currentTurn: this.gameState?.turn || 1
       };
     });
 
-    renderPlayers(playerPositionsContainer, playerInfos);
+    const interactive = this.gameState?.phase === 'TOKEN_TRADING';
+
+    renderPlayers(playerPositionsContainer, playerInfos, {
+      interactive,
+      onTokenClick: (tokenNumber) => {
+        if (interactive) {
+          this.onTokenSelect(tokenNumber);
+        }
+      }
+    });
   }
 
   /**
@@ -546,7 +573,8 @@ export class GameController {
 
       // If token is unowned, render it in the placeholder
       if (token.ownerId === null) {
-        const tokenEl = createTokenElement(token, this.gameState.turn, interactive);
+        const currentTurn = this.gameState?.turn || 1;
+        const tokenEl = createTokenElement(token, currentTurn, interactive);
 
         if (interactive) {
           tokenEl.addEventListener('click', () => {
@@ -560,45 +588,12 @@ export class GameController {
       tokenArea.appendChild(placeholder);
     });
 
-    // Render owned tokens at player positions
-    this.gameState.players.forEach((player, index) => {
-      const ownedToken = this.gameState.tokens.find(t => t.ownerId === player.id);
-      if (!ownedToken) {
-        // Clear any existing token container if player no longer has token
-        const existingContainer = document.getElementById(`player-token-${player.id}`);
-        if (existingContainer) {
-          existingContainer.innerHTML = '';
-        }
-        return;
+    // Clear any player token containers (tokens now shown in history row)
+    this.gameState.players.forEach(player => {
+      const container = document.getElementById(`player-token-${player.id}`);
+      if (container) {
+        container.style.display = 'none';
       }
-
-      let playerTokenContainer = document.getElementById(`player-token-${player.id}`);
-      if (!playerTokenContainer) {
-        // Create token container for this player if it doesn't exist
-        const container = document.createElement('div');
-        container.id = `player-token-${player.id}`;
-        container.className = 'player-token-container';
-        container.classList.add(`player-position-${index}`);
-
-        if (player.id === this.myPlayerId) {
-          container.classList.add('current-player');
-        }
-
-        document.getElementById('player-positions')?.appendChild(container);
-        playerTokenContainer = container;
-      }
-
-      // Render token at player position
-      playerTokenContainer.innerHTML = '';
-      const tokenEl = createTokenElement(ownedToken, this.gameState.turn, interactive);
-
-      if (interactive) {
-        tokenEl.addEventListener('click', () => {
-          this.onTokenSelect(ownedToken.number);
-        });
-      }
-
-      playerTokenContainer.appendChild(tokenEl);
     });
   }
 

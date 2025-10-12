@@ -257,6 +257,17 @@ export function addTokenStyles() {
       filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
     }
 
+    /* Medium tokens for current turn in history */
+    .token.medium {
+      width: 60px;
+      height: 60px;
+      margin: 2px;
+    }
+
+    .token.medium .token-svg {
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.4));
+    }
+
     .player-tokens {
       display: flex;
       gap: 8px;

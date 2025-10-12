@@ -1,6 +1,7 @@
 // @ts-check
 
 import { createAvatarElement } from './avatarManager.js';
+import { createTokenElement } from './tokenRenderer.js';
 
 /**
  * @typedef {Object} PlayerInfo
@@ -9,14 +10,19 @@ import { createAvatarElement } from './avatarManager.js';
  * @property {boolean} isReady - Whether player is ready
  * @property {number} [tokenNumber] - Current token number (if any)
  * @property {boolean} isCurrentPlayer - Whether this is the current viewing player
+ * @property {(number|null)[]} [tokenHistory] - Token history for previous turns
+ * @property {number} [currentTurn] - Current turn number
  */
 
 /**
  * Render player avatars around the table
  * @param {HTMLElement} container - Container to render players in
  * @param {PlayerInfo[]} players - Array of player info
+ * @param {Object} [options] - Optional configuration
+ * @param {(tokenNumber: number) => void} [options.onTokenClick] - Callback for token clicks
+ * @param {boolean} [options.interactive] - Whether tokens are interactive
  */
-export function renderPlayers(container, players) {
+export function renderPlayers(container, players, options = {}) {
   container.innerHTML = '';
 
   players.forEach((player, index) => {
@@ -57,6 +63,50 @@ export function renderPlayers(container, players) {
       nameDiv.textContent += ' (You)';
     }
     playerDiv.appendChild(nameDiv);
+
+    // Token history display (show all turns' tokens including current)
+    if (player.tokenHistory && player.currentTurn) {
+      const historyContainer = document.createElement('div');
+      historyContainer.className = 'player-token-history';
+
+      // Show all turns including current turn
+      for (let turn = 1; turn <= player.currentTurn; turn++) {
+        const tokenNumber = player.tokenHistory[turn - 1];
+
+        if (tokenNumber !== null) {
+          // Only current turn token is interactive
+          const isCurrentTurn = turn === player.currentTurn;
+          const isInteractive = isCurrentTurn && (options.interactive || false);
+
+          const tokenEl = createTokenElement(
+            { number: tokenNumber, ownerId: player.id, timestamp: 0 },
+            turn,
+            isInteractive
+          );
+
+          // Current turn token is medium size, previous turns are mini
+          if (isCurrentTurn) {
+            tokenEl.classList.add('medium');
+
+            // Add click handler only for current turn token if interactive
+            if (options.interactive && options.onTokenClick) {
+              tokenEl.style.cursor = 'pointer';
+              tokenEl.addEventListener('click', () => {
+                options.onTokenClick?.(tokenNumber);
+              });
+            }
+          } else {
+            tokenEl.classList.add('mini');
+          }
+
+          historyContainer.appendChild(tokenEl);
+        }
+      }
+
+      if (historyContainer.children.length > 0) {
+        playerDiv.appendChild(historyContainer);
+      }
+    }
 
     container.appendChild(playerDiv);
   });
@@ -154,6 +204,15 @@ export function addPlayerStyles() {
       justify-content: center;
       border: 2px solid white;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .player-token-history {
+      display: flex;
+      flex-direction: row;
+      gap: 4px;
+      margin-top: 6px;
+      align-items: center;
+      justify-content: center;
     }
 
     /* Player token containers - positioned near avatars */
