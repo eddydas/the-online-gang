@@ -1,7 +1,7 @@
 // @ts-check
 
 import {  createDeck, shuffleDeck, dealHoleCards, dealCommunityCards, randomizeCardBackColor  } from "./deck.js";
-import {  generateTokens  } from "./tokens.js";
+import {  generateTokens, applyTokenAction  } from "./tokens.js";
 import {  MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS  } from "./constants.js";
 
 /**
@@ -10,6 +10,10 @@ import {  MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS  } from "./constants.js";
 
 /**
  * @typedef {import('./tokens').Token} Token
+ */
+
+/**
+ * @typedef {import('./tokens').TokenAction} TokenAction
  */
 
 /**
@@ -189,6 +193,26 @@ function allPlayersReady(state) {
 }
 
 /**
+ * Handles token action (select or steal)
+ * @param {GameState} state - Current state
+ * @param {TokenAction} action - Token action to apply
+ * @returns {GameState} Updated state with new token ownership
+ */
+function handleTokenAction(state, action) {
+  // Only apply token actions during TOKEN_TRADING phase
+  if (state.phase !== 'TOKEN_TRADING') {
+    return state;
+  }
+
+  const updatedTokens = applyTokenAction(state.tokens, action);
+
+  return {
+    ...state,
+    tokens: updatedTokens
+  };
+}
+
+/**
  * Resets game for next round (after END_GAME)
  * @param {GameState} state - Current state
  * @returns {GameState} Fresh game state (keeps players, new cards/tokens)
@@ -214,5 +238,6 @@ export {
   advancePhase,
   setPlayerReady,
   allPlayersReady,
+  handleTokenAction,
   resetForNextGame
 };

@@ -4,8 +4,13 @@ import { createInitialState,
   setPlayerReady,
   allPlayersReady,
   startGame,
+  handleTokenAction,
   resetForNextGame
  } from '../src/browser/gameState.js';
+
+/**
+ * @typedef {import('../src/browser/tokens.js').TokenAction} TokenAction
+ */
 
 describe('Game State Machine', () => {
 
@@ -287,6 +292,96 @@ describe('Game State Machine', () => {
       expect(state.phase).toBe(originalPhase);
       expect(newState.phase).toBe('READY_UP');
       expect(newState).not.toBe(state);
+    });
+  });
+
+  describe('Token Actions', () => {
+    test('should handle token selection during TOKEN_TRADING phase', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Advance to TOKEN_TRADING
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state);
+
+      expect(state.phase).toBe('TOKEN_TRADING');
+
+      /** @type {TokenAction} */
+      const action = {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+
+      state = handleTokenAction(state, action);
+
+      const token1 = state.tokens.find(t => t.number === 1);
+      expect(token1).toBeDefined();
+      expect(token1?.ownerId).toBe('p1');
+    });
+
+    test('should not apply token actions outside TOKEN_TRADING phase', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Still in READY_UP phase
+      expect(state.phase).toBe('READY_UP');
+
+      /** @type {TokenAction} */
+      const action = {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+
+      const newState = handleTokenAction(state, action);
+
+      // State should be unchanged
+      expect(newState).toBe(state);
+      const token1 = newState.tokens.find(t => t.number === 1);
+      expect(token1?.ownerId).toBeNull();
+    });
+
+    test('should handle token stealing', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state);
+
+      // Advance to TOKEN_TRADING
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state);
+
+      // P1 selects token 1
+      /** @type {TokenAction} */
+      let action = {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      };
+      state = handleTokenAction(state, action);
+
+      let token1 = state.tokens.find(t => t.number === 1);
+      expect(token1?.ownerId).toBe('p1');
+
+      // P2 steals token 1
+      /** @type {TokenAction} */
+      action = {
+        type: 'steal',
+        playerId: 'p2',
+        tokenNumber: 1,
+        timestamp: Date.now() + 1
+      };
+      state = handleTokenAction(state, action);
+
+      token1 = state.tokens.find(t => t.number === 1);
+      expect(token1?.ownerId).toBe('p2');
     });
   });
 
