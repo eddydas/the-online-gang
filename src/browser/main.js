@@ -239,8 +239,8 @@ async function initializeGame() {
     console.log('Creating game as host');
     const peerId = await gameController.initializeAsHost();
 
-    // Update URL with peer ID
-    updateUrlWithPeerId(peerId);
+    // Don't update URL - this prevents host from trying to join their own old session on reload
+    // The shareable link will still include the peer ID for clients to join
 
     // Show share link
     const shareLinkContainer = document.getElementById('share-link-container');
