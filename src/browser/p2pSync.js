@@ -4,7 +4,7 @@ import { createMessage, serializeMessage } from './p2pProtocol.js';
 /**
  * Broadcasts game state to all connected peers
  * @param {Object} state - Current game state
- * @param {Array} connections - Array of peer connections
+ * @param {Array<*>} connections - Array of peer connections
  */
 export function broadcastState(state, connections) {
   const message = createMessage('STATE_UPDATE', state);

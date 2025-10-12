@@ -1,8 +1,14 @@
 // @ts-check
 
 /**
+ * @typedef {Object} Card
+ * @property {string} rank
+ * @property {string} suit
+ */
+
+/**
  * Renders a card as a text string
- * @param {import('./browser/deck.js').Card} card - Card to render
+ * @param {Card} card - Card to render
  * @returns {string} Card representation (e.g., "A♠")
  */
 function renderCard(card) {
@@ -12,9 +18,9 @@ function renderCard(card) {
 /**
  * @typedef {Object} EndGameData
  * @property {boolean} isWin - Whether team won
- * @property {Array} sortedPlayers - Players sorted by hand strength
+ * @property {Array<*>} sortedPlayers - Players sorted by hand strength
  * @property {Object.<string, (number|null)[]>} tokenHistory - Map of playerId to token array (4 turns)
- * @property {Array} communityCards - 5 community cards
+ * @property {Array<Card>} communityCards - 5 community cards
  * @property {Object.<string, boolean>} correctness - Map of playerId to whether their turn 4 token was correct
  */
 
