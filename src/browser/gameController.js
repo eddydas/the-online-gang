@@ -455,8 +455,8 @@ export class GameController {
   renderPlayersUI() {
     if (!this.gameState) return;
 
-    const playerAvatarsContainer = document.getElementById('player-avatars');
-    if (!playerAvatarsContainer) return;
+    const playerPositionsContainer = document.getElementById('player-positions');
+    if (!playerPositionsContainer) return;
 
     // Build player info array
     const playerInfos = this.gameState.players.map(player => {
@@ -475,7 +475,7 @@ export class GameController {
       };
     });
 
-    renderPlayers(playerAvatarsContainer, playerInfos);
+    renderPlayers(playerPositionsContainer, playerInfos);
   }
 
   /**
