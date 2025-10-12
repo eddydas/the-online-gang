@@ -7,7 +7,7 @@ import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
 import { addPlayer, updatePlayerReady, canStartGame } from './lobby.js';
 import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
-import { renderTokens } from './tokenRenderer.js';
+import { createTokenElement } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
@@ -508,7 +508,7 @@ export class GameController {
   }
 
   /**
-   * Render tokens
+   * Render tokens - split between center (unowned) and player positions (owned)
    */
   renderTokensUI() {
     if (!this.gameState) return;
@@ -518,15 +518,72 @@ export class GameController {
 
     const interactive = this.gameState.phase === 'TOKEN_TRADING';
 
-    renderTokens(
-      tokenArea,
-      this.gameState.tokens,
-      this.gameState.turn,
-      interactive,
-      (/** @type {number} */ tokenNumber) => {
-        this.onTokenSelect(tokenNumber);
+    // Clear and set up token area with placeholders
+    tokenArea.innerHTML = '';
+    tokenArea.className = 'token-pool';
+
+    // Create placeholders for all tokens (to prevent reflow)
+    this.gameState.tokens.forEach(token => {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'token-placeholder-slot';
+      placeholder.dataset.tokenNumber = String(token.number);
+
+      // If token is unowned, render it in the placeholder
+      if (token.ownerId === null) {
+        const tokenEl = createTokenElement(token, this.gameState.turn, interactive);
+
+        if (interactive) {
+          tokenEl.addEventListener('click', () => {
+            this.onTokenSelect(token.number);
+          });
+        }
+
+        placeholder.appendChild(tokenEl);
       }
-    );
+
+      tokenArea.appendChild(placeholder);
+    });
+
+    // Render owned tokens at player positions
+    this.gameState.players.forEach((player, index) => {
+      const ownedToken = this.gameState.tokens.find(t => t.ownerId === player.id);
+      if (!ownedToken) {
+        // Clear any existing token container if player no longer has token
+        const existingContainer = document.getElementById(`player-token-${player.id}`);
+        if (existingContainer) {
+          existingContainer.innerHTML = '';
+        }
+        return;
+      }
+
+      let playerTokenContainer = document.getElementById(`player-token-${player.id}`);
+      if (!playerTokenContainer) {
+        // Create token container for this player if it doesn't exist
+        const container = document.createElement('div');
+        container.id = `player-token-${player.id}`;
+        container.className = 'player-token-container';
+        container.classList.add(`player-position-${index}`);
+
+        if (player.id === this.myPlayerId) {
+          container.classList.add('current-player');
+        }
+
+        document.getElementById('player-positions')?.appendChild(container);
+        playerTokenContainer = container;
+      }
+
+      // Render token at player position
+      playerTokenContainer.innerHTML = '';
+      const tokenEl = createTokenElement(ownedToken, this.gameState.turn, interactive);
+
+      if (interactive) {
+        tokenEl.addEventListener('click', () => {
+          this.onTokenSelect(ownedToken.number);
+        });
+      }
+
+      playerTokenContainer.appendChild(tokenEl);
+    });
   }
 
   /**

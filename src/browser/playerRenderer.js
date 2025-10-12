@@ -58,14 +58,6 @@ export function renderPlayers(container, players) {
     }
     playerDiv.appendChild(nameDiv);
 
-    // Token indicator
-    if (player.tokenNumber !== undefined) {
-      const tokenBadge = document.createElement('div');
-      tokenBadge.className = 'player-token-badge';
-      tokenBadge.textContent = `Token: ${player.tokenNumber}`;
-      playerDiv.appendChild(tokenBadge);
-    }
-
     container.appendChild(playerDiv);
   });
 }
@@ -164,15 +156,46 @@ export function addPlayerStyles() {
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
-    .player-token-badge {
-      background: #f39c12;
-      color: #000;
-      font-size: 12px;
-      font-weight: bold;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-top: 6px;
-      display: inline-block;
+    /* Player token containers - positioned near avatars */
+    .player-token-container {
+      position: absolute;
+      pointer-events: auto;
+      transition: all 0.3s ease;
+    }
+
+    /* Current player token - bottom center, below avatar */
+    .player-token-container.current-player {
+      top: 80%;
+      left: 50%;
+      transform: translate(-50%, 20px);
+    }
+
+    /* Position 0 token (if not current player): top left, below avatar */
+    .player-token-container.player-position-0:not(.current-player) {
+      top: 60px;
+      left: 15%;
+      transform: translate(0, 60px);
+    }
+
+    /* Position 1 token (if not current player): top right, below avatar */
+    .player-token-container.player-position-1:not(.current-player) {
+      top: 60px;
+      right: 15%;
+      transform: translate(0, 60px);
+    }
+
+    /* Position 2 token: left side, below avatar */
+    .player-token-container.player-position-2 {
+      top: 50%;
+      left: 10%;
+      transform: translate(0, 30px);
+    }
+
+    /* Position 3 token: right side, below avatar */
+    .player-token-container.player-position-3 {
+      top: 50%;
+      right: 10%;
+      transform: translate(0, 30px);
     }
 
     /* Mobile responsive */
@@ -199,6 +222,36 @@ export function addPlayerStyles() {
       .table-player.player-position-3 {
         top: 40%;
         right: 5%;
+      }
+
+      /* Mobile token containers */
+      .player-token-container.current-player {
+        top: 85%;
+        transform: translate(-50%, 10px);
+      }
+
+      .player-token-container.player-position-0:not(.current-player) {
+        top: 40px;
+        left: 10%;
+        transform: translate(0, 50px);
+      }
+
+      .player-token-container.player-position-1:not(.current-player) {
+        top: 40px;
+        right: 10%;
+        transform: translate(0, 50px);
+      }
+
+      .player-token-container.player-position-2 {
+        top: 40%;
+        left: 5%;
+        transform: translate(0, 30px);
+      }
+
+      .player-token-container.player-position-3 {
+        top: 40%;
+        right: 5%;
+        transform: translate(0, 30px);
       }
     }
   `;

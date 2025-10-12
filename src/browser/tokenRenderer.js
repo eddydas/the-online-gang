@@ -296,6 +296,27 @@ export function addTokenStyles() {
       padding: 4px;
     }
 
+    /* Token placeholder slot in center (prevents reflow) */
+    .token-placeholder-slot {
+      width: 80px;
+      height: 80px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 5px;
+      position: relative;
+    }
+
+    .token-placeholder-slot:empty::before {
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border: 2px dashed rgba(149, 165, 166, 0.3);
+      border-radius: 50%;
+      box-sizing: border-box;
+    }
+
     /* Responsive sizing */
     @media (max-width: 768px) {
       .token {
@@ -312,6 +333,17 @@ export function addTokenStyles() {
       .token-pool {
         gap: 8px;
         padding: 12px;
+      }
+
+      .token-placeholder-slot {
+        width: 60px;
+        height: 60px;
+        margin: 3px;
+      }
+
+      .token-placeholder-slot:empty::before {
+        width: 60px;
+        height: 60px;
       }
     }
   `;

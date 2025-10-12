@@ -240,7 +240,7 @@
     /* === Community Cards (center) === */
     #community-cards {
       position: absolute;
-      top: 45%;
+      top: 30%;
       left: 50%;
       transform: translate(-50%, -50%);
       display: flex;
@@ -251,9 +251,9 @@
     /* === Player Cards (bottom center) === */
     #player-cards {
       position: absolute;
-      bottom: 160px;
+      top: 70%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       display: flex;
       gap: 8px;
       z-index: 5;
@@ -262,7 +262,7 @@
     /* === Token Area (center) === */
     #token-area {
       position: absolute;
-      top: 60%;
+      top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       display: flex;
@@ -276,9 +276,9 @@
     /* === Action Buttons === */
     #action-buttons {
       position: absolute;
-      bottom: 240px;
+      top: 78%;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translate(-50%, -50%);
       z-index: 10;
     }
 
@@ -479,14 +479,14 @@
 
     /* Avatar Container */
     .player-avatar {
-      width: 60px;
-      height: 60px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: var(--avatar-color, #95a5a6);
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 3px solid white;
+      border: 2px solid white;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       position: relative;
       flex-shrink: 0;
@@ -494,7 +494,7 @@
 
     /* Avatar Initials */
     .avatar-initials {
-      font-size: 24px;
+      font-size: 16px;
       font-weight: bold;
       color: white;
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -504,23 +504,33 @@
 
     /* Avatar Sizes */
     .player-avatar.small {
+      width: 24px;
+      height: 24px;
+      border-width: 1px;
+    }
+
+    .player-avatar.small .avatar-initials {
+      font-size: 10px;
+    }
+
+    .player-avatar.medium {
       width: 40px;
       height: 40px;
       border-width: 2px;
     }
 
-    .player-avatar.small .avatar-initials {
+    .player-avatar.medium .avatar-initials {
       font-size: 16px;
     }
 
     .player-avatar.large {
-      width: 80px;
-      height: 80px;
-      border-width: 4px;
+      width: 40px;
+      height: 40px;
+      border-width: 2px;
     }
 
     .player-avatar.large .avatar-initials {
-      font-size: 32px;
+      font-size: 16px;
     }
 
     /* Player Display (Avatar + Name) */
@@ -540,20 +550,32 @@
     /* Avatar Mobile Responsive */
     @media (max-width: 768px) {
       .player-avatar {
-        width: 48px;
-        height: 48px;
+        width: 32px;
+        height: 32px;
       }
 
       .avatar-initials {
-        font-size: 18px;
+        font-size: 14px;
       }
 
       .player-display {
-        gap: 8px;
+        gap: 6px;
       }
 
       .player-name-label {
-        font-size: 14px;
+        font-size: 12px;
+      }
+
+      #community-cards {
+        top: 25%;
+      }
+
+      #player-cards {
+        top: 75%;
+      }
+
+      #action-buttons {
+        top: 82%;
       }
     }
   </style>
