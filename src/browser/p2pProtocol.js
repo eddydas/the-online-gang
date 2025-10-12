@@ -56,18 +56,12 @@ export function deserializeMessage(jsonString) {
   try {
     const parsed = JSON.parse(jsonString);
 
-    console.log('Parsed message:', parsed);
-
-    // Validate structure
     if (!isValidMessage(parsed)) {
-      console.warn('Invalid message structure:', parsed);
       return null;
     }
 
     return parsed;
   } catch (e) {
-    // Invalid JSON
-    console.error('Failed to parse JSON:', e);
     return null;
   }
 }

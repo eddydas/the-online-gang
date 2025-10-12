@@ -65,14 +65,12 @@ export class GameController {
     this.isHost = true;
     this.myPlayerId = peerId;
 
-    console.log('Host initialized with peer ID:', peerId);
 
     // Add self to lobby
     this.lobbyState = addPlayer(this.lobbyState, peerId, 'Player 1', true);
 
     // Listen for incoming connections
     this.connectionManager.onMessage((/** @type {any} */ message) => {
-      console.log('Host received message:', message);
       this.handlePeerMessage(message);
     });
 
@@ -90,16 +88,12 @@ export class GameController {
     this.isHost = false;
     this.myPlayerId = this.connectionManager.peerId;
 
-    console.log('Client connected with peer ID:', this.myPlayerId);
-
     // Listen for messages from host
     this.connectionManager.onMessage((/** @type {any} */ message) => {
-      console.log('Client received message:', message);
       this.handlePeerMessage(message);
     });
 
     // Send join request to host
-    console.log('Sending JOIN_REQUEST to host');
     this.sendMessage({
       type: 'JOIN_REQUEST',
       payload: {
@@ -114,9 +108,6 @@ export class GameController {
    * @param {any} message
    */
   handlePeerMessage(message) {
-    console.log('[DEBUG] handlePeerMessage received:', message.type);
-    console.log('Received P2P message:', message.type, message.payload);
-
     // Host assigns server timestamp to all incoming messages for consistency
     if (this.isHost) {
       message.timestamp = Date.now();
@@ -125,7 +116,6 @@ export class GameController {
     switch (message.type) {
       case 'JOIN_REQUEST':
         if (this.isHost) {
-          console.log('Host handling JOIN_REQUEST from:', message.payload.playerId);
           this.handleJoinRequest(message.payload);
         }
         break;
@@ -138,7 +128,6 @@ export class GameController {
         break;
 
       case 'STATE_UPDATE':
-        console.log('[DEBUG] STATE_UPDATE received, phase:', message.payload.phase);
         if (!this.isHost) {
           this.gameState = message.payload;
           this.updateGameUI();
@@ -152,7 +141,6 @@ export class GameController {
         break;
 
       case 'TURN_READY':
-        console.log('[DEBUG] TURN_READY received from:', message.payload.playerId);
         if (this.isHost) {
           this.handleTurnReady(message.payload.playerId);
         }
@@ -165,7 +153,6 @@ export class GameController {
         break;
 
       case 'PROCEED_TURN':
-        console.log('[DEBUG] PROCEED_TURN received from:', message.payload.playerId);
         if (this.isHost) {
           this.handleProceedTurn(message.payload.playerId);
         }
@@ -180,8 +167,6 @@ export class GameController {
   handleJoinRequest(payload) {
     if (!this.isHost) return;
 
-    console.log('Adding player to lobby:', payload);
-
     // Add player to lobby
     this.lobbyState = addPlayer(
       this.lobbyState,
@@ -189,8 +174,6 @@ export class GameController {
       payload.playerName,
       false
     );
-
-    console.log('Updated lobby state:', this.lobbyState);
 
     // Broadcast updated lobby state
     this.broadcastLobbyState();
@@ -216,16 +199,12 @@ export class GameController {
     if (!this.isHost) return;
     if (!this.gameState) return;
 
-    console.log('[DEBUG] handleTurnReady called for player:', playerId);
-
     // Mark player as ready
     this.gameState = setPlayerReady(this.gameState, playerId, true);
 
     // Check if all players ready, then advance phase
     if (allPlayersReady(this.gameState)) {
-      console.log('[DEBUG] All players ready, advancing phase from:', this.gameState.phase);
       this.gameState = advancePhase(this.gameState);
-      console.log('[DEBUG] Phase advanced to:', this.gameState.phase);
     }
 
     this.broadcastGameState();
@@ -237,8 +216,6 @@ export class GameController {
    */
   broadcastLobbyState() {
     if (!this.isHost) return;
-
-    console.log('Broadcasting lobby state to all clients');
 
     this.sendMessage({
       type: 'LOBBY_UPDATE',
@@ -290,7 +267,6 @@ export class GameController {
    * @param {string} playerId
    */
   handleProceedTurn(playerId) {
-    console.log('[DEBUG] handleProceedTurn called for player:', playerId);
     if (!this.isHost) return;
     if (!this.gameState) return;
 
@@ -299,9 +275,7 @@ export class GameController {
 
     // Check if all players ready, then advance phase
     if (allPlayersReady(this.gameState)) {
-      console.log('[DEBUG] All players ready, advancing phase from:', this.gameState.phase);
       this.gameState = advancePhase(this.gameState);
-      console.log('[DEBUG] Phase advanced to:', this.gameState.phase);
     }
 
     this.broadcastGameState();
@@ -321,7 +295,6 @@ export class GameController {
       message.timestamp = Date.now();
     }
 
-    console.log('Sending message:', message);
     this.connectionManager.sendMessage(message);
   }
 
@@ -329,7 +302,6 @@ export class GameController {
    * Broadcast current game state to all clients
    */
   broadcastGameState() {
-    console.log('[DEBUG] broadcastGameState called');
     if (!this.isHost) return;
     if (!this.connectionManager) return;
     if (!this.gameState) return;
@@ -341,8 +313,6 @@ export class GameController {
    * Update game UI - renders cards, tokens, and phase indicator
    */
   updateGameUI() {
-    console.log('[DEBUG] updateGameUI called, stack:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
-
     if (!this.gameState) return;
 
     // Check if game is over
@@ -363,12 +333,8 @@ export class GameController {
     // Render tokens
     this.renderTokensUI();
 
-    console.log('Game state:', this.gameState);
-
     // Notify delegate
-    console.log('[DEBUG] About to call delegate.onGameStateChange');
     this.delegate?.onGameStateChange?.();
-    console.log('[DEBUG] Finished calling delegate.onGameStateChange');
   }
 
   /**
@@ -402,7 +368,7 @@ export class GameController {
           name: p.name,
           holeCards: p.holeCards,
           currentToken: currentToken?.number,
-          hand: /** @type {HandResult | undefined} */ (undefined) // TODO: Get from evaluated hands
+          hand: /** @type {HandResult | undefined} */ (undefined) // Hand should be evaluated by poker.js before END_GAME phase
         };
       })
       .filter((p) => p.currentToken !== undefined && p.hand !== undefined)
@@ -433,8 +399,7 @@ export class GameController {
    * Handle "Next Game" button click
    */
   onNextGameClick() {
-    // TODO: Implement next game logic
-    console.log('Next game clicked');
+    // Next game logic to be implemented
   }
 
   /**

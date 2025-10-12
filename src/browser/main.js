@@ -226,12 +226,8 @@ async function initializeGame() {
   });
 
   if (peerIdFromUrl) {
-    // Client mode - join existing game
-    console.log('Joining game as client:', peerIdFromUrl);
     await gameController.initializeAsClient(peerIdFromUrl);
   } else {
-    // Host mode - create new game
-    console.log('Creating game as host');
     await gameController.initializeAsHost();
 
     // Don't update URL - this prevents host from trying to join their own old session on reload
