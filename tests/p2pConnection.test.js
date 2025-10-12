@@ -149,6 +149,7 @@ describe('P2P Connection Manager', () => {
 
   describe('sendMessage', () => {
     test('should send message to all connections (host)', async () => {
+      /** @type {Function | undefined} */
       let connectionCallback;
       const mockConnection = {
         on: vi.fn(),
@@ -173,7 +174,7 @@ describe('P2P Connection Manager', () => {
       await manager.createHost();
 
       // Simulate incoming connection
-      connectionCallback(mockConnection);
+      connectionCallback?.(mockConnection);
 
       manager.sendMessage({ type: 'TEST', payload: {} });
 
@@ -231,6 +232,7 @@ describe('P2P Connection Manager', () => {
     });
 
     test('should call callback when message received', async () => {
+      /** @type {Function | undefined} */
       let dataCallback;
       const mockConnection = {
         on: vi.fn((event, callback) => {

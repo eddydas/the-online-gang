@@ -46,6 +46,7 @@ describe('Token System', () => {
   describe('Token Selection', () => {
     test('should assign token to player on selection', () => {
       const tokens = generateTokens(3);
+      /** @type {import('../src/browser/tokens.js').TokenAction} */
       const action = {
         type: 'select',
         playerId: 'player1',

@@ -37,6 +37,7 @@ describe('P2P State Synchronization', () => {
 
     test('should handle empty connections array', () => {
       const state = { phase: 'LOBBY' };
+      /** @type {Array<{ send: Function }>} */
       const mockConnections = [];
 
       // Should not throw
@@ -105,13 +106,13 @@ describe('P2P State Synchronization', () => {
     test('should handle null/undefined received state', () => {
       const localState = { phase: 'LOBBY' };
 
-      expect(applyStateUpdate(localState, null)).toEqual(localState);
-      expect(applyStateUpdate(localState, undefined)).toEqual(localState);
+      expect(applyStateUpdate(localState, /** @type {any} */ (null))).toEqual(localState);
+      expect(applyStateUpdate(localState, /** @type {any} */ (undefined))).toEqual(localState);
     });
 
     test('should handle empty received state', () => {
       const localState = { phase: 'LOBBY', players: [] };
-      const receivedState = {};
+      const receivedState = /** @type {Record<string, any>} */ ({});
 
       const newState = applyStateUpdate(localState, receivedState);
 
@@ -130,7 +131,7 @@ describe('P2P State Synchronization', () => {
       const newState = applyStateUpdate(localState, receivedState);
 
       // Mutating newState should not affect receivedState
-      newState.players[0].name = 'Charlie';
+      /** @type {any} */ (newState).players[0].name = 'Charlie';
       expect(receivedState.players[0].name).toBe('Bob');
     });
 
@@ -140,19 +141,19 @@ describe('P2P State Synchronization', () => {
         turn: 0
       };
 
-      const receivedState = {
+      const receivedState = /** @type {Record<string, any>} */ ({
         phase: 'TOKEN_TRADING',
         turn: 2,
         players: [{ id: 'p1' }],
         tokens: [{ number: 1 }],
         communityCards: [],
         newField: 'test'
-      };
+      });
 
       const newState = applyStateUpdate(localState, receivedState);
 
       expect(newState).toEqual(receivedState);
-      expect(newState.newField).toBe('test');
+      expect(/** @type {any} */ (newState).newField).toBe('test');
     });
   });
 

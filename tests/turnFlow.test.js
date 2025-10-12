@@ -49,8 +49,11 @@ describe('Turn Flow UI', () => {
   });
 
   describe('Phase UI Updates', () => {
+    /** @type {{ textContent: string }} */
     let mockPhaseText;
+    /** @type {{ style: { display: string } }} */
     let mockReadyButton;
+    /** @type {{ style: { display: string } }} */
     let mockProceedButton;
 
     beforeEach(() => {
