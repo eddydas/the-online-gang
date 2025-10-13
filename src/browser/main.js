@@ -77,15 +77,30 @@ function initializeLobbyUI() {
       <div id="players-container"></div>
     </div>
     <div id="lobby-controls">
-      <button id="ready-toggle-button">Ready</button>
-      <button id="start-game-button" style="display: none;">Start Game</button>
+      <div id="lobby-buttons">
+        <button id="ready-toggle-button">Ready</button>
+        <div id="waiting-spinner" style="display: none;">
+          <div class="spinner">
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+          </div>
+        </div>
+        <button id="start-game-button" style="visibility: hidden;">Start Game</button>
+      </div>
       <div id="share-link-container" style="display: none;">
         <input type="text" id="share-link-input" readonly />
         <button id="copy-link-button">Copy Link</button>
       </div>
-    </div>
-    <div id="lobby-status">
-      <p id="players-ready-text">Players Ready: 0 out of 0</p>
     </div>
     <div id="token-showcase">
       <h3 style="color: #fff; margin-top: 30px; margin-bottom: 15px;">Token Design Showcase</h3>
@@ -136,8 +151,8 @@ function renderTokenShowcase() {
  */
 function updateLobbyUI() {
   const playersContainer = document.getElementById('players-container');
-  const playersReadyText = document.getElementById('players-ready-text');
   const startGameButton = document.getElementById('start-game-button');
+  const waitingSpinner = document.getElementById('waiting-spinner');
 
   if (playersContainer) {
     playersContainer.innerHTML = '';
@@ -179,13 +194,17 @@ function updateLobbyUI() {
   const readyCount = gameController.lobbyState.filter(p => p.isReady).length;
   const totalCount = gameController.lobbyState.length;
 
-  if (playersReadyText) {
-    playersReadyText.textContent = `Players Ready: ${readyCount} out of ${totalCount}`;
-  }
+  const canStart = readyCount === totalCount && totalCount >= 2;
 
   // Show start button only for host when all ready
   if (startGameButton && gameController.isHost) {
-    startGameButton.style.display = readyCount === totalCount && totalCount >= 2 ? 'block' : 'none';
+    startGameButton.style.visibility = canStart ? 'visible' : 'hidden';
+  }
+
+  // Show spinner when waiting (for everyone, when button is hidden or not host)
+  if (waitingSpinner) {
+    const shouldShowSpinner = !canStart || !gameController.isHost;
+    waitingSpinner.style.display = shouldShowSpinner ? 'flex' : 'none';
   }
 }
 
@@ -220,7 +239,7 @@ function setupLobbyEventHandlers() {
         });
       }
 
-      readyToggleButton.textContent = newReadyState ? 'Unready' : 'Ready';
+      readyToggleButton.textContent = newReadyState ? 'Not Ready' : 'Ready';
     });
   }
 

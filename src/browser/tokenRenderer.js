@@ -208,7 +208,7 @@ export function addTokenStyles() {
 
     .token.interactive:hover {
       transform: scale(1.1);
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5)) brightness(1.1);
+      filter: brightness(1.1);
     }
 
     .token.interactive:active {
@@ -218,7 +218,6 @@ export function addTokenStyles() {
     .token-svg {
       width: 100%;
       height: 100%;
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
     }
 
     .token-pool {
@@ -232,7 +231,6 @@ export function addTokenStyles() {
 
     .token.selected {
       transform: scale(1.15);
-      filter: drop-shadow(0 0 16px rgba(243, 156, 18, 0.8));
     }
 
     .token.disabled {
@@ -253,19 +251,11 @@ export function addTokenStyles() {
       margin: 2px;
     }
 
-    .token.mini .token-svg {
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-    }
-
     /* Medium tokens for current turn in history */
     .token.medium {
       width: 60px;
       height: 60px;
       margin: 2px;
-    }
-
-    .token.medium .token-svg {
-      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.4));
     }
 
     .player-tokens {
