@@ -371,7 +371,7 @@ export class GameController {
     }
 
     // Update phase UI
-    updatePhaseUI(this.gameState.phase, this.gameState.tokens);
+    updatePhaseUI(this.gameState.phase, this.gameState.tokens, this.gameState.turn);
 
     // Render player avatars
     this.renderPlayersUI();

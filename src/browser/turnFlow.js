@@ -59,8 +59,9 @@ function shouldShowProceedButton(phase, tokens) {
  * Updates the phase UI based on current game phase
  * @param {GamePhase} phase - Current game phase
  * @param {import('./tokens.js').Token[]} [tokens] - Token array (optional, needed for TOKEN_TRADING phase)
+ * @param {number} [turn] - Current turn number (optional, used to customize button text)
  */
-function updatePhaseUI(phase, tokens) {
+function updatePhaseUI(phase, tokens, turn) {
   const phaseTextEl = document.getElementById('phase-text');
   const readyButtonEl = document.getElementById('ready-button');
   const proceedButtonEl = document.getElementById('proceed-button');
@@ -75,6 +76,13 @@ function updatePhaseUI(phase, tokens) {
 
   if (proceedButtonEl) {
     proceedButtonEl.style.display = shouldShowProceedButton(phase, tokens) ? 'block' : 'none';
+
+    // Update button text based on turn and phase
+    if (phase === 'TURN_COMPLETE' && turn === 4) {
+      proceedButtonEl.textContent = 'See Final Results';
+    } else {
+      proceedButtonEl.textContent = 'Proceed to Next Turn';
+    }
   }
 }
 
