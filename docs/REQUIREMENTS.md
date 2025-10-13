@@ -481,6 +481,9 @@ After the final turn (Turn 4) when all hole cards are revealed, a summary table 
   - Y = total number of connected players (including host)
 - **Player Identification:**
   - **Default Name:** "Player X" assigned automatically when joining (X = join order number)
+    - **Collision Prevention:** If "Player X" already exists, auto-increment to next unused number
+    - Example: If "Player 1" exists, assign "Player 2"; if "Player 1" and "Player 2" exist, assign "Player 3"
+    - Skip numbers already in use (e.g., if "Player 1", "Player 2", "Player 4" exist, assign "Player 3")
   - **Name Editing:** Players can edit their display name in lobby
     - Name field is editable when player is NOT ready
     - Once player clicks "Ready," name field becomes locked/non-editable
@@ -493,6 +496,16 @@ After the final turn (Turn 4) when all hole cards are revealed, a summary table 
     - Cannot upload custom avatars
     - "Randomize" button next to avatar allows player to request a new random emoji
     - Randomize only available when player is NOT ready
+    - **Avatar Initials:** Display first letter of EACH word in player's name
+      - Extract first character from each word (split by spaces)
+      - Maximum 2 characters displayed
+      - Examples: "Peter Hill" → "PH", "John Doe Smith" → "JD", "Alice" → "AL"
+      - NOT first 2 characters of first word only
+    - **Avatar Color:** Background color must be unique per player
+      - No color collisions allowed within the same game session
+      - When new player joins, assign a color not currently in use
+      - Maintain color palette of 8-12+ visually distinct colors
+      - Suggested colors: Red (#e74c3c), Blue (#3498db), Green (#2ecc71), Orange (#f39c12), Purple (#9b59b6), Teal (#1abc9c), etc.
 - **Player Positioning:**
   - Players are seated around the poker table
   - Evenly distributed around the table based on player count

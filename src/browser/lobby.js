@@ -6,10 +6,29 @@
  * @property {string} name - Player name
  * @property {boolean} isReady - Ready status
  * @property {boolean} isHost - Whether player is host
+ * @property {string} avatarColor - Avatar background color (hex code)
  */
 
 const MAX_NAME_LENGTH = 20;
 const MIN_PLAYERS = 2;
+
+/**
+ * Generates a unique player name that doesn't collide with existing players
+ * @param {LobbyPlayer[]} lobbyState - Current lobby state
+ * @returns {string} - Unique player name (e.g., "Player 1", "Player 2")
+ */
+function generateUniquePlayerName(lobbyState) {
+  let playerNumber = 1;
+  let candidateName;
+
+  // Keep incrementing until we find an unused number
+  do {
+    candidateName = `Player ${playerNumber}`;
+    playerNumber++;
+  } while (isNameTaken(lobbyState, candidateName));
+
+  return candidateName;
+}
 
 /**
  * Validates player name
@@ -51,14 +70,16 @@ function getLobbyPlayers(lobbyState) {
  * @param {string} id - Player ID
  * @param {string} name - Player name
  * @param {boolean} isHost - Whether player is host
+ * @param {string} avatarColor - Avatar background color
  * @returns {LobbyPlayer[]} Updated lobby state
  */
-function addPlayer(lobbyState, id, name, isHost) {
+function addPlayer(lobbyState, id, name, isHost, avatarColor) {
   const newPlayer = {
     id,
     name,
     isReady: false,
-    isHost
+    isHost,
+    avatarColor
   };
 
   return [...lobbyState, newPlayer];
@@ -121,6 +142,7 @@ function isNameTaken(lobbyState, name) {
 }
 
 export {
+  generateUniquePlayerName,
   validatePlayerName,
   canStartGame,
   getLobbyPlayers,

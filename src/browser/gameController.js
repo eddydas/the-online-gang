@@ -5,13 +5,14 @@ import { createInitialState, startGame, advancePhase, setPlayerReady, allPlayers
 import { applyTokenAction } from './tokens.js';
 import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
-import { addPlayer, updatePlayerReady, canStartGame } from './lobby.js';
+import { addPlayer, updatePlayerReady, canStartGame, generateUniquePlayerName } from './lobby.js';
 import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
 import { createTokenElement } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
 import { evaluateHand } from './poker.js';
+import { getNextAvailableColor } from './avatarManager.js';
 
 /**
  * @typedef {import('./winCondition.js').PlayerWithHand} PlayerWithHand
@@ -41,7 +42,7 @@ export class GameController {
     /** @type {boolean} */
     this.isHost = false;
 
-    /** @type {Array<{id: string, name: string, isReady: boolean, isHost: boolean}>} */
+    /** @type {Array<{id: string, name: string, isReady: boolean, isHost: boolean, avatarColor: string}>} */
     this.lobbyState = [];
 
     /** @type {GameControllerDelegate | null} */
@@ -66,9 +67,9 @@ export class GameController {
     this.isHost = true;
     this.myPlayerId = peerId;
 
-
-    // Add self to lobby
-    this.lobbyState = addPlayer(this.lobbyState, peerId, 'Player 1', true);
+    // Add self to lobby with first available color
+    const hostColor = getNextAvailableColor([]);
+    this.lobbyState = addPlayer(this.lobbyState, peerId, 'Player 1', true, hostColor);
 
     // Listen for incoming connections
     this.connectionManager.onMessage((/** @type {any} */ message) => {
@@ -99,7 +100,7 @@ export class GameController {
       type: 'JOIN_REQUEST',
       payload: {
         playerId: this.myPlayerId,
-        playerName: `Player ${this.lobbyState.length + 1}`
+        playerName: generateUniquePlayerName(this.lobbyState)
       }
     });
   }
@@ -174,12 +175,20 @@ export class GameController {
   handleJoinRequest(payload) {
     if (!this.isHost) return;
 
-    // Add player to lobby
+    // Generate unique name if the requested name collides
+    const uniqueName = generateUniquePlayerName(this.lobbyState);
+
+    // Get next available color that's not already in use
+    const usedColors = this.lobbyState.map(p => p.avatarColor);
+    const uniqueColor = getNextAvailableColor(usedColors);
+
+    // Add player to lobby with unique name and color
     this.lobbyState = addPlayer(
       this.lobbyState,
       payload.playerId,
-      payload.playerName,
-      false
+      uniqueName,
+      false,
+      uniqueColor
     );
 
     // Broadcast updated lobby state

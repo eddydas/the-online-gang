@@ -9,15 +9,36 @@
  * High contrast colors that work well on poker green background
  */
 const AVATAR_COLORS = [
-  '#3498db', // Blue
   '#e74c3c', // Red
+  '#3498db', // Blue
   '#2ecc71', // Green
   '#f39c12', // Orange
   '#9b59b6', // Purple
   '#1abc9c', // Teal
-  '#e67e22', // Dark Orange
   '#34495e', // Dark Blue-Gray
+  '#e67e22', // Dark Orange
+  '#95a5a6', // Gray
+  '#16a085', // Dark Teal
+  '#27ae60', // Dark Green
+  '#8e44ad', // Dark Purple
 ];
+
+/**
+ * Get next available color that's not already in use
+ * @param {string[]} usedColors - Array of hex color codes already in use
+ * @returns {string} - Hex color code
+ */
+export function getNextAvailableColor(usedColors) {
+  // Find first color not in use
+  for (const color of AVATAR_COLORS) {
+    if (!usedColors.includes(color)) {
+      return color;
+    }
+  }
+
+  // If all colors are used, return first color (fallback)
+  return AVATAR_COLORS[0];
+}
 
 /**
  * Get initials from player name
@@ -44,26 +65,8 @@ export function getInitials(name) {
 }
 
 /**
- * Get deterministic color for player
- * Same player ID always gets same color
- * @param {string} playerId - Player ID
- * @returns {string} - Hex color code
- */
-export function getAvatarColor(playerId) {
-  // Simple hash function for deterministic color
-  let hash = 0;
-  for (let i = 0; i < playerId.length; i++) {
-    hash = ((hash << 5) - hash) + playerId.charCodeAt(i);
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-
-  const index = Math.abs(hash) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[index];
-}
-
-/**
  * Create avatar element
- * @param {{ id: string, name: string }} player - Player object with id and name
+ * @param {{ id: string, name: string, avatarColor?: string }} player - Player object with id, name, and optional color
  * @param {string} [size='medium'] - 'small', 'medium', 'large'
  * @returns {HTMLElement}
  */
@@ -73,7 +76,8 @@ export function createAvatarElement(player, size = 'medium') {
   avatar.dataset.playerId = player.id;
   avatar.setAttribute('aria-label', `Avatar for ${player.name}`);
 
-  const color = getAvatarColor(player.id);
+  // Use player's assigned color if available, otherwise use first color as fallback
+  const color = player.avatarColor || AVATAR_COLORS[0];
   avatar.style.setProperty('--avatar-color', color);
 
   const initials = document.createElement('span');

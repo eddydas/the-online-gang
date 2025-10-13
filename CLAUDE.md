@@ -261,11 +261,13 @@ git commit ...
 
 ## Documentation
 
-- **Requirements:** `docs/REQUIREMENTS.md` - Complete game specifications
+- **Requirements:** `docs/REQUIREMENTS.md` - Complete game specifications (ALWAYS check this file for feature requirements)
 - **Testing Guide:** `docs/TESTING.md` - TDD workflow and Vitest patterns
 - **Type Safety:** `docs/TYPE_SAFETY.md` - JSDoc patterns and examples
 - **Sprint Planning:** `docs/sprints/README.md` - Sprint index and goals
 - **Current Sprint:** `docs/sprints/sprint-1.md` - Detailed tasks
+
+**Important:** All requirements and specifications should be documented in `docs/REQUIREMENTS.md`. When implementing any feature, always reference this file first to ensure compliance with the defined specifications.
 
 ## Git Configuration
 
@@ -285,3 +287,4 @@ Brief description of changes
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+- Never push to remote git unless explicitly asked to do so. Always run test and type check for any code changes, and fix up errors as needed. Do not import within type annotations.
