@@ -407,4 +407,123 @@ describe('GameController', () => {
       expect(player3?.tokenHistory).toEqual([2, 3, 1, null]);
     });
   });
+
+  describe('handleUpdateName', () => {
+    test('host should update player name', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.lobbyState = [
+        { id: 'player-1', name: 'Player 1', isReady: false, isHost: false, avatarColor: '#e74c3c' },
+        { id: 'player-2', name: 'Player 2', isReady: false, isHost: false, avatarColor: '#3498db' }
+      ];
+
+      // Mock connection manager for broadcasting
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+
+      controller.handleUpdateName('player-1', 'Alice');
+
+      // Verify name was updated
+      const player = controller.lobbyState.find(p => p.id === 'player-1');
+      expect(player?.name).toBe('Alice');
+    });
+
+    test('host should not update name for ready players', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.lobbyState = [
+        { id: 'player-1', name: 'Player 1', isReady: true, isHost: false, avatarColor: '#e74c3c' }
+      ];
+
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+
+      controller.handleUpdateName('player-1', 'Alice');
+
+      // Verify name was NOT updated (player is ready)
+      const player = controller.lobbyState.find(p => p.id === 'player-1');
+      expect(player?.name).toBe('Player 1');
+    });
+
+    test('host should broadcast lobby state after name update', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.lobbyState = [
+        { id: 'player-1', name: 'Player 1', isReady: false, isHost: false, avatarColor: '#e74c3c' }
+      ];
+
+      const mockSendMessage = vi.fn();
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: mockSendMessage,
+        getConnections: vi.fn(() => [])
+      });
+
+      controller.handleUpdateName('player-1', 'Alice');
+
+      // Verify broadcast was called
+      expect(mockSendMessage).toHaveBeenCalledOnce();
+      expect(mockSendMessage.mock.calls[0][0]).toMatchObject({
+        type: 'LOBBY_UPDATE',
+        payload: {
+          lobbyState: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'player-1',
+              name: 'Alice'
+            })
+          ])
+        }
+      });
+    });
+
+    test('client should not handle name updates', () => {
+      const controller = new GameController();
+      controller.isHost = false;
+      controller.lobbyState = [
+        { id: 'player-1', name: 'Player 1', isReady: false, isHost: false, avatarColor: '#e74c3c' }
+      ];
+
+      controller.handleUpdateName('player-1', 'Alice');
+
+      // Verify name was NOT updated (client doesn't process updates)
+      const player = controller.lobbyState.find(p => p.id === 'player-1');
+      expect(player?.name).toBe('Player 1');
+    });
+
+    test('UPDATE_NAME message should be routed to handleUpdateName', () => {
+      const controller = new GameController();
+      controller.isHost = true;
+      controller.lobbyState = [
+        { id: 'player-1', name: 'Player 1', isReady: false, isHost: false, avatarColor: '#e74c3c' }
+      ];
+
+      controller.connectionManager = /** @type {any} */ ({
+        sendMessage: vi.fn(),
+        getConnections: vi.fn(() => [])
+      });
+
+      // Spy on handleUpdateName
+      const handleUpdateNameSpy = vi.spyOn(controller, 'handleUpdateName');
+
+      const message = {
+        type: 'UPDATE_NAME',
+        payload: {
+          playerId: 'player-1',
+          newName: 'Alice'
+        }
+      };
+
+      controller.handlePeerMessage(message);
+
+      // Verify handleUpdateName was called
+      expect(handleUpdateNameSpy).toHaveBeenCalledWith('player-1', 'Alice');
+
+      // Verify name was actually updated
+      const player = controller.lobbyState.find(p => p.id === 'player-1');
+      expect(player?.name).toBe('Alice');
+    });
+  });
 });
