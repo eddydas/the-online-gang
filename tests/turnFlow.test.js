@@ -18,11 +18,11 @@ describe('Turn Flow UI', () => {
     });
 
     test('should return correct text for TOKEN_TRADING phase', () => {
-      expect(getPhaseText('TOKEN_TRADING')).toBe('Select or steal a token. Press Proceed when done.');
+      expect(getPhaseText('TOKEN_TRADING')).toBe('Select or steal a token');
     });
 
     test('should return correct text for TURN_COMPLETE phase', () => {
-      expect(getPhaseText('TURN_COMPLETE')).toBe('Press Proceed to continue to the next turn');
+      expect(getPhaseText('TURN_COMPLETE')).toBe('Press Play to continue to the next turn');
     });
 
     test('should return correct text for END_GAME phase', () => {
@@ -79,14 +79,20 @@ describe('Turn Flow UI', () => {
     let mockPhaseText;
     /** @type {{ style: { display: string } }} */
     let mockReadyButton;
-    /** @type {{ style: { display: string } }} */
+    /** @type {{ classList: { add: Function, remove: Function, contains: Function } }} */
     let mockProceedButton;
 
     beforeEach(() => {
       // Create mock DOM elements
       mockPhaseText = { textContent: '' };
       mockReadyButton = { style: { display: '' } };
-      mockProceedButton = { style: { display: '' } };
+      mockProceedButton = {
+        classList: {
+          add: vi.fn(),
+          remove: vi.fn(),
+          contains: vi.fn(() => false)
+        }
+      };
 
       // Mock document.getElementById
       vi.stubGlobal('document', {
@@ -107,7 +113,7 @@ describe('Turn Flow UI', () => {
     test('should show ready button in READY_UP phase', () => {
       updatePhaseUI('READY_UP');
       expect(mockReadyButton.style.display).toBe('block');
-      expect(mockProceedButton.style.display).toBe('none');
+      expect(mockProceedButton.classList.add).toHaveBeenCalledWith('hidden');
     });
 
     test('should show proceed button in TOKEN_TRADING phase', () => {
@@ -118,7 +124,8 @@ describe('Turn Flow UI', () => {
 
       updatePhaseUI('TOKEN_TRADING', allOwned);
       expect(mockReadyButton.style.display).toBe('none');
-      expect(mockProceedButton.style.display).toBe('block');
+      expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('hidden');
+      expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('waiting');
     });
 
     test('should hide proceed button in TOKEN_TRADING when tokens not all owned', () => {
@@ -129,19 +136,20 @@ describe('Turn Flow UI', () => {
 
       updatePhaseUI('TOKEN_TRADING', someUnowned);
       expect(mockReadyButton.style.display).toBe('none');
-      expect(mockProceedButton.style.display).toBe('none');
+      expect(mockProceedButton.classList.add).toHaveBeenCalledWith('hidden');
     });
 
     test('should show proceed button in TURN_COMPLETE phase', () => {
       updatePhaseUI('TURN_COMPLETE');
       expect(mockReadyButton.style.display).toBe('none');
-      expect(mockProceedButton.style.display).toBe('block');
+      expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('hidden');
+      expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('waiting');
     });
 
     test('should hide all buttons in END_GAME phase', () => {
       updatePhaseUI('END_GAME');
       expect(mockReadyButton.style.display).toBe('none');
-      expect(mockProceedButton.style.display).toBe('none');
+      expect(mockProceedButton.classList.add).toHaveBeenCalledWith('hidden');
     });
   });
 

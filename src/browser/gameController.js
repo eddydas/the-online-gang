@@ -397,8 +397,8 @@ export class GameController {
       return;
     }
 
-    // Update phase UI
-    updatePhaseUI(this.gameState.phase, this.gameState.tokens, this.gameState.turn);
+    // Update phase UI (phase text and ready button)
+    updatePhaseUI(this.gameState.phase, this.gameState.tokens);
 
     // Render player avatars
     this.renderPlayersUI();
@@ -406,8 +406,11 @@ export class GameController {
     // Render cards
     this.renderCards();
 
-    // Render tokens
+    // Render tokens (includes proceed button)
     this.renderTokensUI();
+
+    // Update phase UI again to update proceed button visibility/state
+    updatePhaseUI(this.gameState.phase, this.gameState.tokens);
 
     // Notify delegate
     this.delegate?.onGameStateChange?.();
@@ -564,6 +567,46 @@ export class GameController {
   }
 
   /**
+   * Create proceed button element
+   * @returns {HTMLButtonElement}
+   */
+  createProceedButton() {
+    const button = document.createElement('button');
+    button.id = 'proceed-button';
+    button.className = 'circular-proceed-button hidden';
+
+    // Add click handler
+    button.addEventListener('click', () => {
+      if (!button.classList.contains('waiting')) {
+        this.onProceedClick();
+      }
+    });
+
+    // Create spinner
+    const spinner = document.createElement('div');
+    spinner.className = 'proceed-spinner';
+    for (let i = 0; i < 12; i++) {
+      const blade = document.createElement('div');
+      blade.className = 'spinner-blade';
+      spinner.appendChild(blade);
+    }
+
+    // Create play icon
+    const playIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    playIcon.setAttribute('class', 'proceed-play-icon');
+    playIcon.setAttribute('viewBox', '0 0 24 24');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M8 5v14l11-7z');
+    path.setAttribute('fill', 'currentColor');
+    playIcon.appendChild(path);
+
+    button.appendChild(spinner);
+    button.appendChild(playIcon);
+
+    return button;
+  }
+
+  /**
    * Render tokens - split between center (unowned) and player positions (owned)
    * Tokens are hidden during READY_UP phase
    */
@@ -592,6 +635,11 @@ export class GameController {
     tokenArea.innerHTML = '';
     tokenArea.className = 'token-pool';
 
+    // Add dummy spacer at the start to balance the proceed button at the end
+    const spacer = document.createElement('div');
+    spacer.className = 'token-spacer';
+    tokenArea.appendChild(spacer);
+
     // Create placeholders for all tokens (to prevent reflow)
     this.gameState.tokens.forEach(token => {
       const placeholder = document.createElement('div');
@@ -614,6 +662,10 @@ export class GameController {
 
       tokenArea.appendChild(placeholder);
     });
+
+    // Append proceed button at the end of tokens
+    const proceedButton = this.createProceedButton();
+    tokenArea.appendChild(proceedButton);
 
     // Clear any player token containers (tokens now shown in history row)
     this.gameState.players.forEach(player => {

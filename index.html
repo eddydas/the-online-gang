@@ -41,10 +41,9 @@
             <!-- Player's Hole Cards (bottom) -->
             <div id="player-cards"></div>
 
-            <!-- Ready/Action Buttons -->
+            <!-- Ready Button (for READY_UP phase) -->
             <div id="action-buttons">
               <button id="ready-button" style="display: none;">Ready</button>
-              <button id="proceed-button" style="display: none;">Proceed to Next Turn</button>
             </div>
           </div>
         </div>
@@ -406,6 +405,80 @@
       z-index: 5;
     }
 
+    /* Token spacer to balance proceed button */
+    .token-spacer {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+    }
+
+    /* === Circular Proceed Button === */
+    .circular-proceed-button {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #3498db;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, visibility 0s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 0;
+      flex-shrink: 0;
+      visibility: visible;
+    }
+
+    .circular-proceed-button.hidden {
+      visibility: hidden;
+    }
+
+    .circular-proceed-button:hover:not(.waiting) {
+      background: #2980b9;
+      transform: scale(1.05);
+    }
+
+    .circular-proceed-button.waiting {
+      cursor: default;
+      background: #555;
+    }
+
+    /* Spinner inside proceed button */
+    .proceed-spinner {
+      width: 24px;
+      height: 24px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .circular-proceed-button.waiting .proceed-spinner {
+      display: block;
+    }
+
+    .circular-proceed-button.waiting .proceed-play-icon {
+      display: none;
+    }
+
+    /* Play icon */
+    .proceed-play-icon {
+      width: 24px;
+      height: 24px;
+      color: white;
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .circular-proceed-button.waiting .proceed-play-icon {
+      display: none;
+    }
+
     /* === Action Buttons === */
     #action-buttons {
       position: absolute;
@@ -413,6 +486,9 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* === Card Styles === */
