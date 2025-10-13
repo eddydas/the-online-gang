@@ -48,19 +48,20 @@ export function getNextAvailableColor(usedColors) {
 export function getInitials(name) {
   if (!name) return '?';
 
-  // Remove special characters
-  const cleanName = name.replace(/[^a-zA-Z\s]/g, '');
-
-  const words = cleanName.trim().split(/\s+/);
+  // Split by spaces first to preserve word boundaries
+  const words = name.trim().split(/\s+/).filter(word => word.length > 0);
 
   if (words.length === 0) return '?';
 
   if (words.length === 1) {
-    // Single word: return first 2 characters
-    return words[0].substring(0, 2).toUpperCase();
+    // Single word: return first 2 characters (removing special chars)
+    const cleaned = words[0].replace(/[^a-zA-Z0-9]/g, '');
+    return cleaned.substring(0, 2).toUpperCase();
   } else {
-    // Multiple words: return first letter of first 2 words
-    return (words[0][0] + words[1][0]).toUpperCase();
+    // Multiple words: return first character of first 2 words
+    const first = words[0][0] || '';
+    const second = words[1][0] || '';
+    return (first + second).toUpperCase();
   }
 }
 
