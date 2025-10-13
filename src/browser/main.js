@@ -165,11 +165,55 @@ function updateLobbyUI() {
       const avatar = createAvatarElement(player, 'medium');
       playerItem.appendChild(avatar);
 
-      // Add name
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'player-name';
-      nameSpan.textContent = player.name;
-      playerItem.appendChild(nameSpan);
+      // Add name (editable input for current player when not ready, span otherwise)
+      const isCurrentPlayer = player.id === gameController.myPlayerId;
+      const canEditName = isCurrentPlayer && !player.isReady;
+
+      if (canEditName) {
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'player-name-input';
+        nameInput.value = player.name;
+        nameInput.maxLength = 20;
+
+        // Update name on blur
+        nameInput.addEventListener('blur', () => {
+          const newName = nameInput.value.trim();
+          if (newName && newName !== player.name) {
+            if (gameController.isHost) {
+              // Host updates their own name directly
+              gameController.lobbyState = gameController.lobbyState.map(p =>
+                p.id === gameController.myPlayerId ? { ...p, name: newName } : p
+              );
+              gameController.broadcastLobbyState();
+              updateLobbyUI();
+            } else {
+              // Client sends name update request to host
+              gameController.sendMessage({
+                type: 'UPDATE_NAME',
+                payload: {
+                  playerId: gameController.myPlayerId,
+                  newName: newName
+                }
+              });
+            }
+          }
+        });
+
+        // Also submit on Enter key
+        nameInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            nameInput.blur();
+          }
+        });
+
+        playerItem.appendChild(nameInput);
+      } else {
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'player-name';
+        nameSpan.textContent = player.name;
+        playerItem.appendChild(nameSpan);
+      }
 
       // Add host badge
       if (player.isHost) {

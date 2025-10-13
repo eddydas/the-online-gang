@@ -5,7 +5,7 @@ import { createInitialState, startGame, advancePhase, setPlayerReady, allPlayers
 import { applyTokenAction } from './tokens.js';
 import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
-import { addPlayer, updatePlayerReady, canStartGame, generateUniquePlayerName } from './lobby.js';
+import { addPlayer, updatePlayerReady, canStartGame, generateUniquePlayerName, updatePlayerName } from './lobby.js';
 import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
 import { createTokenElement } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
@@ -142,6 +142,12 @@ export class GameController {
         }
         break;
 
+      case 'UPDATE_NAME':
+        if (this.isHost) {
+          this.handleUpdateName(message.payload.playerId, message.payload.newName);
+        }
+        break;
+
       case 'TURN_READY':
         if (this.isHost) {
           this.handleTurnReady(message.payload.playerId);
@@ -204,6 +210,18 @@ export class GameController {
     if (!this.isHost) return;
 
     this.lobbyState = updatePlayerReady(this.lobbyState, playerId, isReady);
+    this.broadcastLobbyState();
+  }
+
+  /**
+   * Handle player name update
+   * @param {string} playerId
+   * @param {string} newName
+   */
+  handleUpdateName(playerId, newName) {
+    if (!this.isHost) return;
+
+    this.lobbyState = updatePlayerName(this.lobbyState, playerId, newName);
     this.broadcastLobbyState();
   }
 
