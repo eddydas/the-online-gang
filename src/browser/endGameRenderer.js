@@ -272,14 +272,14 @@ export function addEndGameStyles() {
     .end-game-table th {
       background: #34495e;
       color: #ecf0f1;
-      padding: 15px 10px;
+      padding: 15px 4px;
       font-weight: bold;
       text-align: left;
       border-bottom: 2px solid #2c3e50;
     }
 
     .end-game-table td {
-      padding: 12px 10px;
+      padding: 12px 4px;
       border-bottom: 1px solid #34495e;
       vertical-align: middle;
     }
@@ -310,8 +310,8 @@ export function addEndGameStyles() {
 
     .avatar-cell {
       text-align: center;
-      padding: 8px;
-      width: 60px;
+      padding: 8px 4px;
+      width: 50px;
     }
 
     .name-cell {
@@ -322,8 +322,8 @@ export function addEndGameStyles() {
 
     .token-cell {
       text-align: center;
-      padding: 8px;
-      width: 60px;
+      padding: 8px 4px;
+      width: 50px;
     }
 
     .mini-token {
@@ -341,7 +341,7 @@ export function addEndGameStyles() {
     }
 
     .cards-cell {
-      padding: 8px;
+      padding: 8px 4px;
     }
 
     .cards-container {
