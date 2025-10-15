@@ -441,8 +441,14 @@ describe('Win/Loss Determination', () => {
             rank: 1,
             name: 'High Card',
             tiebreakers: [7, 6, 5, 3, 2], // 7-6-5-3-2
-            bestFive: [],
-            primaryCards: [],
+            bestFive: [
+              { rank: '7', suit: '♠' },
+              { rank: '6', suit: '♥' },
+              { rank: '5', suit: '♦' },
+              { rank: '3', suit: '♣' },
+              { rank: '2', suit: '♠' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 7'
           },
           currentToken: 1
@@ -454,8 +460,14 @@ describe('Win/Loss Determination', () => {
             rank: 1,
             name: 'High Card',
             tiebreakers: [7, 6, 5, 4, 2], // 7-6-5-4-2
-            bestFive: [],
-            primaryCards: [],
+            bestFive: [
+              { rank: '7', suit: '♦' },
+              { rank: '6', suit: '♣' },
+              { rank: '5', suit: '♥' },
+              { rank: '4', suit: '♠' },
+              { rank: '2', suit: '♥' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 7'
           },
           currentToken: 2
@@ -464,7 +476,8 @@ describe('Win/Loss Determination', () => {
 
       const result = determineWinLoss(players);
 
-      // Both players should have [3] as decisive kicker index (4th position, 0-indexed position 3)
+      // Both players should have [3] as decisive kicker index (4th card, 0-indexed position 3)
+      // This is the first differing card: 3 vs 4
       expect(result.decisiveKickers['p1']).toEqual([3]);
       expect(result.decisiveKickers['p2']).toEqual([3]);
     });
@@ -477,9 +490,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [7, 6, 5, 4, 2], // Strongest
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [7, 6, 5, 4, 2], // Strongest: 7-6-5-4-2
+            bestFive: [
+              { rank: '7', suit: '♠' },
+              { rank: '6', suit: '♥' },
+              { rank: '5', suit: '♦' },
+              { rank: '4', suit: '♣' },
+              { rank: '2', suit: '♠' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 7'
           },
           currentToken: 3
@@ -490,9 +509,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [7, 6, 5, 3, 2], // Middle
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [7, 6, 5, 3, 2], // Middle: 7-6-5-3-2
+            bestFive: [
+              { rank: '7', suit: '♦' },
+              { rank: '6', suit: '♣' },
+              { rank: '5', suit: '♥' },
+              { rank: '3', suit: '♠' },
+              { rank: '2', suit: '♥' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 7'
           },
           currentToken: 2
@@ -503,9 +528,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [7, 6, 4, 3, 2], // Weakest (different at position 2)
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [7, 6, 4, 3, 2], // Weakest: 7-6-4-3-2
+            bestFive: [
+              { rank: '7', suit: '♣' },
+              { rank: '6', suit: '♠' },
+              { rank: '4', suit: '♥' },
+              { rank: '3', suit: '♦' },
+              { rank: '2', suit: '♣' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 7'
           },
           currentToken: 1
@@ -514,13 +545,13 @@ describe('Win/Loss Determination', () => {
 
       const result = determineWinLoss(players);
 
-      // p1 differs from p2 at position 3 (4 vs 3)
+      // p1 differs from p2 at index 3 (4 vs 3)
       expect(result.decisiveKickers['p1']).toEqual([3]);
 
-      // p2 differs from p1 at position 3 (3 vs 4) AND from p3 at position 2 (5 vs 4)
+      // p2 differs from p1 at index 3 (3 vs 4) AND from p3 at index 2 (5 vs 4)
       expect(result.decisiveKickers['p2']).toEqual([2, 3]);
 
-      // p3 differs from p2 at position 2 (4 vs 5)
+      // p3 differs from p2 at index 2 (4 vs 5)
       expect(result.decisiveKickers['p3']).toEqual([2]);
     });
 
@@ -607,8 +638,17 @@ describe('Win/Loss Determination', () => {
             rank: 2,
             name: 'Pair',
             tiebreakers: [14, 13, 12, 11], // A-A-K-Q-J
-            bestFive: [],
-            primaryCards: [],
+            bestFive: [
+              { rank: 'A', suit: '♠' },
+              { rank: 'A', suit: '♥' },
+              { rank: 'K', suit: '♦' },
+              { rank: 'Q', suit: '♣' },
+              { rank: 'J', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: 'A', suit: '♠' },
+              { rank: 'A', suit: '♥' }
+            ], // The pair
             description: 'Pair of Aces'
           },
           currentToken: 2
@@ -620,8 +660,17 @@ describe('Win/Loss Determination', () => {
             rank: 2,
             name: 'Pair',
             tiebreakers: [14, 12, 11, 10], // A-A-Q-J-10
-            bestFive: [],
-            primaryCards: [],
+            bestFive: [
+              { rank: 'A', suit: '♦' },
+              { rank: 'A', suit: '♣' },
+              { rank: 'Q', suit: '♥' },
+              { rank: 'J', suit: '♦' },
+              { rank: '10', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: 'A', suit: '♦' },
+              { rank: 'A', suit: '♣' }
+            ], // The pair
             description: 'Pair of Aces'
           },
           currentToken: 1
@@ -630,9 +679,10 @@ describe('Win/Loss Determination', () => {
 
       const result = determineWinLoss(players);
 
-      // Both players differ at position 1 (K vs Q, after the pair)
-      expect(result.decisiveKickers['p1']).toEqual([1]);
-      expect(result.decisiveKickers['p2']).toEqual([1]);
+      // Both players differ at bestFive index 2 (K vs Q, first kicker after the pair)
+      // Note: tiebreaker index 1, but bestFive index 2 because pair occupies indices 0-1
+      expect(result.decisiveKickers['p1']).toEqual([2]);
+      expect(result.decisiveKickers['p2']).toEqual([2]);
     });
 
     test('should work with 4 players with various decisive kickers', () => {
@@ -643,9 +693,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [10, 9, 7, 5, 3],
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [10, 9, 7, 5, 3], // 10-9-7-5-3
+            bestFive: [
+              { rank: '10', suit: '♠' },
+              { rank: '9', suit: '♥' },
+              { rank: '7', suit: '♦' },
+              { rank: '5', suit: '♣' },
+              { rank: '3', suit: '♠' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 10'
           },
           currentToken: 4
@@ -656,9 +712,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [10, 9, 7, 4, 3],
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [10, 9, 7, 4, 3], // 10-9-7-4-3
+            bestFive: [
+              { rank: '10', suit: '♦' },
+              { rank: '9', suit: '♣' },
+              { rank: '7', suit: '♥' },
+              { rank: '4', suit: '♠' },
+              { rank: '3', suit: '♥' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 10'
           },
           currentToken: 3
@@ -669,9 +731,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [10, 9, 6, 4, 3],
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [10, 9, 6, 4, 3], // 10-9-6-4-3
+            bestFive: [
+              { rank: '10', suit: '♣' },
+              { rank: '9', suit: '♠' },
+              { rank: '6', suit: '♦' },
+              { rank: '4', suit: '♥' },
+              { rank: '3', suit: '♦' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 10'
           },
           currentToken: 2
@@ -682,9 +750,15 @@ describe('Win/Loss Determination', () => {
           hand: {
             rank: 1,
             name: 'High Card',
-            tiebreakers: [10, 8, 6, 4, 3],
-            bestFive: [],
-            primaryCards: [],
+            tiebreakers: [10, 8, 6, 4, 3], // 10-8-6-4-3
+            bestFive: [
+              { rank: '10', suit: '♥' },
+              { rank: '8', suit: '♦' },
+              { rank: '6', suit: '♣' },
+              { rank: '4', suit: '♦' },
+              { rank: '3', suit: '♣' }
+            ],
+            primaryCards: [], // High card has no primary cards
             description: 'High Card, 10'
           },
           currentToken: 1
@@ -693,16 +767,16 @@ describe('Win/Loss Determination', () => {
 
       const result = determineWinLoss(players);
 
-      // p1 differs from p2 at position 3 (5 vs 4)
+      // p1 differs from p2 at index 3 (5 vs 4)
       expect(result.decisiveKickers['p1']).toEqual([3]);
 
-      // p2 differs from p1 at position 3 (4 vs 5) AND from p3 at position 2 (7 vs 6)
+      // p2 differs from p1 at index 3 (4 vs 5) AND from p3 at index 2 (7 vs 6)
       expect(result.decisiveKickers['p2']).toEqual([2, 3]);
 
-      // p3 differs from p2 at position 2 (6 vs 7) AND from p4 at position 1 (9 vs 8)
+      // p3 differs from p2 at index 2 (6 vs 7) AND from p4 at index 1 (9 vs 8)
       expect(result.decisiveKickers['p3']).toEqual([1, 2]);
 
-      // p4 differs from p3 at position 1 (8 vs 9)
+      // p4 differs from p3 at index 1 (8 vs 9)
       expect(result.decisiveKickers['p4']).toEqual([1]);
     });
   });

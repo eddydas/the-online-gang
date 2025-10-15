@@ -92,35 +92,81 @@ function groupPlayersByTies(sortedPlayers) {
 }
 
 /**
- * Finds which tiebreaker index made the difference between two players with same rank
+ * Finds which bestFive card indices made the difference between two players
+ * Returns indices of cards that are different and not in primaryCards
  * @param {PlayerWithHand} p1 - First player
  * @param {PlayerWithHand} p2 - Second player
- * @returns {number | null} Index of tiebreaker that made difference, or null if tied/different rank
+ * @returns {number[]} Indices in bestFive array that are decisive kickers
  */
-function findDecisiveTiebreakerIndex(p1, p2) {
-  // Different rank - no tiebreaker comparison
+function findDecisiveKickerIndices(p1, p2) {
+  // Different rank - no kicker comparison
   if (p1.hand.rank !== p2.hand.rank) {
-    return null;
+    return [];
   }
 
-  // Compare tiebreakers to find first difference
-  const len = Math.max(p1.hand.tiebreakers.length, p2.hand.tiebreakers.length);
-  for (let i = 0; i < len; i++) {
-    const val1 = p1.hand.tiebreakers[i] || 0;
-    const val2 = p2.hand.tiebreakers[i] || 0;
+  // If identical hands, no decisive kickers
+  const comparison = comparePlayerHands(p1, p2);
+  if (comparison === 0) {
+    return [];
+  }
+
+  // Get primary card values to exclude them
+  const p1PrimaryValues = new Set(
+    p1.hand.primaryCards?.map(c => c.rank + c.suit) || []
+  );
+  const p2PrimaryValues = new Set(
+    p2.hand.primaryCards?.map(c => c.rank + c.suit) || []
+  );
+
+  // Compare bestFive cards in order, looking for first difference in non-primary cards
+  const maxLen = Math.max(p1.hand.bestFive?.length || 0, p2.hand.bestFive?.length || 0);
+
+  for (let i = 0; i < maxLen; i++) {
+    const card1 = p1.hand.bestFive?.[i];
+    const card2 = p2.hand.bestFive?.[i];
+
+    if (!card1 || !card2) continue;
+
+    // Check if these cards are primary cards (skip if so)
+    const card1Key = card1.rank + card1.suit;
+    const card2Key = card2.rank + card2.suit;
+    const card1IsPrimary = p1PrimaryValues.has(card1Key);
+    const card2IsPrimary = p2PrimaryValues.has(card2Key);
+
+    // Skip if either card is a primary card
+    if (card1IsPrimary || card2IsPrimary) continue;
+
+    // Compare card ranks
+    const val1 = getRankValue(card1.rank);
+    const val2 = getRankValue(card2.rank);
+
     if (val1 !== val2) {
-      return i; // This tiebreaker made the difference
+      // This is the first differing kicker - this is the decisive one
+      return [i];
     }
   }
 
-  // Identical hands
-  return null;
+  return [];
+}
+
+/**
+ * Gets numeric value for a rank
+ * @param {string} rank - Card rank
+ * @returns {number} Numeric value
+ */
+function getRankValue(rank) {
+  /** @type {Record<string, number>} */
+  const values = {
+    '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8,
+    '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
+  };
+  return values[rank] || 0;
 }
 
 /**
  * Calculates which kicker positions were decisive for each player
  * @param {PlayerWithHand[]} sortedPlayers - Players sorted by hand strength
- * @returns {Object.<string, number[]>} Map of playerId to array of decisive tiebreaker indices
+ * @returns {Object.<string, number[]>} Map of playerId to array of decisive bestFive indices
  */
 function calculateDecisiveKickers(sortedPlayers) {
   /** @type {Object.<string, number[]>} */
@@ -139,19 +185,15 @@ function calculateDecisiveKickers(sortedPlayers) {
     // Compare with previous player (if exists)
     if (i > 0) {
       const prevPlayer = sortedPlayers[i - 1];
-      const index = findDecisiveTiebreakerIndex(currentPlayer, prevPlayer);
-      if (index !== null) {
-        decisiveIndices.add(index);
-      }
+      const indices = findDecisiveKickerIndices(currentPlayer, prevPlayer);
+      indices.forEach(idx => decisiveIndices.add(idx));
     }
 
     // Compare with next player (if exists)
     if (i < sortedPlayers.length - 1) {
       const nextPlayer = sortedPlayers[i + 1];
-      const index = findDecisiveTiebreakerIndex(currentPlayer, nextPlayer);
-      if (index !== null) {
-        decisiveIndices.add(index);
-      }
+      const indices = findDecisiveKickerIndices(currentPlayer, nextPlayer);
+      indices.forEach(idx => decisiveIndices.add(idx));
     }
 
     decisiveKickers[currentPlayer.id] = Array.from(decisiveIndices).sort((a, b) => a - b);
