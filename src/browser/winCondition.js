@@ -110,6 +110,19 @@ function findDecisiveKickerIndices(p1, p2) {
     return [];
   }
 
+  // Check if primary cards differ (e.g., Pair of 10s vs Pair of 3s)
+  // If the first tiebreaker differs, it means the primary hand strength differs
+  // (e.g., different pair values, different trips values, different quad values)
+  const firstTiebreaker1 = p1.hand.tiebreakers?.[0];
+  const firstTiebreaker2 = p2.hand.tiebreakers?.[0];
+
+  if (firstTiebreaker1 !== undefined &&
+      firstTiebreaker2 !== undefined &&
+      firstTiebreaker1 !== firstTiebreaker2) {
+    // Primary hand strength differs (e.g., A-A vs K-K), so kickers are irrelevant
+    return [];
+  }
+
   // Get primary card values to exclude them
   const p1PrimaryValues = new Set(
     p1.hand.primaryCards?.map(c => c.rank + c.suit) || []

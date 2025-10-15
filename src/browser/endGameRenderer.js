@@ -326,8 +326,7 @@ export function createEndGameTable(winLossResult, gameState) {
   const turnDisplay = container.querySelector('#current-turn-display');
 
   if (slider && turnDisplay) {
-    // Apply initial state for Turn 4 (default slider position)
-    updateTimeTravelView(table, 4);
+    // Apply initial highlighting for Turn 4 (default slider position)
     updateCardHighlighting(tbody, 4, turnWinLossResults[4]);
 
     slider.addEventListener('input', (e) => {
