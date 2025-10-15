@@ -431,4 +431,280 @@ describe('Win/Loss Determination', () => {
     });
   });
 
+  describe('Decisive Kicker Detection', () => {
+    test('should identify decisive kicker when comparing high card hands', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [7, 6, 5, 3, 2], // 7-6-5-3-2
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 7'
+          },
+          currentToken: 1
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [7, 6, 5, 4, 2], // 7-6-5-4-2
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 7'
+          },
+          currentToken: 2
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // Both players should have [3] as decisive kicker index (4th position, 0-indexed position 3)
+      expect(result.decisiveKickers['p1']).toEqual([3]);
+      expect(result.decisiveKickers['p2']).toEqual([3]);
+    });
+
+    test('should identify multiple decisive kickers when player is between two others', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [7, 6, 5, 4, 2], // Strongest
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 7'
+          },
+          currentToken: 3
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [7, 6, 5, 3, 2], // Middle
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 7'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p3',
+          name: 'Carol',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [7, 6, 4, 3, 2], // Weakest (different at position 2)
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 7'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // p1 differs from p2 at position 3 (4 vs 3)
+      expect(result.decisiveKickers['p1']).toEqual([3]);
+
+      // p2 differs from p1 at position 3 (3 vs 4) AND from p3 at position 2 (5 vs 4)
+      expect(result.decisiveKickers['p2']).toEqual([2, 3]);
+
+      // p3 differs from p2 at position 2 (4 vs 5)
+      expect(result.decisiveKickers['p3']).toEqual([2]);
+    });
+
+    test('should have no decisive kickers when hands are identical', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [14, 13, 12, 11],
+            bestFive: [],
+            primaryCards: [],
+            description: 'Pair of Aces'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [14, 13, 12, 11],
+            bestFive: [],
+            primaryCards: [],
+            description: 'Pair of Aces'
+          },
+          currentToken: 3
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // No decisive kickers because hands are identical
+      expect(result.decisiveKickers['p1']).toEqual([]);
+      expect(result.decisiveKickers['p2']).toEqual([]);
+    });
+
+    test('should have no decisive kickers when hands have different ranks', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 3,
+            name: 'Two Pair',
+            tiebreakers: [13, 12, 11],
+            bestFive: [],
+            primaryCards: [],
+            description: 'Two Pair'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [14, 13, 12, 11, 10],
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // No decisive kickers because ranks are different (no tiebreaker comparison needed)
+      expect(result.decisiveKickers['p1']).toEqual([]);
+      expect(result.decisiveKickers['p2']).toEqual([]);
+    });
+
+    test('should identify decisive kicker at first tiebreaker position', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [14, 13, 12, 11], // A-A-K-Q-J
+            bestFive: [],
+            primaryCards: [],
+            description: 'Pair of Aces'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [14, 12, 11, 10], // A-A-Q-J-10
+            bestFive: [],
+            primaryCards: [],
+            description: 'Pair of Aces'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // Both players differ at position 1 (K vs Q, after the pair)
+      expect(result.decisiveKickers['p1']).toEqual([1]);
+      expect(result.decisiveKickers['p2']).toEqual([1]);
+    });
+
+    test('should work with 4 players with various decisive kickers', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [10, 9, 7, 5, 3],
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 10'
+          },
+          currentToken: 4
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [10, 9, 7, 4, 3],
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 10'
+          },
+          currentToken: 3
+        },
+        {
+          id: 'p3',
+          name: 'Carol',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [10, 9, 6, 4, 3],
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 10'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p4',
+          name: 'Dave',
+          hand: {
+            rank: 1,
+            name: 'High Card',
+            tiebreakers: [10, 8, 6, 4, 3],
+            bestFive: [],
+            primaryCards: [],
+            description: 'High Card, 10'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // p1 differs from p2 at position 3 (5 vs 4)
+      expect(result.decisiveKickers['p1']).toEqual([3]);
+
+      // p2 differs from p1 at position 3 (4 vs 5) AND from p3 at position 2 (7 vs 6)
+      expect(result.decisiveKickers['p2']).toEqual([2, 3]);
+
+      // p3 differs from p2 at position 2 (6 vs 7) AND from p4 at position 1 (9 vs 8)
+      expect(result.decisiveKickers['p3']).toEqual([1, 2]);
+
+      // p4 differs from p3 at position 1 (8 vs 9)
+      expect(result.decisiveKickers['p4']).toEqual([1]);
+    });
+  });
+
 });
