@@ -266,7 +266,7 @@ function evaluatePokerHand(cards) {
   }
 
   // Two Pair
-  if (groupSizes[0].count === 2 && groupSizes[1].count === 2) {
+  if (groupSizes[0].count === 2 && groupSizes[1] && groupSizes[1].count === 2) {
     const pair1Rank = groupSizes[0].rank;
     const pair2Rank = groupSizes[1].rank;
     const kicker = groupSizes.find(g => g.count === 1);
@@ -298,23 +298,24 @@ function evaluatePokerHand(cards) {
     const kickers = groupSizes
       .filter(g => g.rank !== pairRank)
       .slice(0, 3);
-    const bestFive = [
-      ...groups[pairRank],
-      groups[kickers[0].rank][0],
-      groups[kickers[1].rank][0],
-      groups[kickers[2].rank][0]
-    ];
+
+    // Build bestFive with available cards (may be less than 5 for 2-card hands)
+    const bestFive = [...groups[pairRank]];
+    const tiebreakers = [getRankValue(pairRank)];
+
+    for (let i = 0; i < Math.min(kickers.length, 3); i++) {
+      if (kickers[i]) {
+        bestFive.push(groups[kickers[i].rank][0]);
+        tiebreakers.push(getRankValue(kickers[i].rank));
+      }
+    }
+
     return {
       rank: 2,
       name: 'Pair',
       bestFive,
       primaryCards: groups[pairRank], // Only the pair
-      tiebreakers: [
-        getRankValue(pairRank),
-        getRankValue(kickers[0].rank),
-        getRankValue(kickers[1].rank),
-        getRankValue(kickers[2].rank)
-      ],
+      tiebreakers,
       description: `Pair of ${pairRank}`
     };
   }

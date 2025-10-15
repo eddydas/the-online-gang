@@ -8,6 +8,8 @@ import { createCardElement } from './cardRenderer.js';
 import { createTokenElement } from './tokenRenderer.js';
 import { createAvatarElement } from './avatarManager.js';
 import { cardsEqual } from './deck.js';
+import { evaluatePokerHand } from './poker.js';
+import { determineWinLoss } from './winCondition.js';
 
 /**
  * @typedef {import('./deck.js').Card} Card
@@ -24,6 +26,39 @@ import { cardsEqual } from './deck.js';
  */
 function getTokenForTurn(tokenHistory, turn) {
   return tokenHistory[turn - 1] || null;
+}
+
+/**
+ * Evaluate token correctness for a specific turn
+ * @param {any[]} players - All players with their data
+ * @param {any} gameState - Game state with community cards
+ * @param {number} turn - Turn number (1-4)
+ * @returns {Object.<string, boolean>} Map of playerId to isCorrect for this turn
+ */
+function evaluateTurnCorrectness(players, gameState, turn) {
+  // Determine how many community cards are available at this turn
+  const communityCardCounts = [0, 3, 4, 5]; // Turn 1=0, Turn 2=3, Turn 3=4, Turn 4=5
+  const communityCount = communityCardCounts[turn - 1];
+  const communityCards = gameState.communityCards.slice(0, communityCount);
+
+  // Evaluate each player's hand at this turn
+  const playersWithHands = players.map(p => {
+    const allCards = [...(p.holeCards || []), ...communityCards];
+    const hand = evaluatePokerHand(allCards);
+    return {
+      id: p.id,
+      name: p.name,
+      holeCards: p.holeCards,
+      currentToken: p.tokenHistory[turn - 1],
+      tokenHistory: p.tokenHistory,
+      hand
+    };
+  });
+
+  // Determine win/loss for this turn's state
+  const turnResult = determineWinLoss(playersWithHands);
+
+  return turnResult.correctness;
 }
 
 /**
@@ -51,6 +86,13 @@ export function createEndGameTable(winLossResult, gameState) {
 
   // Body rows (one per player, sorted by hand strength)
   const tbody = document.createElement('tbody');
+
+  // Evaluate correctness for all turns (1-4)
+  /** @type {Object.<number, Object.<string, boolean>>} */
+  const turnCorrectness = {};
+  for (let t = 1; t <= 4; t++) {
+    turnCorrectness[t] = evaluateTurnCorrectness(gameState.players, gameState, t);
+  }
 
   winLossResult.sortedPlayers.forEach((/** @type {any} */ player) => {
     const row = document.createElement('tr');
@@ -89,10 +131,10 @@ export function createEndGameTable(winLossResult, gameState) {
         );
         miniToken.classList.add('mini-token');
 
-        // Determine if this turn's token was correct
-        // For now, just highlight final turn based on overall correctness
-        if (turn === 4) {
-          tokenCell.classList.add(isCorrect ? 'correct-token' : 'incorrect-token');
+        // Highlight only incorrect tokens (all turns)
+        const isTokenCorrect = turnCorrectness[turn][player.id];
+        if (!isTokenCorrect) {
+          tokenCell.classList.add('incorrect-token');
         }
 
         tokenCell.appendChild(miniToken);
@@ -335,10 +377,6 @@ export function addEndGameStyles() {
       width: 40px;
       height: 40px;
       margin: 0 auto;
-    }
-
-    .token-cell.correct-token {
-      background: rgba(46, 204, 113, 0.2);
     }
 
     .token-cell.incorrect-token {
