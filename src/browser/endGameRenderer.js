@@ -638,8 +638,9 @@ export function addEndGameStyles() {
     }
 
     .end-game-table .mini-card.kicker {
-      outline-color: rgba(149, 165, 166, 1);
-      box-shadow: 0 0 6px rgba(149, 165, 166, 0.8);
+      outline-color: rgba(243, 156, 18, 1);
+      outline-style: dashed;
+      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
     }
 
     .end-game-table .mini-card.not-used {
