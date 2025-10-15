@@ -80,9 +80,29 @@ export function createEndGameTable(winLossResult, gameState) {
   `;
   container.appendChild(announcement);
 
+  // Time travel slider
+  const sliderContainer = document.createElement('div');
+  sliderContainer.className = 'time-travel-slider-container';
+  sliderContainer.innerHTML = `
+    <div class="slider-label">
+      Showing game results as of: Turn <span id="current-turn-display">4</span>
+    </div>
+    <div class="slider-wrapper">
+      <input type="range" id="turn-slider" min="1" max="4" value="4" step="1" class="turn-slider">
+      <div class="slider-markers">
+        <span class="slider-marker">1</span>
+        <span class="slider-marker">2</span>
+        <span class="slider-marker">3</span>
+        <span class="slider-marker">4</span>
+      </div>
+    </div>
+  `;
+  container.appendChild(sliderContainer);
+
   // Summary table
   const table = document.createElement('table');
   table.className = 'end-game-table';
+  table.dataset.currentTurn = '4'; // Store current turn for reference
 
   // Body rows (one per player, sorted by hand strength)
   const tbody = document.createElement('tbody');
@@ -90,8 +110,28 @@ export function createEndGameTable(winLossResult, gameState) {
   // Evaluate correctness for all turns (1-4)
   /** @type {Object.<number, Object.<string, boolean>>} */
   const turnCorrectness = {};
+  /** @type {Object.<number, any[]>} */
+  const turnSortedPlayers = {};
+
   for (let t = 1; t <= 4; t++) {
     turnCorrectness[t] = evaluateTurnCorrectness(gameState.players, gameState, t);
+
+    // Evaluate and sort players for this turn
+    const communityCardCounts = [0, 3, 4, 5];
+    const communityCount = communityCardCounts[t - 1];
+    const communityCards = gameState.communityCards.slice(0, communityCount);
+
+    const playersWithHands = gameState.players.map((/** @type {any} */ p) => {
+      const allCards = [...(p.holeCards || []), ...communityCards];
+      const hand = evaluatePokerHand(allCards);
+      return {
+        id: p.id,
+        name: p.name,
+        hand
+      };
+    });
+
+    turnSortedPlayers[t] = determineWinLoss(playersWithHands).sortedPlayers;
   }
 
   winLossResult.sortedPlayers.forEach((/** @type {any} */ player) => {
@@ -119,6 +159,7 @@ export function createEndGameTable(winLossResult, gameState) {
     for (let turn = 1; turn <= 4; turn++) {
       const tokenCell = document.createElement('td');
       tokenCell.className = 'token-cell';
+      tokenCell.dataset.turn = String(turn); // Mark turn for opacity control
 
       const tokenNumber = getTokenForTurn(gamePlayer?.tokenHistory || [], turn);
 
@@ -187,9 +228,16 @@ export function createEndGameTable(winLossResult, gameState) {
 
     // Add community cards
     if (gameState.communityCards) {
-      gameState.communityCards.forEach((/** @type {Card} */ card) => {
+      gameState.communityCards.forEach((/** @type {Card} */ card, /** @type {number} */ index) => {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
+
+        // Mark card with turn data for opacity control
+        // Cards 0-2: Turn 2 (flop), Card 3: Turn 3 (turn), Card 4: Turn 4 (river)
+        let cardTurn = 2;
+        if (index === 3) cardTurn = 3;
+        else if (index === 4) cardTurn = 4;
+        cardEl.dataset.turn = String(cardTurn);
 
         // Find which position this card is in bestFive (if any)
         const bestFiveIndex = player.hand?.bestFive?.findIndex((/** @type {Card} */ c) => cardsEqual(c, card));
@@ -219,8 +267,19 @@ export function createEndGameTable(winLossResult, gameState) {
     // Hand description column
     const handCell = document.createElement('td');
     handCell.className = 'hand-cell';
+
+    // Store hand descriptions for all turns
+    for (let t = 1; t <= 4; t++) {
+      const turnPlayer = turnSortedPlayers[t].find((/** @type {any} */ p) => p.id === player.id);
+      handCell.dataset[`turn${t}Desc`] = turnPlayer?.hand?.description || 'Unknown';
+    }
+
+    // Display Turn 4 description by default
     handCell.textContent = player.hand?.description || 'Unknown';
     row.appendChild(handCell);
+
+    // Store player ID for row identification during re-sorting
+    row.dataset.playerId = player.id;
 
     tbody.appendChild(row);
   });
@@ -245,7 +304,101 @@ export function createEndGameTable(winLossResult, gameState) {
   `;
   container.appendChild(buttonContainer);
 
+  // Set up time travel slider event handler
+  const slider = container.querySelector('#turn-slider');
+  const turnDisplay = container.querySelector('#current-turn-display');
+
+  if (slider && turnDisplay) {
+    slider.addEventListener('input', (e) => {
+      const selectedTurn = parseInt((/** @type {HTMLInputElement} */ (e.target)).value);
+      turnDisplay.textContent = String(selectedTurn);
+
+      // Update opacity for tokens and cards based on selected turn
+      updateTimeTravelView(table, selectedTurn);
+
+      // Re-sort rows based on selected turn
+      resortTableRows(tbody, turnSortedPlayers[selectedTurn]);
+
+      // Update hand descriptions
+      updateHandDescriptions(tbody, selectedTurn);
+    });
+  }
+
   return container;
+}
+
+/**
+ * Update opacity of cards and tokens based on selected turn
+ * @param {HTMLElement} table - The end game table
+ * @param {number} selectedTurn - Selected turn (1-4)
+ */
+function updateTimeTravelView(table, selectedTurn) {
+  // Update token cells
+  const tokenCells = table.querySelectorAll('.token-cell[data-turn]');
+  tokenCells.forEach((cell) => {
+    const htmlCell = /** @type {HTMLElement} */ (cell);
+    const cellTurn = parseInt(htmlCell.dataset.turn || '4');
+    if (cellTurn > selectedTurn) {
+      htmlCell.style.opacity = '0.2';
+    } else {
+      htmlCell.style.opacity = '1';
+    }
+  });
+
+  // Update community cards
+  const cards = table.querySelectorAll('.mini-card[data-turn]');
+  cards.forEach((card) => {
+    const htmlCard = /** @type {HTMLElement} */ (card);
+    const cardTurn = parseInt(htmlCard.dataset.turn || '4');
+    if (cardTurn > selectedTurn) {
+      htmlCard.style.opacity = '0.2';
+    } else {
+      htmlCard.style.opacity = '1';
+    }
+  });
+}
+
+/**
+ * Re-sort table rows based on selected turn rankings
+ * @param {HTMLElement} tbody - Table body element
+ * @param {any[]} sortedPlayers - Sorted players for the selected turn
+ */
+function resortTableRows(tbody, sortedPlayers) {
+  // Get all rows as array
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+
+  // Create a map of playerId to desired position
+  /** @type {Object.<string, number>} */
+  const positionMap = {};
+  sortedPlayers.forEach((player, index) => {
+    positionMap[player.id] = index;
+  });
+
+  // Sort rows by desired position
+  rows.sort((a, b) => {
+    const aId = (/** @type {HTMLElement} */ (a)).dataset.playerId || '';
+    const bId = (/** @type {HTMLElement} */ (b)).dataset.playerId || '';
+    return positionMap[aId] - positionMap[bId];
+  });
+
+  // Re-append rows in sorted order (this triggers the CSS transition)
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+/**
+ * Update hand descriptions for selected turn
+ * @param {HTMLElement} tbody - Table body element
+ * @param {number} selectedTurn - Selected turn (1-4)
+ */
+function updateHandDescriptions(tbody, selectedTurn) {
+  const handCells = tbody.querySelectorAll('.hand-cell');
+  handCells.forEach((cell) => {
+    const htmlCell = /** @type {HTMLElement} */ (cell);
+    const desc = htmlCell.dataset[`turn${selectedTurn}Desc`];
+    if (desc) {
+      htmlCell.textContent = desc;
+    }
+  });
 }
 
 /**
@@ -327,7 +480,7 @@ export function addEndGameStyles() {
     }
 
     .end-game-table tbody tr {
-      transition: background 0.3s;
+      transition: all 0.1s ease;
     }
 
     .end-game-table tbody tr:hover {
@@ -472,6 +625,103 @@ export function addEndGameStyles() {
 
     .next-game-btn:active {
       transform: translateY(0);
+    }
+
+    /* === Time Travel Slider === */
+    .time-travel-slider-container {
+      margin: 20px 0 30px 0;
+      padding: 20px;
+      background: rgba(52, 73, 94, 0.3);
+      border-radius: 12px;
+    }
+
+    .slider-label {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: #ecf0f1;
+      margin-bottom: 20px;
+    }
+
+    #current-turn-display {
+      color: #3498db;
+      font-weight: bold;
+    }
+
+    .slider-wrapper {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .turn-slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: #34495e;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .turn-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #3498db;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    .turn-slider::-webkit-slider-thumb:hover {
+      background: #2980b9;
+      transform: scale(1.1);
+    }
+
+    .turn-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #3498db;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: all 0.2s;
+    }
+
+    .turn-slider::-moz-range-thumb:hover {
+      background: #2980b9;
+      transform: scale(1.1);
+    }
+
+    .slider-markers {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding: 0 12px;
+    }
+
+    .slider-marker {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #34495e;
+      color: #ecf0f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      border: 2px solid #2c3e50;
+    }
+
+    /* === Token and Card Transitions === */
+    .token-cell, .mini-card {
+      transition: opacity 0.2s ease;
     }
   `;
 
