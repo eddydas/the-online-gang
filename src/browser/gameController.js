@@ -11,7 +11,7 @@ import { createTokenElement } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
-import { evaluateHand } from './poker.js';
+import { evaluateHand, evaluatePokerHand } from './poker.js';
 import { getNextAvailableColor } from './avatarManager.js';
 import { cardsEqual } from './deck.js';
 
@@ -559,8 +559,9 @@ export class GameController {
       const allCards = [...currentPlayer.holeCards, ...this.gameState.communityCards];
       let handResult = null;
 
-      if (allCards.length === 7) {
-        handResult = evaluateHand(allCards);
+      // Evaluate hand if we have at least 2 cards
+      if (allCards.length >= 2) {
+        handResult = evaluatePokerHand(allCards);
       }
 
       // Clear and rebuild container
@@ -618,8 +619,10 @@ export class GameController {
 
       if (currentPlayer && currentPlayer.holeCards && currentPlayer.holeCards.length > 0) {
         const allCards = [...currentPlayer.holeCards, ...this.gameState.communityCards];
-        if (allCards.length === 7) {
-          handResult = evaluateHand(allCards);
+
+        // Evaluate hand if we have at least 2 cards
+        if (allCards.length >= 2) {
+          handResult = evaluatePokerHand(allCards);
         }
       }
 

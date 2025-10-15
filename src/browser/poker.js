@@ -109,6 +109,19 @@ function evaluateHand(cards) {
     throw new Error('evaluateHand requires exactly 7 cards');
   }
 
+  return evaluatePokerHand(cards);
+}
+
+/**
+ * Evaluates a poker hand from any number of cards (2-7)
+ * @param {Card[]} cards - Array of 2-7 cards
+ * @returns {HandResult} Evaluation result
+ */
+function evaluatePokerHand(cards) {
+  if (cards.length < 2 || cards.length > 7) {
+    throw new Error('evaluatePokerHand requires 2-7 cards');
+  }
+
   const sortedCards = [...cards].sort((a, b) =>
     getRankValue(b.rank) - getRankValue(a.rank)
   );
@@ -307,7 +320,7 @@ function evaluateHand(cards) {
   }
 
   // High Card
-  const bestFive = sortedCards.slice(0, 5);
+  const bestFive = sortedCards.slice(0, Math.min(cards.length, 5));
   const tiebreakers = bestFive.map(c => getRankValue(c.rank));
   return {
     rank: 1,
@@ -346,5 +359,6 @@ function compareHands(hand1, hand2) {
 
 export {
   evaluateHand,
+  evaluatePokerHand,
   compareHands
 };
