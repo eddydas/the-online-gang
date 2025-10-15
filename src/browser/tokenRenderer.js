@@ -149,11 +149,6 @@ export function createTokenElement(token, turn = 1, interactive = false) {
 
       <!-- Stars showing number -->
       ${stars}
-
-      <!-- Token number text (smaller, bottom) -->
-      <text x="50" y="94" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-weight="bold">
-        ${token.number}
-      </text>
     </svg>
   `;
 
