@@ -127,9 +127,9 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Check if in best five
-        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
-        if (isInBestFive) {
+        // Check if in primary cards (not kickers)
+        const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        if (isInPrimaryCards) {
           cardEl.classList.add('best-five');
         } else {
           cardEl.classList.add('not-used');
@@ -150,9 +150,9 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Check if in best five
-        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
-        if (isInBestFive) {
+        // Check if in primary cards (not kickers)
+        const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        if (isInPrimaryCards) {
           cardEl.classList.add('best-five');
         } else {
           cardEl.classList.add('not-used');

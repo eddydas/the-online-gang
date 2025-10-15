@@ -15,6 +15,7 @@ describe('Win/Loss Determination', () => {
             name: 'Pair',
             tiebreakers: [14, 13, 12, 11],
             bestFive: [],
+            primaryCards: [],
             description: 'Pair of Aces'
           },
           currentToken: 1
@@ -27,6 +28,7 @@ describe('Win/Loss Determination', () => {
             name: 'Two Pair',
             tiebreakers: [13, 12, 11],
             bestFive: [],
+            primaryCards: [],
             description: 'Two Pair, Kings and Queens'
           },
           currentToken: 2
@@ -39,6 +41,7 @@ describe('Win/Loss Determination', () => {
             name: 'High Card',
             tiebreakers: [14, 13, 12, 11, 10],
             bestFive: [],
+            primaryCards: [],
             description: 'High Card, Ace'
           },
           currentToken: 3
@@ -57,13 +60,13 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' }, // A-A-K-Q-J
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' }, // A-A-K-Q-J
           currentToken: 1
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 12, 11, 10], bestFive: [], description: 'Pair' }, // A-A-Q-J-10
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 12, 11, 10], bestFive: [], primaryCards: [], description: 'Pair' }, // A-A-Q-J-10
           currentToken: 2
         }
       ];
@@ -79,13 +82,13 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3
         }
       ];
@@ -103,19 +106,19 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], description: 'Two Pair' },
+          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], primaryCards: [], description: 'Two Pair' },
           currentToken: 3 // Strongest, highest token
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1 // Weakest, lowest token
         }
       ];
@@ -131,19 +134,19 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], description: 'Two Pair' },
+          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], primaryCards: [], description: 'Two Pair' },
           currentToken: 1 // WRONG! Should be 3
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 3 // WRONG! Should be 1
         }
       ];
@@ -160,13 +163,13 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2 // Correct
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 2 // Wrong (duplicate)
         }
       ];
@@ -185,19 +188,19 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2 // Can be 2 or 3
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3 // Can be 2 or 3
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1
         }
       ];
@@ -215,19 +218,19 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3 // Swapped
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2 // Swapped
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1
         }
       ];
@@ -242,19 +245,19 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 1 // WRONG! Should be 2 or 3
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 2
         }
       ];
@@ -270,25 +273,25 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 4
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p4',
           name: 'Dave',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1
         }
       ];
@@ -307,25 +310,25 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], description: 'Two Pair' },
+          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], primaryCards: [], description: 'Two Pair' },
           currentToken: 4
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3 // Can be 2 or 3
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2 // Can be 2 or 3
         },
         {
           id: 'p4',
           name: 'Dave',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1
         }
       ];
@@ -342,19 +345,19 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], description: 'Two Pair' },
+          hand: { rank: 3, name: 'Two Pair', tiebreakers: [13, 12, 11], bestFive: [], primaryCards: [], description: 'Two Pair' },
           currentToken: 3
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p3',
           name: 'Carol',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1
         }
       ];
@@ -369,13 +372,13 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 3
         }
       ];
@@ -393,13 +396,13 @@ describe('Win/Loss Determination', () => {
         {
           id: 'p1',
           name: 'Alice',
-          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], description: 'Pair' },
+          hand: { rank: 2, name: 'Pair', tiebreakers: [14, 13, 12, 11], bestFive: [], primaryCards: [], description: 'Pair' },
           currentToken: 2
         },
         {
           id: 'p2',
           name: 'Bob',
-          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], description: 'High Card' },
+          hand: { rank: 1, name: 'High Card', tiebreakers: [14, 13, 12, 11, 10], bestFive: [], primaryCards: [], description: 'High Card' },
           currentToken: 1
         }
       ];
@@ -416,7 +419,7 @@ describe('Win/Loss Determination', () => {
         players.push({
           id: `p${i}`,
           name: `Player${i}`,
-          hand: { rank: i, name: 'Hand', tiebreakers: [i], bestFive: [], description: 'Hand' },
+          hand: { rank: i, name: 'Hand', tiebreakers: [i], bestFive: [], primaryCards: [], description: 'Hand' },
           currentToken: MAX_PLAYERS + 1 - i // Reverse order
         });
       }

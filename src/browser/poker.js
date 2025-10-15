@@ -9,6 +9,7 @@
  * @property {number} rank - Hand rank (1-10, higher is better)
  * @property {string} name - Hand name ("Pair", "Two Pair", etc.)
  * @property {Card[]} bestFive - Best 5 cards from 7 available
+ * @property {Card[]} primaryCards - Cards that form the hand (excluding kickers)
  * @property {number[]} tiebreakers - Kicker values for comparison
  * @property {string} description - Full hand description
  */
@@ -137,6 +138,7 @@ function evaluateHand(cards) {
             rank: 10,
             name: 'Royal Flush',
             bestFive: straightCards.slice(0, 5),
+            primaryCards: straightCards.slice(0, 5), // All 5 cards are primary
             tiebreakers: [14],
             description: 'Royal Flush'
           };
@@ -147,6 +149,7 @@ function evaluateHand(cards) {
         rank: 9,
         name: 'Straight Flush',
         bestFive: straightCards.slice(0, 5),
+        primaryCards: straightCards.slice(0, 5), // All 5 cards are primary
         tiebreakers: straightCards.slice(0, 5).map(c => getRankValue(c.rank)),
         description: `Straight Flush, ${RANK_NAMES[straightCards[0].rank]} high`
       };
@@ -177,6 +180,7 @@ function evaluateHand(cards) {
       rank: 8,
       name: 'Four of a Kind',
       bestFive,
+      primaryCards: groups[quadRank], // Only the quad
       tiebreakers: [getRankValue(quadRank), getRankValue(kicker.rank)],
       description: `Four ${RANK_NAMES[quadRank]}s`
     };
@@ -194,6 +198,7 @@ function evaluateHand(cards) {
       rank: 7,
       name: 'Full House',
       bestFive,
+      primaryCards: bestFive, // All 5 cards are primary (trip + pair)
       tiebreakers: [getRankValue(tripRank), getRankValue(pairRank)],
       description: `Full House, ${RANK_NAMES[tripRank]}s over ${RANK_NAMES[pairRank]}s`
     };
@@ -206,6 +211,7 @@ function evaluateHand(cards) {
       rank: 6,
       name: 'Flush',
       bestFive: flushCards.slice(0, 5),
+      primaryCards: flushCards.slice(0, 5), // All 5 cards are primary
       tiebreakers,
       description: `Flush, ${RANK_NAMES[flushCards[0].rank]} high`
     };
@@ -222,6 +228,7 @@ function evaluateHand(cards) {
       rank: 5,
       name: 'Straight',
       bestFive: straightCards.slice(0, 5),
+      primaryCards: straightCards.slice(0, 5), // All 5 cards are primary
       tiebreakers,
       description: `Straight, ${RANK_NAMES[straightCards[0].rank]} high`
     };
@@ -242,6 +249,7 @@ function evaluateHand(cards) {
       rank: 4,
       name: 'Three of a Kind',
       bestFive,
+      primaryCards: groups[tripRank], // Only the trip
       tiebreakers: [
         getRankValue(tripRank),
         getRankValue(kickers[0].rank),
@@ -268,6 +276,7 @@ function evaluateHand(cards) {
       rank: 3,
       name: 'Two Pair',
       bestFive,
+      primaryCards: [...groups[pair1Rank], ...groups[pair2Rank]], // Both pairs
       tiebreakers: [
         getRankValue(pair1Rank),
         getRankValue(pair2Rank),
@@ -293,6 +302,7 @@ function evaluateHand(cards) {
       rank: 2,
       name: 'Pair',
       bestFive,
+      primaryCards: groups[pairRank], // Only the pair
       tiebreakers: [
         getRankValue(pairRank),
         getRankValue(kickers[0].rank),
@@ -310,6 +320,7 @@ function evaluateHand(cards) {
     rank: 1,
     name: 'High Card',
     bestFive,
+    primaryCards: [bestFive[0]], // Only the high card
     tiebreakers,
     description: `High Card, ${RANK_NAMES[bestFive[0].rank]}`
   };
