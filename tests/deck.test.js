@@ -1,7 +1,33 @@
-import { createDeck, shuffleDeck, randomizeCardBackColor, dealHoleCards, dealCommunityCards, RANKS, SUITS } from '../src/browser/deck.js';
+import { createDeck, shuffleDeck, randomizeCardBackColor, dealHoleCards, dealCommunityCards, cardsEqual, RANKS, SUITS } from '../src/browser/deck.js';
 import { MIN_PLAYERS, MAX_PLAYERS } from '../src/browser/constants.js';
 
 describe('Deck Module', () => {
+
+  describe('cardsEqual', () => {
+    test('should return true for identical cards', () => {
+      const card1 = { rank: 'A', suit: '♠' };
+      const card2 = { rank: 'A', suit: '♠' };
+      expect(cardsEqual(card1, card2)).toBe(true);
+    });
+
+    test('should return false for cards with different ranks', () => {
+      const card1 = { rank: 'A', suit: '♠' };
+      const card2 = { rank: 'K', suit: '♠' };
+      expect(cardsEqual(card1, card2)).toBe(false);
+    });
+
+    test('should return false for cards with different suits', () => {
+      const card1 = { rank: 'A', suit: '♠' };
+      const card2 = { rank: 'A', suit: '♥' };
+      expect(cardsEqual(card1, card2)).toBe(false);
+    });
+
+    test('should return false for cards with different rank and suit', () => {
+      const card1 = { rank: 'A', suit: '♠' };
+      const card2 = { rank: 'K', suit: '♥' };
+      expect(cardsEqual(card1, card2)).toBe(false);
+    });
+  });
 
   describe('createDeck', () => {
     test('should create a deck with 52 cards', () => {

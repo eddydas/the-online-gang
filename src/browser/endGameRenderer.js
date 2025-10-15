@@ -7,6 +7,7 @@
 import { createCardElement } from './cardRenderer.js';
 import { createTokenElement } from './tokenRenderer.js';
 import { createAvatarElement } from './avatarManager.js';
+import { cardsEqual } from './deck.js';
 
 /**
  * @typedef {import('./deck.js').Card} Card
@@ -128,9 +129,9 @@ export function createEndGameTable(winLossResult, gameState) {
         cardEl.classList.add('mini-card');
 
         // Check if in bestFive (used for ranking)
-        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => cardsEqual(c, card));
         // Check if in primaryCards (highlight with yellow)
-        const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => cardsEqual(c, card));
 
         if (isInPrimaryCards) {
           cardEl.classList.add('best-five'); // Yellow highlight
@@ -155,9 +156,9 @@ export function createEndGameTable(winLossResult, gameState) {
         cardEl.classList.add('mini-card');
 
         // Check if in bestFive (used for ranking)
-        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => cardsEqual(c, card));
         // Check if in primaryCards (highlight with yellow)
-        const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => cardsEqual(c, card));
 
         if (isInPrimaryCards) {
           cardEl.classList.add('best-five'); // Yellow highlight

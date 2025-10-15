@@ -102,6 +102,16 @@ function dealHoleCards(deck, playerCount) {
 }
 
 /**
+ * Checks if two cards are equal (same rank and suit)
+ * @param {Card} card1 - First card
+ * @param {Card} card2 - Second card
+ * @returns {boolean} True if cards have same rank and suit
+ */
+function cardsEqual(card1, card2) {
+  return card1.rank === card2.rank && card1.suit === card2.suit;
+}
+
+/**
  * @typedef {Object} DealCommunityCardsResult
  * @property {Card[]} communityCards - Community cards dealt this turn
  * @property {Card[]} remainingDeck - Deck after dealing
@@ -156,5 +166,6 @@ export {
   shuffleDeck,
   randomizeCardBackColor,
   dealHoleCards,
-  dealCommunityCards
+  dealCommunityCards,
+  cardsEqual
 };
