@@ -625,17 +625,17 @@ export function addEndGameStyles() {
       font-size: 8px;
       padding: 1px;
       flex-shrink: 0;
-      border: 2px solid transparent;
-      box-sizing: border-box;
+      outline: 2px solid transparent;
+      outline-offset: 0px;
     }
 
     .end-game-table .mini-card.best-five {
-      border-color: rgba(243, 156, 18, 1);
+      outline-color: rgba(243, 156, 18, 1);
       box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
     }
 
     .end-game-table .mini-card.kicker {
-      border-color: rgba(149, 165, 166, 1);
+      outline-color: rgba(149, 165, 166, 1);
       box-shadow: 0 0 6px rgba(149, 165, 166, 0.8);
     }
 
