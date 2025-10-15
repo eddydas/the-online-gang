@@ -112,6 +112,8 @@ export function createEndGameTable(winLossResult, gameState) {
   const turnCorrectness = {};
   /** @type {Object.<number, any[]>} */
   const turnSortedPlayers = {};
+  /** @type {Object.<number, any>} */
+  const turnWinLossResults = {};
 
   for (let t = 1; t <= 4; t++) {
     turnCorrectness[t] = evaluateTurnCorrectness(gameState.players, gameState, t);
@@ -127,11 +129,16 @@ export function createEndGameTable(winLossResult, gameState) {
       return {
         id: p.id,
         name: p.name,
+        holeCards: p.holeCards,
+        currentToken: p.tokenHistory[t - 1],
+        tokenHistory: p.tokenHistory,
         hand
       };
     });
 
-    turnSortedPlayers[t] = determineWinLoss(playersWithHands).sortedPlayers;
+    const turnResult = determineWinLoss(playersWithHands);
+    turnSortedPlayers[t] = turnResult.sortedPlayers;
+    turnWinLossResults[t] = turnResult;
   }
 
   winLossResult.sortedPlayers.forEach((/** @type {any} */ player) => {
@@ -195,9 +202,14 @@ export function createEndGameTable(winLossResult, gameState) {
 
     // Add hole cards
     if (gamePlayer?.holeCards) {
-      gamePlayer.holeCards.forEach((/** @type {Card} */ card) => {
+      gamePlayer.holeCards.forEach((/** @type {Card} */ card, /** @type {number} */ holeIndex) => {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
+
+        // Add unique identifier for this card
+        cardEl.dataset.cardId = `${player.id}-hole-${holeIndex}`;
+        cardEl.dataset.cardRank = card.rank;
+        cardEl.dataset.cardSuit = card.suit;
 
         // Find which position this card is in bestFive (if any)
         const bestFiveIndex = player.hand?.bestFive?.findIndex((/** @type {Card} */ c) => cardsEqual(c, card));
@@ -231,6 +243,11 @@ export function createEndGameTable(winLossResult, gameState) {
       gameState.communityCards.forEach((/** @type {Card} */ card, /** @type {number} */ index) => {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
+
+        // Add unique identifier for this card
+        cardEl.dataset.cardId = `${player.id}-community-${index}`;
+        cardEl.dataset.cardRank = card.rank;
+        cardEl.dataset.cardSuit = card.suit;
 
         // Mark card with turn data for opacity control
         // Cards 0-2: Turn 2 (flop), Card 3: Turn 3 (turn), Card 4: Turn 4 (river)
@@ -316,6 +333,9 @@ export function createEndGameTable(winLossResult, gameState) {
       // Update opacity for tokens and cards based on selected turn
       updateTimeTravelView(table, selectedTurn);
 
+      // Update card highlighting based on selected turn
+      updateCardHighlighting(tbody, selectedTurn, turnWinLossResults[selectedTurn]);
+
       // Re-sort rows based on selected turn
       resortTableRows(tbody, turnSortedPlayers[selectedTurn]);
 
@@ -355,6 +375,76 @@ function updateTimeTravelView(table, selectedTurn) {
     } else {
       htmlCard.style.opacity = '1';
     }
+  });
+}
+
+/**
+ * Update card highlighting based on selected turn
+ * @param {HTMLElement} tbody - Table body element
+ * @param {number} selectedTurn - Selected turn (1-4)
+ * @param {any} turnResult - Win/loss result for this turn with hand evaluations
+ */
+function updateCardHighlighting(tbody, selectedTurn, turnResult) {
+  const rows = tbody.querySelectorAll('tr');
+
+  rows.forEach((row) => {
+    const htmlRow = /** @type {HTMLElement} */ (row);
+    const playerId = htmlRow.dataset.playerId;
+    if (!playerId) return;
+
+    // Find this player's data in turnResult
+    const player = turnResult.sortedPlayers.find((/** @type {any} */ p) => p.id === playerId);
+    if (!player) return;
+
+    // Get decisive kicker indices for this player at this turn
+    const decisiveKickerIndices = turnResult.decisiveKickers?.[playerId] || [];
+
+    // Find all cards for this player in the row
+    const cards = htmlRow.querySelectorAll('.mini-card');
+
+    cards.forEach((card) => {
+      const htmlCard = /** @type {HTMLElement} */ (card);
+      const cardRank = htmlCard.dataset.cardRank;
+      const cardSuit = htmlCard.dataset.cardSuit;
+
+      if (!cardRank || !cardSuit) return;
+
+      // Remove all existing highlighting classes
+      htmlCard.classList.remove('best-five', 'kicker', 'not-used');
+
+      // Check if this is a community card that hasn't been revealed yet at this turn
+      const cardTurn = parseInt(htmlCard.dataset.turn || '4');
+      if (cardTurn > selectedTurn) {
+        // This card hasn't been revealed yet at this turn, skip highlighting
+        return;
+      }
+
+      // Create card object for comparison
+      const currentCard = { rank: cardRank, suit: cardSuit };
+
+      // Find which position this card is in bestFive (if any)
+      const bestFiveIndex = player.hand?.bestFive?.findIndex((/** @type {any} */ c) =>
+        cardsEqual(c, currentCard)
+      );
+
+      // Check if in primaryCards (highlight with yellow)
+      const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {any} */ c) =>
+        cardsEqual(c, currentCard)
+      );
+
+      // Check if this card is a decisive kicker (gray highlight)
+      const isDecisiveKicker = bestFiveIndex !== undefined && bestFiveIndex >= 0 &&
+        decisiveKickerIndices.includes(bestFiveIndex);
+
+      if (isInPrimaryCards) {
+        htmlCard.classList.add('best-five'); // Yellow highlight
+      } else if (isDecisiveKicker) {
+        htmlCard.classList.add('kicker'); // Gray highlight (decisive kicker)
+      } else if (bestFiveIndex === -1) {
+        htmlCard.classList.add('not-used'); // Dim (not used in ranking)
+      }
+      // else: in bestFive but not primary/decisive - normal opacity, no highlight
+    });
   });
 }
 
