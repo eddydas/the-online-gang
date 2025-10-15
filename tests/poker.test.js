@@ -336,7 +336,7 @@ describe('Poker Hand Evaluation', () => {
 
       const result = evaluateHand(cards);
       expect(result.description).toContain('Pair');
-      expect(result.description).toContain('King');
+      expect(result.description).toContain('K');
     });
 
     test('should generate description for Full House', () => {
@@ -352,8 +352,8 @@ describe('Poker Hand Evaluation', () => {
 
       const result = evaluateHand(cards);
       expect(result.description).toContain('Full House');
-      expect(result.description).toContain('Queen');
-      expect(result.description).toContain('Eight'); // "Eights" not "8"
+      expect(result.description).toContain('Q');
+      expect(result.description).toContain('8');
     });
 
     test('should describe Ace-low straight as Five high', () => {
@@ -369,7 +369,7 @@ describe('Poker Hand Evaluation', () => {
 
       const result = evaluateHand(cards);
       expect(result.rank).toBe(5);
-      expect(result.description).toContain('Five');
+      expect(result.description).toContain('5');
     });
   });
 

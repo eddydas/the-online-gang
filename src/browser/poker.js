@@ -20,13 +20,6 @@ const RANK_VALUES = {
   '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14
 };
 
-/** @type {Record<string, string>} */
-const RANK_NAMES = {
-  '2': 'Two', '3': 'Three', '4': 'Four', '5': 'Five', '6': 'Six',
-  '7': 'Seven', '8': 'Eight', '9': 'Nine', '10': 'Ten',
-  'J': 'Jack', 'Q': 'Queen', 'K': 'King', 'A': 'Ace'
-};
-
 /**
  * Gets numeric value for a rank
  * @param {string} rank - Card rank
@@ -151,7 +144,7 @@ function evaluateHand(cards) {
         bestFive: straightCards.slice(0, 5),
         primaryCards: straightCards.slice(0, 5), // All 5 cards are primary
         tiebreakers: straightCards.slice(0, 5).map(c => getRankValue(c.rank)),
-        description: `Straight Flush, ${RANK_NAMES[straightCards[0].rank]} high`
+        description: `Straight Flush, ${straightCards[0].rank} high`
       };
     }
   }
@@ -182,7 +175,7 @@ function evaluateHand(cards) {
       bestFive,
       primaryCards: groups[quadRank], // Only the quad
       tiebreakers: [getRankValue(quadRank), getRankValue(kicker.rank)],
-      description: `Four ${RANK_NAMES[quadRank]}s`
+      description: `Four ${quadRank}`
     };
   }
 
@@ -200,7 +193,7 @@ function evaluateHand(cards) {
       bestFive,
       primaryCards: bestFive, // All 5 cards are primary (trip + pair)
       tiebreakers: [getRankValue(tripRank), getRankValue(pairRank)],
-      description: `Full House, ${RANK_NAMES[tripRank]}s over ${RANK_NAMES[pairRank]}s`
+      description: `Full House, ${tripRank} over ${pairRank}`
     };
   }
 
@@ -213,7 +206,7 @@ function evaluateHand(cards) {
       bestFive: flushCards.slice(0, 5),
       primaryCards: flushCards.slice(0, 5), // All 5 cards are primary
       tiebreakers,
-      description: `Flush, ${RANK_NAMES[flushCards[0].rank]} high`
+      description: `Flush, ${flushCards[0].rank} high`
     };
   }
 
@@ -230,7 +223,7 @@ function evaluateHand(cards) {
       bestFive: straightCards.slice(0, 5),
       primaryCards: straightCards.slice(0, 5), // All 5 cards are primary
       tiebreakers,
-      description: `Straight, ${RANK_NAMES[straightCards[0].rank]} high`
+      description: `Straight, ${straightCards[0].rank} high`
     };
   }
 
@@ -255,7 +248,7 @@ function evaluateHand(cards) {
         getRankValue(kickers[0].rank),
         getRankValue(kickers[1].rank)
       ],
-      description: `Three ${RANK_NAMES[tripRank]}s`
+      description: `Three ${tripRank}`
     };
   }
 
@@ -282,7 +275,7 @@ function evaluateHand(cards) {
         getRankValue(pair2Rank),
         getRankValue(kicker.rank)
       ],
-      description: `Two Pair, ${RANK_NAMES[pair1Rank]}s and ${RANK_NAMES[pair2Rank]}s`
+      description: `Two Pair, ${pair1Rank} and ${pair2Rank}`
     };
   }
 
@@ -309,7 +302,7 @@ function evaluateHand(cards) {
         getRankValue(kickers[1].rank),
         getRankValue(kickers[2].rank)
       ],
-      description: `Pair of ${RANK_NAMES[pairRank]}s`
+      description: `Pair of ${pairRank}`
     };
   }
 
@@ -322,7 +315,7 @@ function evaluateHand(cards) {
     bestFive,
     primaryCards: [bestFive[0]], // Only the high card
     tiebreakers,
-    description: `High Card, ${RANK_NAMES[bestFive[0].rank]}`
+    description: `High Card, ${bestFive[0].rank}`
   };
 }
 
