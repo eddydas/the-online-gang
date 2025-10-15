@@ -603,6 +603,8 @@ export function addEndGameStyles() {
 
     .cards-cell {
       padding: 8px 4px;
+      width: 1%;
+      white-space: nowrap;
     }
 
     .cards-container {
