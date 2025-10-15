@@ -585,7 +585,7 @@ export function addEndGameStyles() {
       color: #ecf0f1;
     }
 
-    .token-cell {
+    .end-game-table .token-cell {
       text-align: center;
       padding: 8px 0;
       width: 50px;
