@@ -784,6 +784,27 @@ export function addEndGameStyles() {
       border: 2px solid #2c3e50;
     }
 
+    /* Turn-specific marker colors */
+    .slider-marker:nth-child(1) {
+      background: #ffffff;
+      color: #2c3e50;
+    }
+
+    .slider-marker:nth-child(2) {
+      background: #f1c40f;
+      color: #2c3e50;
+    }
+
+    .slider-marker:nth-child(3) {
+      background: #e67e22;
+      color: #ffffff;
+    }
+
+    .slider-marker:nth-child(4) {
+      background: #e74c3c;
+      color: #ffffff;
+    }
+
     /* === Token and Card Transitions === */
     .token-cell, .mini-card {
       transition: opacity 0.2s ease;
