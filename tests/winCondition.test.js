@@ -779,6 +779,178 @@ describe('Win/Loss Determination', () => {
       // p4 differs from p3 at index 1 (8 vs 9)
       expect(result.decisiveKickers['p4']).toEqual([1]);
     });
+
+    test('should not mark kickers as decisive when primary hand strength differs (Pair of 10s vs Pair of 3s)', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [10, 6, 5, 3], // 10-10-6-5-Q
+            bestFive: [
+              { rank: '10', suit: '♥' },
+              { rank: '10', suit: '♠' },
+              { rank: '6', suit: '♥' },
+              { rank: '5', suit: '♦' },
+              { rank: 'Q', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: '10', suit: '♥' },
+              { rank: '10', suit: '♠' }
+            ], // The pair of 10s
+            description: 'Pair of 10s'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [3, 10, 5, 2], // 3-3-10-5-Q
+            bestFive: [
+              { rank: '3', suit: '♦' },
+              { rank: '3', suit: '♣' },
+              { rank: '10', suit: '♠' },
+              { rank: '5', suit: '♦' },
+              { rank: 'Q', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: '3', suit: '♦' },
+              { rank: '3', suit: '♣' }
+            ], // The pair of 3s
+            description: 'Pair of 3s'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // No decisive kickers because the pair values differ (10 vs 3)
+      // The first tiebreaker (10 vs 3) is decisive, not the kickers
+      expect(result.decisiveKickers['p1']).toEqual([]);
+      expect(result.decisiveKickers['p2']).toEqual([]);
+    });
+
+    test('should not mark kickers as decisive when primary hand strength differs (Two Pair A-K vs Two Pair A-Q)', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 3,
+            name: 'Two Pair',
+            tiebreakers: [14, 13, 10], // A-A-K-K-10
+            bestFive: [
+              { rank: 'A', suit: '♠' },
+              { rank: 'A', suit: '♥' },
+              { rank: 'K', suit: '♦' },
+              { rank: 'K', suit: '♣' },
+              { rank: '10', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: 'A', suit: '♠' },
+              { rank: 'A', suit: '♥' },
+              { rank: 'K', suit: '♦' },
+              { rank: 'K', suit: '♣' }
+            ], // Both pairs
+            description: 'Two Pair - Aces and Kings'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 3,
+            name: 'Two Pair',
+            tiebreakers: [14, 12, 10], // A-A-Q-Q-10
+            bestFive: [
+              { rank: 'A', suit: '♦' },
+              { rank: 'A', suit: '♣' },
+              { rank: 'Q', suit: '♥' },
+              { rank: 'Q', suit: '♠' },
+              { rank: '10', suit: '♥' }
+            ],
+            primaryCards: [
+              { rank: 'A', suit: '♦' },
+              { rank: 'A', suit: '♣' },
+              { rank: 'Q', suit: '♥' },
+              { rank: 'Q', suit: '♠' }
+            ], // Both pairs
+            description: 'Two Pair - Aces and Queens'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // No decisive kickers because the second pair differs (K-K vs Q-Q)
+      // The tiebreaker is the second pair rank, not the 10 kicker
+      expect(result.decisiveKickers['p1']).toEqual([]);
+      expect(result.decisiveKickers['p2']).toEqual([]);
+    });
+
+    test('should mark kickers as decisive only when pairs match but kickers differ (Pair of As)', () => {
+      const players = [
+        {
+          id: 'p1',
+          name: 'Alice',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [14, 13, 12, 11], // A-A-K-Q-J
+            bestFive: [
+              { rank: 'A', suit: '♠' },
+              { rank: 'A', suit: '♥' },
+              { rank: 'K', suit: '♦' },
+              { rank: 'Q', suit: '♣' },
+              { rank: 'J', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: 'A', suit: '♠' },
+              { rank: 'A', suit: '♥' }
+            ], // The pair
+            description: 'Pair of Aces'
+          },
+          currentToken: 2
+        },
+        {
+          id: 'p2',
+          name: 'Bob',
+          hand: {
+            rank: 2,
+            name: 'Pair',
+            tiebreakers: [14, 12, 11, 10], // A-A-Q-J-10
+            bestFive: [
+              { rank: 'A', suit: '♦' },
+              { rank: 'A', suit: '♣' },
+              { rank: 'Q', suit: '♥' },
+              { rank: 'J', suit: '♦' },
+              { rank: '10', suit: '♠' }
+            ],
+            primaryCards: [
+              { rank: 'A', suit: '♦' },
+              { rank: 'A', suit: '♣' }
+            ], // The pair
+            description: 'Pair of Aces'
+          },
+          currentToken: 1
+        }
+      ];
+
+      const result = determineWinLoss(players);
+
+      // Both have Pair of Aces (same first tiebreaker)
+      // The K vs Q at bestFive index 2 is the decisive kicker
+      expect(result.decisiveKickers['p1']).toEqual([2]);
+      expect(result.decisiveKickers['p2']).toEqual([2]);
+    });
   });
 
 });
