@@ -442,7 +442,13 @@ After the final turn (Turn 4) when all hole cards are revealed, a summary table 
     - Red highlight: Player had incorrect token for that turn
   - **Purpose:** Allows players to evaluate whether their token trading resulted in correct order for intermediate turns, not just the final turn
 - **Column 5:** All cards available to the player (2 hole cards + 5 community cards = 7 cards total)
-  - Yellow border highlights the best 5 cards used for hand strength evaluation
+  - **Primary Cards (Yellow Border):** Highlights the cards that form the hand (e.g., the pair in "Pair of Aces", or all 5 cards in a Flush)
+  - **Decisive Kicker Cards (Gray Border):** Highlights kicker cards that determined the outcome when comparing with other players
+    - Only highlights kickers that actually made a difference in hand rankings
+    - Example: High Card 7 (2-3-5-6-7 vs 2-4-5-6-7) highlights 3 vs 4, not 2/5/6
+    - Calculated by comparing each player with adjacent players (sorted by hand strength) to find which tiebreaker position broke the tie
+  - **Non-Decisive Kicker Cards (No Border):** Cards in best 5 that didn't determine outcome, shown at normal opacity
+  - **Unused Cards (50% Opacity):** The 2 cards not used in the best 5-card hand, dimmed to indicate they didn't contribute
   - Note: Best 5-card combination from the 7 available cards determines strength; remaining 2 cards are ignored
 - **Column 6:** Hand strength description
   - Examples: "Pair of Aces", "Straight to 8", "High Card J", "Two Pair - Kings and 3s", "Flush - Hearts", etc.
@@ -531,4 +537,30 @@ After the final turn (Turn 4) when all hole cards are revealed, a summary table 
   - At end of current game, all players see "Next Game" button
   - All players must click "Next Game" to proceed
   - New game starts with all players (including the new joiner) once everyone clicks "Next Game"
-  - Ready status resets for new game cycle
+
+## Development & Testing Tools
+
+### Quick Test Game (Development Feature)
+A "Quick Test Game" button is available in the lobby for rapid testing of the end game UI:
+
+**Purpose:**
+- Allows developers to quickly reach the end game screen without manually playing through 4 turns
+- Simplifies testing of end game table display, card highlighting, and win/loss determination
+
+**Functionality:**
+- **Location:** Appears in lobby next to "Start Game" button (host only)
+- **Visual Style:** Purple button to distinguish from regular game flow
+- **Automation:** Automatically executes all game phases:
+  1. Auto-ready all players for each turn (300ms delay, then 200ms between players)
+  2. Randomly assign tokens to all players (300ms delay, then 200ms between actions)
+  3. Auto-proceed all players to next turn (300ms delay, then 200ms between players)
+  4. Repeat for all 4 turns
+- **Timing:** Takes approximately 10 seconds to complete all 4 turns
+- **Visibility:** Delays are visible enough to see game progression without being tedious
+- **Result:** Reaches end game screen with valid game state showing actual poker hands and token selections
+
+**Use Cases:**
+- Testing end game table layout and responsive design
+- Verifying card highlighting logic (primary cards, decisive kickers, unused cards)
+- Testing win/loss determination with various hand combinations
+- Rapid iteration on UI polish without manual gameplay
