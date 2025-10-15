@@ -284,6 +284,126 @@ describe('Game State Machine', () => {
 
       expect(state.communityCards).toHaveLength(3); // Turn 2: flop (3 cards)
     });
+
+    test('should not have duplicate cards across all dealt cards', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state); // Turn 1
+
+      // Play through all 4 turns
+      for (let turn = 1; turn <= 4; turn++) {
+        state = setPlayerReady(state, 'p1', true);
+        state = setPlayerReady(state, 'p2', true);
+        state = advancePhase(state); // TOKEN_TRADING
+
+        // Assign all tokens
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p1',
+          tokenNumber: 1,
+          timestamp: Date.now()
+        });
+        state = handleTokenAction(state, {
+          type: 'select',
+          playerId: 'p2',
+          tokenNumber: 2,
+          timestamp: Date.now() + 1
+        });
+
+        state = advancePhase(state); // Advance from TOKEN_TRADING
+      }
+
+      // After all 4 turns, collect all dealt cards
+      const allDealtCards = [
+        ...state.players[0].holeCards || [],
+        ...state.players[1].holeCards || [],
+        ...state.communityCards
+      ];
+
+      // Verify no duplicates
+      const cardStrings = allDealtCards.map(c => `${c.rank}${c.suit}`);
+      const uniqueCards = new Set(cardStrings);
+
+      expect(uniqueCards.size).toBe(allDealtCards.length);
+      expect(allDealtCards).toHaveLength(9); // 2 + 2 hole cards + 5 community cards
+    });
+
+    test('should update deck state when dealing community cards across turns', () => {
+      const players = [{ id: 'p1', name: 'Alice' }, { id: 'p2', name: 'Bob' }];
+      let state = createInitialState(players);
+      state = startGame(state); // Turn 1
+
+      const deckAfterTurn1 = state.deck.length;
+
+      // Advance to turn 2
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
+      state = advancePhase(state); // Advance from TOKEN_TRADING (deals 3 cards)
+
+      const deckAfterTurn2 = state.deck.length;
+      expect(deckAfterTurn2).toBe(deckAfterTurn1 - 3); // 3 cards dealt for flop
+
+      // Advance to turn 3
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
+      state = advancePhase(state); // Advance from TOKEN_TRADING (deals 1 card)
+
+      const deckAfterTurn3 = state.deck.length;
+      expect(deckAfterTurn3).toBe(deckAfterTurn2 - 1); // 1 card dealt for turn
+
+      // Advance to turn 4
+      state = setPlayerReady(state, 'p1', true);
+      state = setPlayerReady(state, 'p2', true);
+      state = advancePhase(state); // TOKEN_TRADING
+
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p1',
+        tokenNumber: 1,
+        timestamp: Date.now()
+      });
+      state = handleTokenAction(state, {
+        type: 'select',
+        playerId: 'p2',
+        tokenNumber: 2,
+        timestamp: Date.now() + 1
+      });
+
+      state = advancePhase(state); // Advance from TOKEN_TRADING (deals 1 card)
+
+      const deckAfterTurn4 = state.deck.length;
+      expect(deckAfterTurn4).toBe(deckAfterTurn3 - 1); // 1 card dealt for river
+    });
   });
 
   describe('Token System', () => {
