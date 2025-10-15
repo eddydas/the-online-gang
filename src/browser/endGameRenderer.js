@@ -602,7 +602,7 @@ export function addEndGameStyles() {
     }
 
     .cards-cell {
-      padding: 8px 4px;
+      padding: 8px 12px;
       width: 1%;
       white-space: nowrap;
     }
