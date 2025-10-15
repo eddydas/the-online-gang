@@ -271,10 +271,11 @@ export class GameController {
     if (!this.isHost) return;
     if (!canStartGame(this.lobbyState)) return;
 
-    // Create players array from lobby state
+    // Create players array from lobby state with avatar colors
     const players = this.lobbyState.map(p => ({
       id: p.id,
-      name: p.name
+      name: p.name,
+      avatarColor: p.avatarColor
     }));
 
     // Initialize game state and start

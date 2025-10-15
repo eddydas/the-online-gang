@@ -79,7 +79,7 @@ export function createEndGameTable(winLossResult, gameState) {
     const avatarCell = document.createElement('td');
     avatarCell.className = 'avatar-cell';
 
-    const avatar = createAvatarElement(player, 'small');
+    const avatar = createAvatarElement(gamePlayer || player, 'small');
     avatarCell.appendChild(avatar);
 
     row.appendChild(avatarCell);
@@ -312,16 +312,12 @@ export function addEndGameStyles() {
       margin: 0 auto;
     }
 
-    .correct-token {
-      padding: 4px;
-      border-radius: 50%;
-      background: rgba(46, 204, 113, 0.3);
+    .token-cell.correct-token {
+      background: rgba(46, 204, 113, 0.2);
     }
 
-    .incorrect-token {
-      padding: 4px;
-      border-radius: 50%;
-      background: rgba(231, 76, 60, 0.3);
+    .token-cell.incorrect-token {
+      background: rgba(231, 76, 60, 0.2);
     }
 
     .cards-cell {

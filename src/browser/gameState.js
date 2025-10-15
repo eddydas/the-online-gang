@@ -24,6 +24,7 @@ import {  MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS  } from "./constants.js";
  * @typedef {Object} Player
  * @property {string} id - Player ID
  * @property {string} name - Player name
+ * @property {string} [avatarColor] - Avatar background color (hex code)
  * @property {Card[]} [holeCards] - Player's hole cards (2 cards)
  * @property {(number|null)[]} [tokenHistory] - Token numbers for each turn [turn1, turn2, turn3, turn4]
  */
@@ -53,7 +54,11 @@ function createInitialState(players) {
   return {
     phase: 'LOBBY',
     turn: 0,
-    players: players.map(p => ({ id: p.id, name: p.name })),
+    players: players.map(p => ({
+      id: p.id,
+      name: p.name,
+      avatarColor: p.avatarColor
+    })),
     deck: createDeck(),
     communityCards: [],
     tokens: [],
@@ -314,7 +319,11 @@ function resetForNextGame(state) {
   }
 
   // Keep original players (without hole cards)
-  const players = state.players.map(p => ({ id: p.id, name: p.name }));
+  const players = state.players.map(p => ({
+    id: p.id,
+    name: p.name,
+    avatarColor: p.avatarColor
+  }));
 
   // Create new game state but keep players
   const newState = createInitialState(players);
