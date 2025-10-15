@@ -167,7 +167,7 @@ function advancePhase(state) {
       // Advance turn or end game directly from TOKEN_TRADING
       if (state.turn < TOTAL_TURNS) {
         // Deal community cards for next turn
-        const { communityCards } = dealCommunityCards(state.deck, state.turn + 1);
+        const { communityCards, remainingDeck } = dealCommunityCards(state.deck, state.turn + 1);
         const allCommunityCards = [...state.communityCards, ...communityCards];
 
         // Reset ready status for new turn
@@ -185,6 +185,7 @@ function advancePhase(state) {
           players: playersWithHistory,
           phase: 'READY_UP',
           turn: state.turn + 1,
+          deck: remainingDeck,
           communityCards: allCommunityCards,
           readyStatus,
           tokens: resetTokensState
@@ -210,7 +211,7 @@ function advancePhase(state) {
       // Advance turn or end game
       if (state.turn < TOTAL_TURNS) {
         // Deal community cards for next turn
-        const { communityCards } = dealCommunityCards(state.deck, state.turn + 1);
+        const { communityCards, remainingDeck } = dealCommunityCards(state.deck, state.turn + 1);
         const allCommunityCards = [...state.communityCards, ...communityCards];
 
         // Reset ready status for new turn
@@ -227,6 +228,7 @@ function advancePhase(state) {
           ...state,
           phase: 'READY_UP',
           turn: state.turn + 1,
+          deck: remainingDeck,
           communityCards: allCommunityCards,
           readyStatus,
           tokens: resetTokensState
