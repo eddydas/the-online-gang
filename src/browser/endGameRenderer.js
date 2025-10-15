@@ -59,6 +59,9 @@ export function createEndGameTable(winLossResult, gameState) {
     const gamePlayer = gameState.players.find((/** @type {any} */ p) => p.id === player.id);
     const isCorrect = winLossResult.correctness[player.id];
 
+    // Get decisive kicker indices for this player
+    const decisiveKickerIndices = winLossResult.decisiveKickers?.[player.id] || [];
+
     row.className = isCorrect ? 'correct-row' : 'incorrect-row';
 
     // Player avatar column (no name)
@@ -113,18 +116,23 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Check if in bestFive (used for ranking)
-        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => cardsEqual(c, card));
+        // Find which position this card is in bestFive (if any)
+        const bestFiveIndex = player.hand?.bestFive?.findIndex((/** @type {Card} */ c) => cardsEqual(c, card));
+
         // Check if in primaryCards (highlight with yellow)
         const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => cardsEqual(c, card));
 
+        // Check if this card is a decisive kicker (gray highlight)
+        const isDecisiveKicker = bestFiveIndex !== undefined && bestFiveIndex >= 0 && decisiveKickerIndices.includes(bestFiveIndex);
+
         if (isInPrimaryCards) {
           cardEl.classList.add('best-five'); // Yellow highlight
-        } else if (isInBestFive) {
-          cardEl.classList.add('kicker'); // Gray highlight (kicker card)
-        } else {
+        } else if (isDecisiveKicker) {
+          cardEl.classList.add('kicker'); // Gray highlight (decisive kicker)
+        } else if (bestFiveIndex === -1) {
           cardEl.classList.add('not-used'); // Dim (not used in ranking)
         }
+        // else: in bestFive but not primary/decisive - normal opacity, no highlight
 
         cardsContainer.appendChild(cardEl);
       });
@@ -141,18 +149,23 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Check if in bestFive (used for ranking)
-        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => cardsEqual(c, card));
+        // Find which position this card is in bestFive (if any)
+        const bestFiveIndex = player.hand?.bestFive?.findIndex((/** @type {Card} */ c) => cardsEqual(c, card));
+
         // Check if in primaryCards (highlight with yellow)
         const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => cardsEqual(c, card));
 
+        // Check if this card is a decisive kicker (gray highlight)
+        const isDecisiveKicker = bestFiveIndex !== undefined && bestFiveIndex >= 0 && decisiveKickerIndices.includes(bestFiveIndex);
+
         if (isInPrimaryCards) {
           cardEl.classList.add('best-five'); // Yellow highlight
-        } else if (isInBestFive) {
-          cardEl.classList.add('kicker'); // Gray highlight (kicker card)
-        } else {
+        } else if (isDecisiveKicker) {
+          cardEl.classList.add('kicker'); // Gray highlight (decisive kicker)
+        } else if (bestFiveIndex === -1) {
           cardEl.classList.add('not-used'); // Dim (not used in ranking)
         }
+        // else: in bestFive but not primary/decisive - normal opacity, no highlight
 
         cardsContainer.appendChild(cardEl);
       });

@@ -24,6 +24,7 @@
  * @property {PlayerWithHand[]} sortedPlayers - Players sorted by hand strength
  * @property {Object.<string, boolean>} correctness - Map of playerId to isCorrect
  * @property {number[]} expectedTokens - Expected token order
+ * @property {Object.<string, number[]>} decisiveKickers - Map of playerId to array of decisive kicker indices (which tiebreaker positions mattered)
  */
 
 /**
@@ -91,6 +92,75 @@ function groupPlayersByTies(sortedPlayers) {
 }
 
 /**
+ * Finds which tiebreaker index made the difference between two players with same rank
+ * @param {PlayerWithHand} p1 - First player
+ * @param {PlayerWithHand} p2 - Second player
+ * @returns {number | null} Index of tiebreaker that made difference, or null if tied/different rank
+ */
+function findDecisiveTiebreakerIndex(p1, p2) {
+  // Different rank - no tiebreaker comparison
+  if (p1.hand.rank !== p2.hand.rank) {
+    return null;
+  }
+
+  // Compare tiebreakers to find first difference
+  const len = Math.max(p1.hand.tiebreakers.length, p2.hand.tiebreakers.length);
+  for (let i = 0; i < len; i++) {
+    const val1 = p1.hand.tiebreakers[i] || 0;
+    const val2 = p2.hand.tiebreakers[i] || 0;
+    if (val1 !== val2) {
+      return i; // This tiebreaker made the difference
+    }
+  }
+
+  // Identical hands
+  return null;
+}
+
+/**
+ * Calculates which kicker positions were decisive for each player
+ * @param {PlayerWithHand[]} sortedPlayers - Players sorted by hand strength
+ * @returns {Object.<string, number[]>} Map of playerId to array of decisive tiebreaker indices
+ */
+function calculateDecisiveKickers(sortedPlayers) {
+  /** @type {Object.<string, number[]>} */
+  const decisiveKickers = {};
+
+  // Initialize all players with empty arrays
+  for (const player of sortedPlayers) {
+    decisiveKickers[player.id] = [];
+  }
+
+  // For each player, compare with adjacent players (before and after)
+  for (let i = 0; i < sortedPlayers.length; i++) {
+    const currentPlayer = sortedPlayers[i];
+    const decisiveIndices = new Set();
+
+    // Compare with previous player (if exists)
+    if (i > 0) {
+      const prevPlayer = sortedPlayers[i - 1];
+      const index = findDecisiveTiebreakerIndex(currentPlayer, prevPlayer);
+      if (index !== null) {
+        decisiveIndices.add(index);
+      }
+    }
+
+    // Compare with next player (if exists)
+    if (i < sortedPlayers.length - 1) {
+      const nextPlayer = sortedPlayers[i + 1];
+      const index = findDecisiveTiebreakerIndex(currentPlayer, nextPlayer);
+      if (index !== null) {
+        decisiveIndices.add(index);
+      }
+    }
+
+    decisiveKickers[currentPlayer.id] = Array.from(decisiveIndices).sort((a, b) => a - b);
+  }
+
+  return decisiveKickers;
+}
+
+/**
  * Determines win/loss based on token selections
  * @param {PlayerWithHand[]} players - All players with hands
  * @returns {WinLossResult} Win/loss determination
@@ -148,11 +218,15 @@ function determineWinLoss(players) {
     }
   }
 
+  // Calculate decisive kickers
+  const decisiveKickers = calculateDecisiveKickers(sortedPlayers);
+
   return {
     isWin: allCorrect,
     sortedPlayers,
     correctness,
-    expectedTokens
+    expectedTokens,
+    decisiveKickers
   };
 }
 
