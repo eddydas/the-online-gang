@@ -127,13 +127,21 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Highlight if in best five
-        if (player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit)) {
+        // Check if in best five
+        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        if (isInBestFive) {
           cardEl.classList.add('best-five');
+        } else {
+          cardEl.classList.add('not-used');
         }
 
         cardsContainer.appendChild(cardEl);
       });
+
+      // Add spacer between hole cards and community cards
+      const spacer = document.createElement('div');
+      spacer.className = 'card-spacer';
+      cardsContainer.appendChild(spacer);
     }
 
     // Add community cards
@@ -142,9 +150,12 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Highlight if in best five
-        if (player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit)) {
+        // Check if in best five
+        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        if (isInBestFive) {
           cardEl.classList.add('best-five');
+        } else {
+          cardEl.classList.add('not-used');
         }
 
         cardsContainer.appendChild(cardEl);
@@ -332,6 +343,12 @@ export function addEndGameStyles() {
       align-items: center;
     }
 
+    .card-spacer {
+      width: 8px;
+      height: 34px;
+      flex-shrink: 0;
+    }
+
     .end-game-table .mini-card {
       width: 24px;
       height: 34px;
@@ -342,6 +359,10 @@ export function addEndGameStyles() {
 
     .end-game-table .mini-card.best-five {
       box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
+    }
+
+    .end-game-table .mini-card.not-used {
+      opacity: 0.5;
     }
 
     .end-game-table .mini-card .card-rank {
