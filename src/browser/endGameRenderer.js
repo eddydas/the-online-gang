@@ -120,10 +120,11 @@ export function createEndGameTable(winLossResult, gameState) {
 
         if (isInPrimaryCards) {
           cardEl.classList.add('best-five'); // Yellow highlight
-        } else if (!isInBestFive) {
+        } else if (isInBestFive) {
+          cardEl.classList.add('kicker'); // Gray highlight (kicker card)
+        } else {
           cardEl.classList.add('not-used'); // Dim (not used in ranking)
         }
-        // else: in bestFive but not primary (kicker) - normal opacity, no highlight
 
         cardsContainer.appendChild(cardEl);
       });
@@ -147,10 +148,11 @@ export function createEndGameTable(winLossResult, gameState) {
 
         if (isInPrimaryCards) {
           cardEl.classList.add('best-five'); // Yellow highlight
-        } else if (!isInBestFive) {
+        } else if (isInBestFive) {
+          cardEl.classList.add('kicker'); // Gray highlight (kicker card)
+        } else {
           cardEl.classList.add('not-used'); // Dim (not used in ranking)
         }
-        // else: in bestFive but not primary (kicker) - normal opacity, no highlight
 
         cardsContainer.appendChild(cardEl);
       });
@@ -358,6 +360,10 @@ export function addEndGameStyles() {
 
     .end-game-table .mini-card.best-five {
       box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
+    }
+
+    .end-game-table .mini-card.kicker {
+      box-shadow: 0 0 6px rgba(149, 165, 166, 0.8);
     }
 
     .end-game-table .mini-card.not-used {
