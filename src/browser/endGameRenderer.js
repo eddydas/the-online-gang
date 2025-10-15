@@ -301,7 +301,7 @@ export function addEndGameStyles() {
     }
 
     .avatar-cell .player-avatar {
-      margin: 0;
+      margin: 0 auto;
     }
 
     .name-cell {
