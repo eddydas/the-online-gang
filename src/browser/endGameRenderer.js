@@ -633,14 +633,14 @@ export function addEndGameStyles() {
     }
 
     .end-game-table .mini-card.best-five {
-      outline-color: rgba(243, 156, 18, 1);
-      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
+      outline-color: #d4af37;
+      box-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
     }
 
     .end-game-table .mini-card.kicker {
-      outline-color: rgba(243, 156, 18, 1);
+      outline-color: #d4af37;
       outline-style: dashed;
-      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
+      box-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
     }
 
     .end-game-table .mini-card.not-used {
