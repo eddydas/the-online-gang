@@ -313,25 +313,15 @@ export function addEndGameStyles() {
     }
 
     .correct-token {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
+      padding: 4px;
       border-radius: 50%;
       background: rgba(46, 204, 113, 0.3);
-      margin: 0 auto;
     }
 
     .incorrect-token {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
+      padding: 4px;
       border-radius: 50%;
       background: rgba(231, 76, 60, 0.3);
-      margin: 0 auto;
     }
 
     .cards-cell {
@@ -347,24 +337,24 @@ export function addEndGameStyles() {
     }
 
     .mini-card {
-      width: 24px;
-      height: 34px;
+      width: 24px !important;
+      height: 34px !important;
       font-size: 8px;
-      padding: 1px;
+      padding: 1px !important;
       flex-shrink: 0;
     }
 
     .mini-card.best-five {
-      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
+      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8) !important;
     }
 
     .mini-card .card-rank {
-      font-size: 9px;
-      margin-bottom: 1px;
+      font-size: 9px !important;
+      margin-bottom: 1px !important;
     }
 
     .mini-card .card-suit.large {
-      font-size: 14px;
+      font-size: 14px !important;
     }
 
     .hand-cell {
