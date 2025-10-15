@@ -336,25 +336,25 @@ export function addEndGameStyles() {
       align-items: center;
     }
 
-    .mini-card {
-      width: 24px !important;
-      height: 34px !important;
+    .end-game-table .mini-card {
+      width: 24px;
+      height: 34px;
       font-size: 8px;
-      padding: 1px !important;
+      padding: 1px;
       flex-shrink: 0;
     }
 
-    .mini-card.best-five {
-      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8) !important;
+    .end-game-table .mini-card.best-five {
+      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
     }
 
-    .mini-card .card-rank {
-      font-size: 9px !important;
-      margin-bottom: 1px !important;
+    .end-game-table .mini-card .card-rank {
+      font-size: 9px;
+      margin-bottom: 1px;
     }
 
-    .mini-card .card-suit.large {
-      font-size: 14px !important;
+    .end-game-table .mini-card .card-suit.large {
+      font-size: 14px;
     }
 
     .hand-cell {
