@@ -326,6 +326,9 @@ export function createEndGameTable(winLossResult, gameState) {
   const turnDisplay = container.querySelector('#current-turn-display');
 
   if (slider && turnDisplay) {
+    // Apply initial highlighting for Turn 4 (default slider position)
+    updateCardHighlighting(tbody, 4, turnWinLossResults[4]);
+
     slider.addEventListener('input', (e) => {
       const selectedTurn = parseInt((/** @type {HTMLInputElement} */ (e.target)).value);
       turnDisplay.textContent = String(selectedTurn);
@@ -413,8 +416,10 @@ function updateCardHighlighting(tbody, selectedTurn, turnResult) {
       htmlCard.classList.remove('best-five', 'kicker', 'not-used');
 
       // Check if this is a community card that hasn't been revealed yet at this turn
-      const cardTurn = parseInt(htmlCard.dataset.turn || '4');
-      if (cardTurn > selectedTurn) {
+      const cardTurn = htmlCard.dataset.turn ? parseInt(htmlCard.dataset.turn) : null;
+
+      // If card has a turn (community card) and hasn't been revealed yet, skip highlighting
+      if (cardTurn !== null && cardTurn > selectedTurn) {
         // This card hasn't been revealed yet at this turn, skip highlighting
         return;
       }
