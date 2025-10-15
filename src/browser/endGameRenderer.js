@@ -339,9 +339,6 @@ export function createEndGameTable(winLossResult, gameState) {
       // Update card highlighting based on selected turn
       updateCardHighlighting(tbody, selectedTurn, turnWinLossResults[selectedTurn]);
 
-      // Re-sort rows based on selected turn
-      resortTableRows(tbody, turnSortedPlayers[selectedTurn]);
-
       // Update hand descriptions
       updateHandDescriptions(tbody, selectedTurn);
     });
@@ -451,33 +448,6 @@ function updateCardHighlighting(tbody, selectedTurn, turnResult) {
       // else: in bestFive but not primary/decisive - normal opacity, no highlight
     });
   });
-}
-
-/**
- * Re-sort table rows based on selected turn rankings
- * @param {HTMLElement} tbody - Table body element
- * @param {any[]} sortedPlayers - Sorted players for the selected turn
- */
-function resortTableRows(tbody, sortedPlayers) {
-  // Get all rows as array
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-
-  // Create a map of playerId to desired position
-  /** @type {Object.<string, number>} */
-  const positionMap = {};
-  sortedPlayers.forEach((player, index) => {
-    positionMap[player.id] = index;
-  });
-
-  // Sort rows by desired position
-  rows.sort((a, b) => {
-    const aId = (/** @type {HTMLElement} */ (a)).dataset.playerId || '';
-    const bId = (/** @type {HTMLElement} */ (b)).dataset.playerId || '';
-    return positionMap[aId] - positionMap[bId];
-  });
-
-  // Re-append rows in sorted order (this triggers the CSS transition)
-  rows.forEach(row => tbody.appendChild(row));
 }
 
 /**
