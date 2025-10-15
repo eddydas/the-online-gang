@@ -300,6 +300,10 @@ export function addEndGameStyles() {
       width: 50px;
     }
 
+    .avatar-cell .player-avatar {
+      margin: 0;
+    }
+
     .name-cell {
       font-weight: bold;
       font-size: 18px;
