@@ -6,13 +6,14 @@ import { applyTokenAction } from './tokens.js';
 import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
 import { addPlayer, updatePlayerReady, canStartGame, generateUniquePlayerName, updatePlayerName } from './lobby.js';
-import { renderHoleCards, renderCommunityCards } from './cardRenderer.js';
+import { createCardElement } from './cardRenderer.js';
 import { createTokenElement } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
 import { evaluateHand } from './poker.js';
 import { getNextAvailableColor } from './avatarManager.js';
+import { cardsEqual } from './deck.js';
 
 /**
  * @typedef {import('./winCondition.js').PlayerWithHand} PlayerWithHand
@@ -552,16 +553,90 @@ export class GameController {
     // Find current player
     const currentPlayer = this.gameState.players.find(p => p.id === this.myPlayerId);
 
-    // Render player's hole cards (face up for them, face down for others in future)
+    // Render player's hole cards with hand strength evaluation
     if (currentPlayer && currentPlayer.holeCards && currentPlayer.holeCards.length > 0) {
-      renderHoleCards(playerCardsContainer, currentPlayer.holeCards, false);
+      // Evaluate current hand strength
+      const allCards = [...currentPlayer.holeCards, ...this.gameState.communityCards];
+      let handResult = null;
+
+      if (allCards.length === 7) {
+        handResult = evaluateHand(allCards);
+      }
+
+      // Clear and rebuild container
+      playerCardsContainer.innerHTML = '';
+
+      // Create wrapper for cards + hand strength text
+      const cardsWrapper = document.createElement('div');
+      cardsWrapper.style.display = 'flex';
+      cardsWrapper.style.flexDirection = 'column';
+      cardsWrapper.style.alignItems = 'center';
+      cardsWrapper.style.gap = '8px';
+
+      // Cards row
+      const cardsRow = document.createElement('div');
+      cardsRow.style.display = 'flex';
+      cardsRow.style.gap = '8px';
+
+      // Render hole cards with highlighting
+      currentPlayer.holeCards.forEach(card => {
+        const cardEl = createCardElement(card, false);
+
+        // Apply highlighting if hand evaluated
+        if (handResult) {
+          const isPrimary = handResult.primaryCards?.some(c => cardsEqual(c, card));
+          if (isPrimary) {
+            cardEl.classList.add('best-five');
+          }
+        }
+
+        cardsRow.appendChild(cardEl);
+      });
+
+      cardsWrapper.appendChild(cardsRow);
+
+      // Hand strength text (if hand evaluated)
+      if (handResult) {
+        const handText = document.createElement('div');
+        handText.className = 'hand-strength-text';
+        handText.textContent = handResult.description;
+        cardsWrapper.appendChild(handText);
+      }
+
+      playerCardsContainer.appendChild(cardsWrapper);
     } else {
       playerCardsContainer.innerHTML = '';
     }
 
-    // Render community cards
+    // Render community cards with highlighting
     if (this.gameState.communityCards.length > 0) {
-      renderCommunityCards(communityCardsContainer, this.gameState.communityCards);
+      communityCardsContainer.innerHTML = '';
+
+      // Evaluate hand if player exists
+      const currentPlayer = this.gameState.players.find(p => p.id === this.myPlayerId);
+      let handResult = null;
+
+      if (currentPlayer && currentPlayer.holeCards && currentPlayer.holeCards.length > 0) {
+        const allCards = [...currentPlayer.holeCards, ...this.gameState.communityCards];
+        if (allCards.length === 7) {
+          handResult = evaluateHand(allCards);
+        }
+      }
+
+      // Render community cards
+      this.gameState.communityCards.forEach(card => {
+        const cardEl = createCardElement(card, false);
+
+        // Apply highlighting if hand evaluated
+        if (handResult) {
+          const isPrimary = handResult.primaryCards?.some(c => cardsEqual(c, card));
+          if (isPrimary) {
+            cardEl.classList.add('best-five');
+          }
+        }
+
+        communityCardsContainer.appendChild(cardEl);
+      });
     } else {
       communityCardsContainer.innerHTML = '';
     }
