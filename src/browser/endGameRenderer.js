@@ -49,21 +49,6 @@ export function createEndGameTable(winLossResult, gameState) {
   const table = document.createElement('table');
   table.className = 'end-game-table';
 
-  // Header row
-  const thead = document.createElement('thead');
-  thead.innerHTML = `
-    <tr>
-      <th>Player</th>
-      <th>Turn 1</th>
-      <th>Turn 2</th>
-      <th>Turn 3</th>
-      <th>Turn 4</th>
-      <th>Cards</th>
-      <th>Hand</th>
-    </tr>
-  `;
-  table.appendChild(thead);
-
   // Body rows (one per player, sorted by hand strength)
   const tbody = document.createElement('tbody');
 
