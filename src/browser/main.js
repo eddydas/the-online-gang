@@ -96,6 +96,7 @@ function initializeLobbyUI() {
           </div>
         </div>
         <button id="start-game-button" style="visibility: hidden;">Start Game</button>
+        <button id="quick-test-button" style="visibility: hidden; background: #9b59b6; margin-left: 10px;">Quick Test Game</button>
       </div>
       <div id="share-link-container" style="display: none;">
         <input type="text" id="share-link-input" readonly />
@@ -152,6 +153,7 @@ function renderTokenShowcase() {
 function updateLobbyUI() {
   const playersContainer = document.getElementById('players-container');
   const startGameButton = document.getElementById('start-game-button');
+  const quickTestButton = document.getElementById('quick-test-button');
   const waitingSpinner = document.getElementById('waiting-spinner');
 
   if (playersContainer) {
@@ -245,6 +247,10 @@ function updateLobbyUI() {
     startGameButton.style.visibility = canStart ? 'visible' : 'hidden';
   }
 
+  if (quickTestButton && gameController.isHost) {
+    quickTestButton.style.visibility = canStart ? 'visible' : 'hidden';
+  }
+
   // Show spinner when waiting (for everyone, when button is hidden or not host)
   if (waitingSpinner) {
     const shouldShowSpinner = !canStart || !gameController.isHost;
@@ -291,6 +297,18 @@ function setupLobbyEventHandlers() {
     startGameButton.addEventListener('click', () => {
       gameController.startGame();
       showGameScreen();
+    });
+  }
+
+  const quickTestButton = document.getElementById('quick-test-button');
+  if (quickTestButton) {
+    quickTestButton.addEventListener('click', () => {
+      gameController.startGame();
+      showGameScreen();
+      // Start automated test game after a short delay
+      setTimeout(() => {
+        gameController.runQuickTestGame();
+      }, 500);
     });
   }
 

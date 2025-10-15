@@ -737,4 +737,80 @@ export class GameController {
       });
     }
   }
+
+  /**
+   * Automated test game - runs through all turns automatically
+   * Only works for host
+   */
+  async runQuickTestGame() {
+    if (!this.isHost) return;
+    if (!this.gameState) return;
+
+    console.log('Starting quick test game...');
+
+    // Helper to wait
+    /** @type {(ms: number) => Promise<void>} */
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Run through 4 turns
+    for (let turn = 1; turn <= 4; turn++) {
+      console.log(`Turn ${turn} starting...`);
+
+      // Wait for READY_UP phase
+      while (this.gameState && this.gameState.phase !== 'READY_UP') {
+        await wait(100);
+      }
+
+      // Ready up all players
+      await wait(300);
+      if (!this.gameState) return;
+      for (const player of this.gameState.players) {
+        this.handleTurnReady(player.id);
+        await wait(200);
+      }
+
+      // Wait for TOKEN_TRADING phase
+      while (this.gameState && this.gameState.phase !== 'TOKEN_TRADING') {
+        await wait(100);
+      }
+
+      // Assign random tokens to each player
+      await wait(300);
+      if (!this.gameState) return;
+      const availableTokens = [...this.gameState.tokens.map(t => t.number)];
+      for (const player of this.gameState.players) {
+        // Pick a random available token
+        const randomIndex = Math.floor(Math.random() * availableTokens.length);
+        const tokenNumber = availableTokens[randomIndex];
+        availableTokens.splice(randomIndex, 1);
+
+        const action = {
+          type: /** @type {const} */ ('select'),
+          playerId: player.id,
+          tokenNumber,
+          timestamp: Date.now()
+        };
+
+        this.handleTokenAction(action);
+        await wait(200);
+      }
+
+      // Wait for all tokens to be owned
+      while (this.gameState && !this.gameState.tokens.every(t => t.ownerId !== null)) {
+        await wait(100);
+      }
+
+      // Proceed all players
+      await wait(300);
+      if (!this.gameState) return;
+      for (const player of this.gameState.players) {
+        this.handleProceedTurn(player.id);
+        await wait(200);
+      }
+
+      console.log(`Turn ${turn} complete`);
+    }
+
+    console.log('Quick test game complete - showing end game screen');
+  }
 }
