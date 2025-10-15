@@ -127,13 +127,17 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Check if in primary cards (not kickers)
+        // Check if in bestFive (used for ranking)
+        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        // Check if in primaryCards (highlight with yellow)
         const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+
         if (isInPrimaryCards) {
-          cardEl.classList.add('best-five');
-        } else {
-          cardEl.classList.add('not-used');
+          cardEl.classList.add('best-five'); // Yellow highlight
+        } else if (!isInBestFive) {
+          cardEl.classList.add('not-used'); // Dim (not used in ranking)
         }
+        // else: in bestFive but not primary (kicker) - normal opacity, no highlight
 
         cardsContainer.appendChild(cardEl);
       });
@@ -150,13 +154,17 @@ export function createEndGameTable(winLossResult, gameState) {
         const cardEl = createCardElement(card, false);
         cardEl.classList.add('mini-card');
 
-        // Check if in primary cards (not kickers)
+        // Check if in bestFive (used for ranking)
+        const isInBestFive = player.hand?.bestFive?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+        // Check if in primaryCards (highlight with yellow)
         const isInPrimaryCards = player.hand?.primaryCards?.some((/** @type {Card} */ c) => c.rank === card.rank && c.suit === card.suit);
+
         if (isInPrimaryCards) {
-          cardEl.classList.add('best-five');
-        } else {
-          cardEl.classList.add('not-used');
+          cardEl.classList.add('best-five'); // Yellow highlight
+        } else if (!isInBestFive) {
+          cardEl.classList.add('not-used'); // Dim (not used in ranking)
         }
+        // else: in bestFive but not primary (kicker) - normal opacity, no highlight
 
         cardsContainer.appendChild(cardEl);
       });
