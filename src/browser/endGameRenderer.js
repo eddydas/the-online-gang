@@ -295,6 +295,7 @@ export function addEndGameStyles() {
 
     .avatar-cell {
       text-align: center;
+      vertical-align: middle;
       padding: 8px 4px;
       width: 50px;
     }
