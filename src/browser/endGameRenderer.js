@@ -52,7 +52,6 @@ export function createEndGameTable(winLossResult, gameState) {
   const thead = document.createElement('thead');
   thead.innerHTML = `
     <tr>
-      <th>Rank</th>
       <th>Player</th>
       <th>Turn 1</th>
       <th>Turn 2</th>
@@ -67,7 +66,7 @@ export function createEndGameTable(winLossResult, gameState) {
   // Body rows (one per player, sorted by hand strength)
   const tbody = document.createElement('tbody');
 
-  winLossResult.sortedPlayers.forEach((/** @type {any} */ player, /** @type {number} */ index) => {
+  winLossResult.sortedPlayers.forEach((/** @type {any} */ player) => {
     const row = document.createElement('tr');
 
     // Get player data from game state
@@ -76,28 +75,14 @@ export function createEndGameTable(winLossResult, gameState) {
 
     row.className = isCorrect ? 'correct-row' : 'incorrect-row';
 
-    // Rank column
-    const rankCell = document.createElement('td');
-    rankCell.className = 'rank-cell';
-    rankCell.textContent = String(index + 1);
-    row.appendChild(rankCell);
-
-    // Player name column (with avatar)
-    const nameCell = document.createElement('td');
-    nameCell.className = 'name-cell';
-
-    const playerDisplay = document.createElement('div');
-    playerDisplay.className = 'player-display';
+    // Player avatar column (no name)
+    const avatarCell = document.createElement('td');
+    avatarCell.className = 'avatar-cell';
 
     const avatar = createAvatarElement(player, 'small');
-    playerDisplay.appendChild(avatar);
+    avatarCell.appendChild(avatar);
 
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = player.name;
-    playerDisplay.appendChild(nameSpan);
-
-    nameCell.appendChild(playerDisplay);
-    row.appendChild(nameCell);
+    row.appendChild(avatarCell);
 
     // Token columns (Turn 1-4)
     for (let turn = 1; turn <= 4; turn++) {
@@ -303,6 +288,12 @@ export function addEndGameStyles() {
       color: #f39c12;
     }
 
+    .avatar-cell {
+      text-align: center;
+      padding: 8px;
+      width: 60px;
+    }
+
     .name-cell {
       font-weight: bold;
       font-size: 18px;
@@ -312,6 +303,7 @@ export function addEndGameStyles() {
     .token-cell {
       text-align: center;
       padding: 8px;
+      width: 60px;
     }
 
     .mini-token {
@@ -321,15 +313,25 @@ export function addEndGameStyles() {
     }
 
     .correct-token {
-      border: 2px solid #2ecc71;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: rgba(46, 204, 113, 0.2);
+      background: rgba(46, 204, 113, 0.3);
+      margin: 0 auto;
     }
 
     .incorrect-token {
-      border: 2px solid #e74c3c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: rgba(231, 76, 60, 0.2);
+      background: rgba(231, 76, 60, 0.3);
+      margin: 0 auto;
     }
 
     .cards-cell {
@@ -338,32 +340,31 @@ export function addEndGameStyles() {
 
     .cards-container {
       display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
+      flex-wrap: nowrap;
+      gap: 2px;
       justify-content: center;
+      align-items: center;
     }
 
     .mini-card {
-      width: 40px;
-      height: 56px;
-      font-size: 10px;
+      width: 24px;
+      height: 34px;
+      font-size: 8px;
+      padding: 1px;
+      flex-shrink: 0;
     }
 
     .mini-card.best-five {
-      border: 2px solid #f39c12;
-      box-shadow: 0 0 8px rgba(243, 156, 18, 0.6);
+      box-shadow: 0 0 6px rgba(243, 156, 18, 0.8);
     }
 
     .mini-card .card-rank {
-      font-size: 12px;
+      font-size: 9px;
+      margin-bottom: 1px;
     }
 
-    .mini-card .card-suit {
-      font-size: 10px;
-    }
-
-    .mini-card .card-suit-large {
-      font-size: 24px;
+    .mini-card .card-suit.large {
+      font-size: 14px;
     }
 
     .hand-cell {
