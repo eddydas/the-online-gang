@@ -564,3 +564,62 @@ A "Quick Test Game" button is available in the lobby for rapid testing of the en
 - Verifying card highlighting logic (primary cards, decisive kickers, unused cards)
 - Testing win/loss determination with various hand combinations
 - Rapid iteration on UI polish without manual gameplay
+
+### Time Travel Slider (End Game Table Feature)
+
+A time travel slider allows players to review token correctness at each turn of the completed game:
+
+**Location & Label:**
+- Positioned above the end game summary table, below the Victory/Defeat banner
+- Label text: "Showing game results as of: Turn X <slider>"
+
+**Slider Design:**
+- 4 circular position markers representing each turn
+- Numbers 1-4 labeled at each circle to indicate turns
+- Default position: Turn 4 (rightmost - final game state)
+
+**Visual Behavior by Turn Selection:**
+
+| Element | Turn 1 | Turn 2 | Turn 3 | Turn 4 |
+|---------|--------|--------|--------|--------|
+| Hole cards (2) | 100% | 100% | 100% | 100% |
+| Community cards 1-3 | 20% | 100% | 100% | 100% |
+| Community card 4 | 20% | 20% | 100% | 100% |
+| Community card 5 | 20% | 20% | 20% | 100% |
+| Turn 1 token | 100% | 100% | 100% | 100% |
+| Turn 2 token | 20% | 100% | 100% | 100% |
+| Turn 3 token | 20% | 20% | 100% | 100% |
+| Turn 4 token | 20% | 20% | 20% | 100% |
+
+**Opacity Behavior:**
+- Full opacity (100%): Cards and tokens revealed by the selected turn
+- Dimmed opacity (20%): Cards and tokens from future turns (not yet revealed at selected time)
+- No blur effect applied - only opacity changes
+
+**Token Highlighting:**
+- Red background highlighting for incorrect tokens remains visible at all turns
+- Future turn red highlights shown at 20% opacity (matching token opacity)
+
+**Hand Description Updates:**
+- Hand strength description updates dynamically based on selected turn
+- Turn 1: Evaluated from 2 hole cards only
+- Turn 2: Evaluated from 2 hole cards + 3 community cards (flop)
+- Turn 3: Evaluated from 2 hole cards + 4 community cards (turn)
+- Turn 4: Evaluated from 2 hole cards + 5 community cards (river) - final hand
+
+**Row Sorting Animation:**
+- Player rows re-sort based on hand rankings at the selected turn
+- Smooth slide transition animation
+- Animation duration: 100ms
+- Players with stronger hands at that turn move toward the top
+- Rankings may differ between turns as community cards reveal new information
+
+**Victory/Defeat Banner:**
+- Always displays final game result (Turn 4)
+- Does not change based on slider position
+- Banner remains static while table content updates dynamically
+
+**Purpose:**
+- Educational tool for players to understand how hand strengths evolved across turns
+- Helps players learn when their token selections became incorrect
+- Provides insight into optimal token trading strategies for future games
