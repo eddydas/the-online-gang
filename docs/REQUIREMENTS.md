@@ -70,6 +70,34 @@ The game consists of 4 turns total:
 - **Trading Speed as Signal:** The speed and decisiveness of token grabs carries meaning
   - Quick grab of a high token often signals a strong hand (Pair, Ace, etc.)
 
+### Token Stolen Status Indicator
+- **Visual Feedback:** During token trading, players need visual indication when their token has been stolen
+- **Dotted Circle Placeholder:**
+  - At the start of each turn's TOKEN_TRADING phase, each player's token history displays a dotted circle placeholder for the upcoming token slot
+  - Similar to the unowned token pool which shows dotted circles for tokens that have been taken
+  - The dotted circle remains visible until the player acquires a token for the current turn
+- **Stolen Indicator "→ O":**
+  - **Trigger:** Displayed when a player's token is stolen by another player (original owner and new owner are both players, not null)
+  - **Not shown when:** Token is returned to the unowned pool (new owner is null)
+  - **Visual Design:**
+    - Text arrow "→" followed by small avatar of the player who stole the token
+    - Avatar size: 50% of the dotted circle height
+    - Entire "→ O" group rendered at 50% opacity
+    - Horizontally center-aligned within the dotted circle
+  - **Display Location:** Inside the dotted circle placeholder in the player's token history row
+  - **Lifecycle:**
+    - Appears immediately when token is stolen
+    - Disappears when player acquires a new token (dotted circle is replaced by actual token)
+    - Updates if token is stolen again (shows new thief's avatar)
+    - Does NOT persist after turn completion - resets at the start of each new turn
+- **Multiple Steals Example:**
+  - Player A has token 5 → Player B steals it → Player A sees "→ B" (50% opacity)
+  - Player A takes token 3 → "→ B" disappears, replaced by token 3
+  - Player C steals token 3 from Player A → Player A sees "→ C" (50% opacity)
+- **Data Storage:** Temporary state stored in `stolenBy` field during TOKEN_TRADING phase only
+  - Does not persist to token history after turn completes
+  - Future consideration: May need persistent state for reconnection support
+
 ### Turn Flow and Pacing
 Each turn follows this sequence:
 

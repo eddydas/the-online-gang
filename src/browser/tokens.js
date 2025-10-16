@@ -38,12 +38,19 @@ function generateTokens(playerCount) {
 }
 
 /**
+ * @typedef {Object} TokenActionResult
+ * @property {Token[]} tokens - Updated token state
+ * @property {string|null} stolenFromId - Player ID whose token was stolen (null if no steal occurred)
+ * @property {string|null} stolenById - Player ID who performed the steal (null if no steal occurred)
+ */
+
+/**
  * Applies a token selection with conflict resolution
  * Clicking your own token returns it to unowned.
  * Later timestamp wins conflicts. If timestamps equal, lower player ID wins.
  * @param {Token[]} tokens - Current token state
  * @param {TokenAction} action - Selection action
- * @returns {Token[]} Updated token state (new array)
+ * @returns {TokenActionResult} Updated token state and steal information
  */
 function applyTokenAction(tokens, action) {
   const tokensCopy = tokens.map(t => ({ ...t }));
@@ -53,11 +60,15 @@ function applyTokenAction(tokens, action) {
     throw new Error(`Token ${action.tokenNumber} not found`);
   }
 
+  // Track if this action results in a steal
+  let stolenFromId = null;
+  let stolenById = null;
+
   // If clicking your own token, return it to unowned
   if (token.ownerId === action.playerId) {
     token.ownerId = null;
     token.timestamp = 0;
-    return tokensCopy;
+    return { tokens: tokensCopy, stolenFromId, stolenById };
   }
 
   // Release any token currently owned by this player
@@ -76,11 +87,17 @@ function applyTokenAction(tokens, action) {
     (action.timestamp === token.timestamp && action.playerId < token.ownerId); // Tie-breaker
 
   if (shouldTakeToken) {
+    // Check if this is a steal (original owner is a player, new owner is a player)
+    if (token.ownerId !== null && token.ownerId !== action.playerId) {
+      stolenFromId = token.ownerId;
+      stolenById = action.playerId;
+    }
+
     token.ownerId = action.playerId;
     token.timestamp = action.timestamp;
   }
 
-  return tokensCopy;
+  return { tokens: tokensCopy, stolenFromId, stolenById };
 }
 
 /**

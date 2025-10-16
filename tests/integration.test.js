@@ -1221,19 +1221,21 @@ describe('Integration Tests - Game Flow', () => {
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // READY_UP -> TOKEN_TRADING
 
-      state.tokens = applyTokenAction(state.tokens, {
+      let result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 1,
         timestamp: 1000
       });
+      state.tokens = result.tokens;
 
-      state.tokens = applyTokenAction(state.tokens, {
+      result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 2,
         timestamp: 1001
       });
+      state.tokens = result.tokens;
 
       state = advancePhase(state); // TOKEN_TRADING -> TURN_COMPLETE
 
@@ -1247,14 +1249,14 @@ describe('Integration Tests - Game Flow', () => {
       state = advancePhase(state); // TURN_COMPLETE -> READY_UP
       state = advancePhase(state); // READY_UP -> TOKEN_TRADING
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 2,
         timestamp: 2000
       });
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 1,
@@ -1284,21 +1286,21 @@ describe('Integration Tests - Game Flow', () => {
       state = setPlayerReady(state, 'p3', true);
       state = advancePhase(state);
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 1,
         timestamp: 1000
       });
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 2,
         timestamp: 1001
       });
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p3',
         tokenNumber: 3,
@@ -1327,14 +1329,14 @@ describe('Integration Tests - Game Flow', () => {
       state = advancePhase(state);
 
       // P1 selects token 1, P2 selects token 2
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 1,
         timestamp: 1000
       });
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 2,
@@ -1342,7 +1344,7 @@ describe('Integration Tests - Game Flow', () => {
       });
 
       // P2 steals token 1 from P1 (automatically releases token 2)
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 1,
@@ -1350,7 +1352,7 @@ describe('Integration Tests - Game Flow', () => {
       });
 
       // P1 picks up the released token 2
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 2,
@@ -1389,14 +1391,14 @@ describe('Integration Tests - Game Flow', () => {
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state);
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 1,
         timestamp: 1000
       });
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 2,
@@ -1413,14 +1415,14 @@ describe('Integration Tests - Game Flow', () => {
       state = advancePhase(state);
       state = advancePhase(state);
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p1',
         tokenNumber: 2,
         timestamp: 2000
       });
 
-      state.tokens = applyTokenAction(state.tokens, {
+      const result = applyTokenAction(state.tokens, {
         type: 'select',
         playerId: 'p2',
         tokenNumber: 1,

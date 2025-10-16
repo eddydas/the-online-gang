@@ -296,8 +296,9 @@ export class GameController {
     if (!this.isHost) return;
     if (!this.gameState) return;
 
-    // Apply token action
-    this.gameState.tokens = applyTokenAction(this.gameState.tokens, action);
+    // Apply token action (returns {tokens, stolenFromId, stolenById})
+    const result = applyTokenAction(this.gameState.tokens, action);
+    this.gameState.tokens = result.tokens;
 
     // Update player token history in real-time
     this.gameState.players = this.gameState.players.map(player => {

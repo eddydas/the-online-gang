@@ -2,6 +2,17 @@
 import { generateTokens, applyTokenAction, initializePlayerTokenHistory, updateTokenHistory, resetTokens } from '../src/browser/tokens.js';
 import { MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS } from '../src/browser/constants.js';
 
+/**
+ * Helper to extract tokens array from applyTokenAction result
+ * @param {import('../src/browser/tokens.js').Token[]} tokens
+ * @param {import('../src/browser/tokens.js').TokenAction} action
+ * @returns {import('../src/browser/tokens.js').Token[]}
+ */
+function applyToken(tokens, action) {
+  const result = applyTokenAction(tokens, action);
+  return result.tokens;
+}
+
 describe('Token System', () => {
 
   describe('Token Generation', () => {
@@ -54,7 +65,7 @@ describe('Token System', () => {
         timestamp: 1000
       };
 
-      const updatedTokens = applyTokenAction(tokens, action);
+      const updatedTokens = applyToken(tokens, action);
       const token2 = updatedTokens.find(t => t.number === 2);
 
       expect(token2).toBeDefined();
@@ -65,14 +76,14 @@ describe('Token System', () => {
     test('should allow different players to select different tokens', () => {
       let tokens = generateTokens(3);
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 1,
         timestamp: 1000
       });
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 3,
@@ -92,7 +103,7 @@ describe('Token System', () => {
       const tokens = generateTokens(3);
       const originalToken = tokens[0];
 
-      applyTokenAction(tokens, {
+      applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 1,
@@ -109,7 +120,7 @@ describe('Token System', () => {
       let tokens = generateTokens(3);
 
       // Player1 selects token 2
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -117,7 +128,7 @@ describe('Token System', () => {
       });
 
       // Player1 clicks their own token 2 to return it
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -134,7 +145,7 @@ describe('Token System', () => {
       let tokens = generateTokens(3);
 
       // Player1 selects token 2
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -142,7 +153,7 @@ describe('Token System', () => {
       });
 
       // Player2 steals token 2
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
@@ -158,7 +169,7 @@ describe('Token System', () => {
     test('should allow stealing from unowned token (same as select)', () => {
       const tokens = generateTokens(3);
 
-      const updatedTokens = applyTokenAction(tokens, {
+      const updatedTokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -173,21 +184,21 @@ describe('Token System', () => {
     test('should handle multiple steals of same token', () => {
       let tokens = generateTokens(3);
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
         timestamp: 1000
       });
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
         timestamp: 1500
       });
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player3',
         tokenNumber: 2,
@@ -206,7 +217,7 @@ describe('Token System', () => {
       let tokens = generateTokens(3);
 
       // Player1 selects at 1000
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -215,7 +226,7 @@ describe('Token System', () => {
 
       // Player2 tries to select same token at 999 (earlier)
       // This should NOT override since later timestamp wins
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
@@ -231,7 +242,7 @@ describe('Token System', () => {
     test('should allow later timestamp to override', () => {
       let tokens = generateTokens(3);
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -239,7 +250,7 @@ describe('Token System', () => {
       });
 
       // Later timestamp should override
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
@@ -255,7 +266,7 @@ describe('Token System', () => {
     test('should allow taking token with later timestamp (always takes)', () => {
       let tokens = generateTokens(3);
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -263,7 +274,7 @@ describe('Token System', () => {
       });
 
       // Later select always takes the token
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
@@ -331,7 +342,7 @@ describe('Token System', () => {
     test('should return token to unowned when player clicks same token they already own', () => {
       let tokens = generateTokens(3);
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -339,7 +350,7 @@ describe('Token System', () => {
       });
 
       // Same player clicks again (should return to unowned)
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -356,7 +367,7 @@ describe('Token System', () => {
       let tokens = generateTokens(3);
 
       // Player1 selects token 1
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 1,
@@ -364,7 +375,7 @@ describe('Token System', () => {
       });
 
       // Player1 selects token 2 (abandoning token 1)
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 2,
@@ -386,21 +397,21 @@ describe('Token System', () => {
       let tokens = generateTokens(3);
 
       // Assign tokens to players
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 1,
         timestamp: 1000
       });
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player2',
         tokenNumber: 2,
         timestamp: 1001
       });
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player3',
         tokenNumber: 3,
@@ -434,7 +445,7 @@ describe('Token System', () => {
     test('should not modify original tokens array', () => {
       let tokens = generateTokens(2);
 
-      tokens = applyTokenAction(tokens, {
+      tokens = applyToken(tokens, {
         type: 'select',
         playerId: 'player1',
         tokenNumber: 1,

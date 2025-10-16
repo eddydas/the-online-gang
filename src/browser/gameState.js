@@ -27,6 +27,7 @@ import {  MIN_PLAYERS, MAX_PLAYERS, TOTAL_TURNS  } from "./constants.js";
  * @property {string} [avatarColor] - Avatar background color (hex code)
  * @property {Card[]} [holeCards] - Player's hole cards (2 cards)
  * @property {(number|null)[]} [tokenHistory] - Token numbers for each turn [turn1, turn2, turn3, turn4]
+ * @property {string|null} [stolenBy] - Player ID who most recently stole this player's token (temporary, TOKEN_TRADING phase only)
  */
 
 /**
@@ -169,6 +170,12 @@ function advancePhase(state) {
       // Record token ownership history for current turn
       const playersWithHistory = recordTokenHistory(state.players, state.tokens, state.turn);
 
+      // Clear stolenBy for all players (new turn resets stolen status)
+      const playersWithoutStolenStatus = playersWithHistory.map(p => ({
+        ...p,
+        stolenBy: null
+      }));
+
       // Advance turn or end game directly from TOKEN_TRADING
       if (state.turn < TOTAL_TURNS) {
         // Deal community cards for next turn
@@ -187,7 +194,7 @@ function advancePhase(state) {
 
         return {
           ...state,
-          players: playersWithHistory,
+          players: playersWithoutStolenStatus,
           phase: 'READY_UP',
           turn: state.turn + 1,
           deck: remainingDeck,
@@ -205,7 +212,7 @@ function advancePhase(state) {
 
         return {
           ...state,
-          players: playersWithHistory,
+          players: playersWithoutStolenStatus,
           phase: 'END_GAME',
           readyStatus
         };
@@ -300,11 +307,27 @@ function handleTokenAction(state, action) {
     return state;
   }
 
-  const updatedTokens = applyTokenAction(state.tokens, action);
+  const result = applyTokenAction(state.tokens, action);
+
+  // Update players' stolenBy field if a steal occurred
+  const updatedPlayers = state.players.map(player => {
+    // Clear stolenBy for player who just acquired a token
+    if (player.id === action.playerId) {
+      return { ...player, stolenBy: null };
+    }
+
+    // Set stolenBy for player whose token was stolen
+    if (player.id === result.stolenFromId) {
+      return { ...player, stolenBy: result.stolenById };
+    }
+
+    return player;
+  });
 
   return {
     ...state,
-    tokens: updatedTokens
+    tokens: result.tokens,
+    players: updatedPlayers
   };
 }
 
