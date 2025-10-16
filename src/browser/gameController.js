@@ -517,14 +517,24 @@ export class GameController {
       // Check ready status
       const isReady = this.gameState?.readyStatus?.[player.id] ?? false;
 
+      // Find the player who stole this player's token (if any)
+      const stolenByPlayer = player.stolenBy ?
+        this.gameState?.players.find(p => p.id === player.stolenBy) : null;
+
       return {
         id: player.id,
         name: player.name,
+        avatarColor: player.avatarColor,
         isReady: isReady,
         tokenNumber: token?.number,
         isCurrentPlayer: player.id === this.myPlayerId,
         tokenHistory: player.tokenHistory,
-        currentTurn: this.gameState?.turn || 1
+        currentTurn: this.gameState?.turn || 1,
+        stolenBy: (stolenByPlayer && stolenByPlayer.avatarColor) ? {
+          id: stolenByPlayer.id,
+          name: stolenByPlayer.name,
+          avatarColor: stolenByPlayer.avatarColor
+        } : null
       };
     });
 

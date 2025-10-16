@@ -414,6 +414,66 @@
       flex-shrink: 0;
     }
 
+    /* === Token Placeholder (dotted circle) === */
+    .token-placeholder {
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      flex-shrink: 0;
+    }
+
+    .token-placeholder.medium {
+      width: 40px;
+      height: 40px;
+    }
+
+    .token-placeholder.mini {
+      width: 24px;
+      height: 24px;
+      border-width: 1px;
+    }
+
+    /* === Stolen Indicator (→ O) === */
+    .stolen-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      opacity: 0.5;
+    }
+
+    .stolen-arrow {
+      font-size: 12px;
+      color: white;
+      line-height: 1;
+    }
+
+    .stolen-avatar {
+      /* Avatar size is 50% of placeholder height */
+      /* For medium (40px), avatar is 20px */
+      /* For mini (24px), avatar is 12px */
+      width: 50% !important;
+      height: 50% !important;
+      flex-shrink: 0;
+    }
+
+    .token-placeholder.medium .stolen-avatar {
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    .token-placeholder.mini .stolen-avatar {
+      width: 12px !important;
+      height: 12px !important;
+    }
+
+    .stolen-avatar .avatar-initials {
+      font-size: 8px;
+    }
+
     /* === Circular Proceed Button === */
     .circular-proceed-button {
       width: 60px;

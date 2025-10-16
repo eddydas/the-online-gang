@@ -7,11 +7,13 @@ import { createTokenElement } from './tokenRenderer.js';
  * @typedef {Object} PlayerInfo
  * @property {string} id - Player ID
  * @property {string} name - Player name
+ * @property {string} [avatarColor] - Avatar background color
  * @property {boolean} isReady - Whether player is ready
  * @property {number} [tokenNumber] - Current token number (if any)
  * @property {boolean} isCurrentPlayer - Whether this is the current viewing player
  * @property {(number|null)[]} [tokenHistory] - Token history for previous turns
  * @property {number} [currentTurn] - Current turn number
+ * @property {{id: string, name: string, avatarColor: string}|null} [stolenBy] - Player who stole this player's token (temporary, TOKEN_TRADING phase only)
  */
 
 /**
@@ -48,10 +50,10 @@ export function renderPlayers(container, players, options = {}) {
       // Show all turns including current turn
       for (let turn = 1; turn <= player.currentTurn; turn++) {
         const tokenNumber = player.tokenHistory[turn - 1];
+        const isCurrentTurn = turn === player.currentTurn;
 
         if (tokenNumber !== null) {
-          // Only current turn token is interactive
-          const isCurrentTurn = turn === player.currentTurn;
+          // Render actual token
           const isInteractive = isCurrentTurn && (options.interactive || false);
 
           const tokenEl = createTokenElement(
@@ -76,6 +78,31 @@ export function renderPlayers(container, players, options = {}) {
           }
 
           historyContainer.appendChild(tokenEl);
+        } else if (isCurrentTurn && options.phase === 'TOKEN_TRADING') {
+          // Show dotted circle placeholder for current turn during TOKEN_TRADING
+          const placeholder = document.createElement('div');
+          placeholder.className = 'token-placeholder medium';
+
+          // If token was stolen, show "→ O" indicator
+          if (player.stolenBy) {
+            const stolenIndicator = document.createElement('div');
+            stolenIndicator.className = 'stolen-indicator';
+
+            // Arrow character
+            const arrow = document.createElement('span');
+            arrow.textContent = '→';
+            arrow.className = 'stolen-arrow';
+            stolenIndicator.appendChild(arrow);
+
+            // Small avatar of thief
+            const thiefAvatar = createAvatarElement(player.stolenBy, 'small');
+            thiefAvatar.classList.add('stolen-avatar');
+            stolenIndicator.appendChild(thiefAvatar);
+
+            placeholder.appendChild(stolenIndicator);
+          }
+
+          historyContainer.appendChild(placeholder);
         }
       }
 
@@ -119,10 +146,10 @@ export function renderPlayers(container, players, options = {}) {
       // Show all turns including current turn
       for (let turn = 1; turn <= player.currentTurn; turn++) {
         const tokenNumber = player.tokenHistory[turn - 1];
+        const isCurrentTurn = turn === player.currentTurn;
 
         if (tokenNumber !== null) {
-          // Only current turn token is interactive
-          const isCurrentTurn = turn === player.currentTurn;
+          // Render actual token
           const isInteractive = isCurrentTurn && (options.interactive || false);
 
           const tokenEl = createTokenElement(
@@ -147,6 +174,31 @@ export function renderPlayers(container, players, options = {}) {
           }
 
           historyContainer.appendChild(tokenEl);
+        } else if (isCurrentTurn && options.phase === 'TOKEN_TRADING') {
+          // Show dotted circle placeholder for current turn during TOKEN_TRADING
+          const placeholder = document.createElement('div');
+          placeholder.className = 'token-placeholder medium';
+
+          // If token was stolen, show "→ O" indicator
+          if (player.stolenBy) {
+            const stolenIndicator = document.createElement('div');
+            stolenIndicator.className = 'stolen-indicator';
+
+            // Arrow character
+            const arrow = document.createElement('span');
+            arrow.textContent = '→';
+            arrow.className = 'stolen-arrow';
+            stolenIndicator.appendChild(arrow);
+
+            // Small avatar of thief
+            const thiefAvatar = createAvatarElement(player.stolenBy, 'small');
+            thiefAvatar.classList.add('stolen-avatar');
+            stolenIndicator.appendChild(thiefAvatar);
+
+            placeholder.appendChild(stolenIndicator);
+          }
+
+          historyContainer.appendChild(placeholder);
         }
       }
 
