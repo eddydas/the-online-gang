@@ -21,6 +21,7 @@ import { createTokenElement } from './tokenRenderer.js';
  * @param {Object} [options] - Optional configuration
  * @param {(tokenNumber: number) => void} [options.onTokenClick] - Callback for token clicks
  * @param {boolean} [options.interactive] - Whether tokens are interactive
+ * @param {string} [options.phase] - Current game phase
  */
 export function renderPlayers(container, players, options = {}) {
   container.innerHTML = '';
@@ -38,6 +39,51 @@ export function renderPlayers(container, players, options = {}) {
       playerDiv.classList.add('ready');
     }
 
+    // Token history display (show all turns' tokens including current)
+    // For current player, render tokens first (above avatar)
+    if (player.isCurrentPlayer && player.tokenHistory && player.currentTurn) {
+      const historyContainer = document.createElement('div');
+      historyContainer.className = 'player-token-history';
+
+      // Show all turns including current turn
+      for (let turn = 1; turn <= player.currentTurn; turn++) {
+        const tokenNumber = player.tokenHistory[turn - 1];
+
+        if (tokenNumber !== null) {
+          // Only current turn token is interactive
+          const isCurrentTurn = turn === player.currentTurn;
+          const isInteractive = isCurrentTurn && (options.interactive || false);
+
+          const tokenEl = createTokenElement(
+            { number: tokenNumber, ownerId: player.id, timestamp: 0 },
+            turn,
+            isInteractive
+          );
+
+          // Current turn token is medium size, previous turns are mini
+          if (isCurrentTurn) {
+            tokenEl.classList.add('medium');
+
+            // Add click handler only for current turn token if interactive
+            if (options.interactive && options.onTokenClick) {
+              tokenEl.style.cursor = 'pointer';
+              tokenEl.addEventListener('click', () => {
+                options.onTokenClick?.(tokenNumber);
+              });
+            }
+          } else {
+            tokenEl.classList.add('mini');
+          }
+
+          historyContainer.appendChild(tokenEl);
+        }
+      }
+
+      if (historyContainer.children.length > 0) {
+        playerDiv.appendChild(historyContainer);
+      }
+    }
+
     // Avatar wrapper with ready badge overlay
     const avatarWrapper = document.createElement('div');
     avatarWrapper.className = 'player-avatar-wrapper';
@@ -46,7 +92,8 @@ export function renderPlayers(container, players, options = {}) {
     avatarWrapper.appendChild(avatar);
 
     // Ready indicator - positioned at corner of avatar
-    if (player.isReady) {
+    // Hide during TOKEN_TRADING phase since everyone is already ready
+    if (player.isReady && options.phase !== 'TOKEN_TRADING') {
       const readyBadge = document.createElement('div');
       readyBadge.className = 'player-ready-badge';
       readyBadge.textContent = '✓';
@@ -64,8 +111,8 @@ export function renderPlayers(container, players, options = {}) {
     }
     playerDiv.appendChild(nameDiv);
 
-    // Token history display (show all turns' tokens including current)
-    if (player.tokenHistory && player.currentTurn) {
+    // Token history display for non-current players (below avatar)
+    if (!player.isCurrentPlayer && player.tokenHistory && player.currentTurn) {
       const historyContainer = document.createElement('div');
       historyContainer.className = 'player-token-history';
 

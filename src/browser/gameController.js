@@ -531,6 +531,7 @@ export class GameController {
 
     renderPlayers(playerPositionsContainer, playerInfos, {
       interactive,
+      phase: this.gameState?.phase,
       onTokenClick: (tokenNumber) => {
         if (interactive) {
           this.onTokenSelect(tokenNumber);
