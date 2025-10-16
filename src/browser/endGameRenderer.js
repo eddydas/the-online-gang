@@ -304,21 +304,49 @@ export function createEndGameTable(winLossResult, gameState) {
   table.appendChild(tbody);
   container.appendChild(table);
 
-  // "Ready for Next Game" button with ready status display
+  // "Ready for Next Game" button with player ready status display
   const buttonContainer = document.createElement('div');
   buttonContainer.className = 'end-game-actions';
 
-  // Show ready status
-  const readyStatus = gameState.readyStatus || {};
-  const readyPlayers = Object.values(readyStatus).filter(r => r === true).length;
-  const totalPlayers = gameState.players.length;
+  // Player avatars with ready indicators
+  const playersContainer = document.createElement('div');
+  playersContainer.className = 'end-game-players';
 
-  buttonContainer.innerHTML = `
-    <div id="ready-status" class="ready-status">
-      Players Ready: ${readyPlayers} / ${totalPlayers}
-    </div>
-    <button id="next-game-button" class="next-game-btn">Ready for Next Game</button>
-  `;
+  const readyStatus = gameState.readyStatus || {};
+
+  gameState.players.forEach((/** @type {any} */ player) => {
+    const isReady = readyStatus[player.id] || false;
+
+    const playerWrapper = document.createElement('div');
+    playerWrapper.className = 'end-game-player-wrapper';
+
+    const avatarWrapper = document.createElement('div');
+    avatarWrapper.className = 'player-avatar-wrapper';
+
+    const avatar = createAvatarElement(player, 'medium');
+    avatarWrapper.appendChild(avatar);
+
+    if (isReady) {
+      const readyBadge = document.createElement('div');
+      readyBadge.className = 'player-ready-badge';
+      readyBadge.textContent = '✓';
+      avatarWrapper.appendChild(readyBadge);
+    }
+
+    playerWrapper.appendChild(avatarWrapper);
+    playersContainer.appendChild(playerWrapper);
+  });
+
+  buttonContainer.appendChild(playersContainer);
+
+  // Next game button
+  const nextGameButton = document.createElement('button');
+  nextGameButton.id = 'next-game-button';
+  nextGameButton.className = 'next-game-btn';
+  // Button text determined by current player's ready state (set by gameController)
+  nextGameButton.textContent = 'Ready for Next Game';
+
+  buttonContainer.appendChild(nextGameButton);
   container.appendChild(buttonContainer);
 
   // Set up time travel slider event handler
@@ -665,6 +693,45 @@ export function addEndGameStyles() {
     .end-game-actions {
       text-align: center;
       margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .end-game-players {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .end-game-player-wrapper {
+      position: relative;
+    }
+
+    .end-game-players .player-avatar-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .end-game-players .player-ready-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      background: #2ecc71;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .ready-status {

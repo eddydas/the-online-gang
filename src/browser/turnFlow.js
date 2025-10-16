@@ -59,8 +59,9 @@ function shouldShowProceedButton(phase, tokens) {
  * Updates the phase UI based on current game phase
  * @param {GamePhase} phase - Current game phase
  * @param {import('./tokens.js').Token[]} [tokens] - Token array (optional, needed for TOKEN_TRADING phase)
+ * @param {boolean} [isPlayerReady] - Whether the current player is ready (optional, for READY_UP phase)
  */
-function updatePhaseUI(phase, tokens) {
+function updatePhaseUI(phase, tokens, isPlayerReady) {
   const phaseTextEl = document.getElementById('phase-text');
   const readyButtonEl = document.getElementById('ready-button');
   const proceedButtonEl = document.getElementById('proceed-button');
@@ -70,7 +71,13 @@ function updatePhaseUI(phase, tokens) {
   }
 
   if (readyButtonEl) {
-    readyButtonEl.style.display = shouldShowReadyButton(phase) ? 'block' : 'none';
+    if (shouldShowReadyButton(phase)) {
+      readyButtonEl.style.display = 'block';
+      // Update button text based on ready state
+      readyButtonEl.textContent = isPlayerReady ? 'Not Ready' : 'Ready';
+    } else {
+      readyButtonEl.style.display = 'none';
+    }
   }
 
   if (proceedButtonEl) {

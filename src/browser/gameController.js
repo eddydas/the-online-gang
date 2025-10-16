@@ -11,7 +11,7 @@ import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
 import { evaluateHand, evaluatePokerHand } from './poker.js';
-import { getNextAvailableColor } from './avatarManager.js';
+import { getNextAvailableColor, createAvatarElement } from './avatarManager.js';
 import { cardsEqual } from './deck.js';
 
 /**
@@ -339,7 +339,63 @@ export class GameController {
   }
 
   /**
+   * Update next game button text based on ready status
+   */
+  updateNextGameButtonText() {
+    if (!this.gameState) return;
+
+    const nextGameButton = document.getElementById('next-game-button');
+    if (!nextGameButton) return;
+
+    const isPlayerReady = this.gameState.readyStatus?.[this.myPlayerId || ''] ?? false;
+    nextGameButton.textContent = isPlayerReady ? 'Not ready yet' : 'Ready for Next Game';
+  }
+
+  /**
+   * Update end game ready status (avatars and button) without recreating the screen
+   */
+  updateEndGameReadyStatus() {
+    if (!this.gameState) return;
+
+    // Update button text
+    this.updateNextGameButtonText();
+
+    // Update player avatars with ready badges
+    const playersContainer = document.querySelector('.end-game-players');
+    if (!playersContainer || !this.gameState) return;
+
+    // Clear and rebuild player avatars
+    playersContainer.innerHTML = '';
+
+    const readyStatus = this.gameState.readyStatus || {};
+
+    this.gameState.players.forEach((player) => {
+      const isReady = readyStatus[player.id] || false;
+
+      const playerWrapper = document.createElement('div');
+      playerWrapper.className = 'end-game-player-wrapper';
+
+      const avatarWrapper = document.createElement('div');
+      avatarWrapper.className = 'player-avatar-wrapper';
+
+      const avatar = createAvatarElement(player, 'medium');
+      avatarWrapper.appendChild(avatar);
+
+      if (isReady) {
+        const readyBadge = document.createElement('div');
+        readyBadge.className = 'player-ready-badge';
+        readyBadge.textContent = '✓';
+        avatarWrapper.appendChild(readyBadge);
+      }
+
+      playerWrapper.appendChild(avatarWrapper);
+      playersContainer.appendChild(playerWrapper);
+    });
+  }
+
+  /**
    * Handle "Next Game Ready" click (host only)
+   * Toggles ready state - clicking again will un-ready
    * @param {string} playerId
    */
   handleNextGameReady(playerId) {
@@ -347,8 +403,9 @@ export class GameController {
     if (!this.gameState) return;
     if (this.gameState.phase !== 'END_GAME') return;
 
-    // Mark player as ready for next game
-    this.gameState = setPlayerReady(this.gameState, playerId, true);
+    // Toggle ready state
+    const currentReadyState = this.gameState.readyStatus?.[playerId] ?? false;
+    this.gameState = setPlayerReady(this.gameState, playerId, !currentReadyState);
 
     // Check if all players are ready for next game
     if (allPlayersReady(this.gameState)) {
@@ -358,7 +415,14 @@ export class GameController {
 
     // Broadcast updated state
     this.broadcastGameState();
-    this.updateGameUI();
+
+    // Update end game UI (button text and avatars) without recreating
+    if (this.gameState.phase === 'END_GAME') {
+      this.updateEndGameReadyStatus();
+    } else {
+      // All players ready, game reset - show new game screen
+      this.updateGameUI();
+    }
   }
 
   /**
@@ -396,12 +460,26 @@ export class GameController {
 
     // Check if game is over
     if (this.gameState.phase === 'END_GAME') {
-      this.showEndGameScreen();
+      // Only show end game screen if not already showing
+      // Check if we're already on the end game screen
+      const endGameScreen = document.getElementById('end-game-screen');
+      const isAlreadyShowing = endGameScreen && endGameScreen.style.display === 'block';
+
+      if (!isAlreadyShowing) {
+        // First time showing end game screen
+        this.showEndGameScreen();
+      } else {
+        // Just update the ready status without recreating the whole screen
+        this.updateEndGameReadyStatus();
+      }
       return;
     }
 
+    // Get current player's ready status
+    const isPlayerReady = this.gameState.readyStatus?.[this.myPlayerId || ''] ?? false;
+
     // Update phase UI (phase text and ready button)
-    updatePhaseUI(this.gameState.phase, this.gameState.tokens);
+    updatePhaseUI(this.gameState.phase, this.gameState.tokens, isPlayerReady);
 
     // Render player avatars
     this.renderPlayersUI();
@@ -413,7 +491,7 @@ export class GameController {
     this.renderTokensUI();
 
     // Update phase UI again to update proceed button visibility/state
-    updatePhaseUI(this.gameState.phase, this.gameState.tokens);
+    updatePhaseUI(this.gameState.phase, this.gameState.tokens, isPlayerReady);
 
     // Notify delegate
     this.delegate?.onGameStateChange?.();
@@ -470,6 +548,9 @@ export class GameController {
     endGameScreen.innerHTML = '';
     endGameScreen.appendChild(endGameTable);
     endGameScreen.style.display = 'block';
+
+    // Update button text based on ready status
+    this.updateNextGameButtonText();
 
     // Set up "Next Game" button handler
     const nextGameButton = document.getElementById('next-game-button');
