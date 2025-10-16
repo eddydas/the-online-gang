@@ -1,8 +1,7 @@
 // @ts-check
 
 import { ConnectionManager } from './p2pConnection.js';
-import { createInitialState, startGame, advancePhase, setPlayerReady, allPlayersReady, resetForNextGame } from './gameState.js';
-import { applyTokenAction } from './tokens.js';
+import { createInitialState, startGame, advancePhase, setPlayerReady, allPlayersReady, resetForNextGame, handleTokenAction } from './gameState.js';
 import { broadcastState } from './p2pSync.js';
 import { updatePhaseUI } from './turnFlow.js';
 import { addPlayer, updatePlayerReady, canStartGame, generateUniquePlayerName, updatePlayerName } from './lobby.js';
@@ -296,11 +295,10 @@ export class GameController {
     if (!this.isHost) return;
     if (!this.gameState) return;
 
-    // Apply token action (returns {tokens, stolenFromId, stolenById})
-    const result = applyTokenAction(this.gameState.tokens, action);
-    this.gameState.tokens = result.tokens;
+    // Use gameState's handleTokenAction which tracks stolen status
+    this.gameState = handleTokenAction(this.gameState, action);
 
-    // Update player token history in real-time
+    // Update player token history in real-time (preserve stolenBy from handleTokenAction)
     this.gameState.players = this.gameState.players.map(player => {
       const ownedToken = this.gameState?.tokens.find(t => t.ownerId === player.id);
       const tokenHistory = player.tokenHistory || [null, null, null, null];
@@ -310,7 +308,9 @@ export class GameController {
 
       return {
         ...player,
-        tokenHistory: updatedHistory
+        tokenHistory: updatedHistory,
+        // Preserve stolenBy field set by handleTokenAction
+        stolenBy: player.stolenBy
       };
     });
 
