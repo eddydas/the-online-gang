@@ -617,12 +617,12 @@ export function addEndGameStyles() {
     .end-game-table .token-cell {
       text-align: center;
       padding: 8px 0;
-      width: 50px;
+      width: 80px;
     }
 
     .mini-token {
-      width: 40px;
-      height: 40px;
+      width: 70px;
+      height: 70px;
       margin: 0 auto;
     }
 
@@ -639,22 +639,22 @@ export function addEndGameStyles() {
     .cards-container {
       display: flex;
       flex-wrap: nowrap;
-      gap: 2px;
+      gap: 10px;
       justify-content: center;
       align-items: center;
     }
 
     .card-spacer {
-      width: 8px;
-      height: 34px;
+      width: 16px;
+      height: 60px;
       flex-shrink: 0;
     }
 
     .end-game-table .mini-card {
-      width: 24px;
-      height: 34px;
-      font-size: 8px;
-      padding: 1px;
+      width: 42px;
+      height: 60px;
+      font-size: 12px;
+      padding: 3px;
       flex-shrink: 0;
       outline: 2px solid transparent;
       outline-offset: 0px;
@@ -676,12 +676,12 @@ export function addEndGameStyles() {
     }
 
     .end-game-table .mini-card .card-rank {
-      font-size: 9px;
-      margin-bottom: 1px;
+      font-size: 16px;
+      margin-bottom: 3px;
     }
 
     .end-game-table .mini-card .card-suit.large {
-      font-size: 14px;
+      font-size: 24px;
     }
 
     .hand-cell {
@@ -955,7 +955,7 @@ export function addEndGameStyles() {
       }
     }
 
-    /* Narrow screens (≤768px) - Two-line layout */
+    /* Narrow screens (≤768px) - Three-line layout */
     @media (max-width: 768px) {
       .end-game-table tbody tr {
         display: flex;
@@ -963,6 +963,7 @@ export function addEndGameStyles() {
         padding: 12px 8px;
         gap: 8px;
         border-bottom: 1px solid #34495e;
+        justify-content: center;
       }
 
       .end-game-table td {
@@ -970,62 +971,65 @@ export function addEndGameStyles() {
         padding: 0;
       }
 
-      /* First line: Avatar + Cards */
+      /* First line: Avatar + Tokens - centered */
       .avatar-cell {
         order: 1;
         width: auto;
         padding: 0;
         margin-right: 8px;
-        align-self: flex-start;
+        display: flex;
+        align-items: center;
       }
 
-      .cards-cell {
-        order: 2;
-        flex: 1;
-        min-width: 0;
-        padding: 0;
-        white-space: normal;
-      }
-
-      .cards-container {
-        justify-content: flex-start;
-        flex-wrap: nowrap;
-      }
-
-      /* Second line: All tokens in a row + Hand Description */
       .token-cell {
-        order: 3;
+        order: 2;
         width: auto;
         padding: 0 2px;
         flex-shrink: 0;
       }
 
-      .hand-cell {
-        order: 100;
+      /* Second line: Cards - centered */
+      .cards-cell {
+        order: 3;
         width: 100%;
-        text-align: left;
+        padding: 0;
+        white-space: normal;
+        display: flex;
+        justify-content: center;
+      }
+
+      .cards-container {
+        justify-content: center;
+        flex-wrap: nowrap;
+      }
+
+      /* Third line: Hand Description - centered */
+      .hand-cell {
+        order: 4;
+        width: 100%;
+        text-align: center;
         padding: 8px 0 0 0;
         margin-top: 4px;
       }
 
-      /* Make cards smaller on mobile */
+      /* Make cards bigger and tokens smaller on mobile */
       .end-game-table .mini-card {
-        width: 20px;
-        height: 28px;
-        font-size: 7px;
+        width: 36px;
+        height: 50px;
+        font-size: 10px;
       }
 
       .end-game-table .mini-card .card-rank {
-        font-size: 8px;
+        font-size: 14px;
       }
 
       .end-game-table .mini-card .card-suit.large {
-        font-size: 12px;
+        font-size: 20px;
       }
 
       .card-spacer {
-        width: 6px;
-        height: 28px;
+        width: 10px;
+        height: 50px;
       }
 
       .mini-token {
@@ -1034,7 +1038,7 @@ export function addEndGameStyles() {
       }
 
       .hand-cell {
-        font-size: 12px;
+        font-size: 14px;
       }
 
       .end-game-announcement h1 {
@@ -1046,37 +1050,37 @@ export function addEndGameStyles() {
       }
 
       .cards-container {
-        gap: 1px;
+        gap: 4px;
       }
     }
 
-    /* Very narrow screens (≤480px) - Even smaller cards */
+    /* Very narrow screens (≤480px) - Still bigger than before */
     @media (max-width: 480px) {
       .end-game-container {
         padding: 10px;
       }
 
       .end-game-table .mini-card {
-        width: 18px;
-        height: 25px;
-        font-size: 6px;
+        width: 32px;
+        height: 44px;
+        font-size: 9px;
       }
 
       .end-game-table .mini-card .card-rank {
-        font-size: 7px;
+        font-size: 12px;
       }
 
       .end-game-table .mini-card .card-suit.large {
-        font-size: 10px;
+        font-size: 18px;
       }
 
       .card-spacer {
-        width: 4px;
-        height: 25px;
+        width: 8px;
+        height: 44px;
       }
 
       .cards-container {
-        gap: 1px;
+        gap: 3px;
       }
 
       .mini-token {
@@ -1085,7 +1089,7 @@ export function addEndGameStyles() {
       }
 
       .hand-cell {
-        font-size: 11px;
+        font-size: 13px;
       }
 
       .avatar-cell .player-avatar {
