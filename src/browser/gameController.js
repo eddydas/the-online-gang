@@ -640,8 +640,9 @@ export class GameController {
 
     const playerCardsContainer = document.getElementById('player-cards');
     const communityCardsContainer = document.getElementById('community-cards');
+    const handStrengthText = document.getElementById('hand-strength-text');
 
-    if (!playerCardsContainer || !communityCardsContainer) return;
+    if (!playerCardsContainer || !communityCardsContainer || !handStrengthText) return;
 
     // Find current player
     const currentPlayer = this.gameState.players.find(p => p.id === this.myPlayerId);
@@ -657,20 +658,8 @@ export class GameController {
         handResult = evaluatePokerHand(allCards);
       }
 
-      // Clear and rebuild container
+      // Clear and render hole cards
       playerCardsContainer.innerHTML = '';
-
-      // Create wrapper for cards + hand strength text
-      const cardsWrapper = document.createElement('div');
-      cardsWrapper.style.display = 'flex';
-      cardsWrapper.style.flexDirection = 'column';
-      cardsWrapper.style.alignItems = 'center';
-      cardsWrapper.style.gap = '8px';
-
-      // Cards row
-      const cardsRow = document.createElement('div');
-      cardsRow.style.display = 'flex';
-      cardsRow.style.gap = '8px';
 
       // Render hole cards with highlighting
       currentPlayer.holeCards.forEach(card => {
@@ -684,22 +673,18 @@ export class GameController {
           }
         }
 
-        cardsRow.appendChild(cardEl);
+        playerCardsContainer.appendChild(cardEl);
       });
 
-      cardsWrapper.appendChild(cardsRow);
-
-      // Hand strength text (if hand evaluated)
+      // Render hand strength text
       if (handResult) {
-        const handText = document.createElement('div');
-        handText.className = 'hand-strength-text';
-        handText.textContent = handResult.description;
-        cardsWrapper.appendChild(handText);
+        handStrengthText.textContent = handResult.description;
+      } else {
+        handStrengthText.textContent = '';
       }
-
-      playerCardsContainer.appendChild(cardsWrapper);
     } else {
       playerCardsContainer.innerHTML = '';
+      handStrengthText.textContent = '';
     }
 
     // Render community cards with highlighting

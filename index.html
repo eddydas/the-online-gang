@@ -32,18 +32,24 @@
             <!-- Player Positions (dynamically positioned) -->
             <div id="player-positions"></div>
 
-            <!-- Community Cards (center of table) -->
-            <div id="community-cards"></div>
+            <!-- Center Area (vertical stack) -->
+            <div class="table-center">
+              <!-- Token Trading Area -->
+              <div id="token-area"></div>
 
-            <!-- Token Trading Area (center of table) -->
-            <div id="token-area"></div>
+              <!-- Community Cards -->
+              <div id="community-cards"></div>
 
-            <!-- Player's Hole Cards (bottom) -->
-            <div id="player-cards"></div>
+              <!-- Ready Button (for READY_UP phase) -->
+              <div id="action-buttons">
+                <button id="ready-button" style="display: none;">Ready</button>
+              </div>
 
-            <!-- Ready Button (for READY_UP phase) -->
-            <div id="action-buttons">
-              <button id="ready-button" style="display: none;">Ready</button>
+              <!-- Player's Hole Cards -->
+              <div class="player-hand-section">
+                <div id="player-cards"></div>
+                <div id="hand-strength-text"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -340,7 +346,7 @@
       width: 100%;
       height: 100%;
       background: var(--table-border);
-      border-radius: 50%;
+      border-radius: 20px;
       padding: var(--border-width);
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     }
@@ -349,7 +355,7 @@
       width: 100%;
       height: 100%;
       background: linear-gradient(135deg, var(--poker-green) 0%, #156624 100%);
-      border-radius: 50%;
+      border-radius: 16px;
       position: relative;
       box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
     }
@@ -362,6 +368,7 @@
       transform: translateX(-50%);
       text-align: center;
       z-index: 10;
+      display: none;
     }
 
     #phase-text {
@@ -371,40 +378,61 @@
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* === Community Cards (center) === */
-    #community-cards {
-      position: absolute;
-      top: 32%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      gap: 8px;
-      z-index: 5;
-    }
-
-    /* === Player Cards (bottom center) === */
-    #player-cards {
-      position: absolute;
-      top: 68%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      gap: 8px;
-      z-index: 5;
-    }
-
-    /* === Token Area (center) === */
-    #token-area {
+    /* === Center Area (vertical stack) === */
+    .table-center {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 65%;
+      max-width: 700px;
+      z-index: 5;
+    }
+
+    /* === Token Area === */
+    #token-area {
+      display: flex;
       gap: 12px;
       flex-wrap: nowrap;
       justify-content: center;
       align-items: center;
-      z-index: 5;
+    }
+
+    /* === Community Cards === */
+    #community-cards {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    /* === Player Cards === */
+    #player-cards {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    /* === Player Hand Section === */
+    .player-hand-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border: 2px solid rgba(212, 175, 55, 0.5);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    #hand-strength-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-gold);
+      text-align: center;
     }
 
     /* Token spacer to balance proceed button */

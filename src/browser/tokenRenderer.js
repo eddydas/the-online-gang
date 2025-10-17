@@ -316,30 +316,35 @@ export function addTokenStyles() {
     /* Responsive sizing */
     @media (max-width: 768px) {
       .token {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         margin: 3px;
       }
 
       .token.mini {
-        width: 35px;
-        height: 35px;
+        width: 30px;
+        height: 30px;
+      }
+
+      .token.medium {
+        width: 45px;
+        height: 45px;
       }
 
       .token-pool {
-        gap: 8px;
-        padding: 12px;
+        gap: 6px;
+        padding: 10px;
       }
 
       .token-placeholder-slot {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         margin: 3px;
       }
 
       .token-placeholder-slot:empty::before {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
       }
     }
   `;

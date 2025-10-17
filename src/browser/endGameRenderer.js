@@ -186,6 +186,22 @@ export function createEndGameTable(winLossResult, gameState) {
         }
 
         tokenCell.appendChild(miniToken);
+
+        // Add click handler to jump to this turn
+        tokenCell.style.cursor = 'pointer';
+        tokenCell.addEventListener('click', () => {
+          const slider = document.getElementById('turn-slider');
+          const turnDisplay = document.getElementById('current-turn-display');
+          if (slider && turnDisplay) {
+            (/** @type {HTMLInputElement} */ (slider)).value = String(turn);
+            turnDisplay.textContent = String(turn);
+
+            // Trigger the same updates as the slider
+            updateTimeTravelView(table, turn);
+            updateCardHighlighting(tbody, turn, turnWinLossResults[turn]);
+            updateHandDescriptions(tbody, turn);
+          }
+        });
       } else {
         tokenCell.textContent = '-';
       }
@@ -568,7 +584,7 @@ export function addEndGameStyles() {
     }
 
     .end-game-table td {
-      padding: 12px 4px;
+      padding: 6px 4px;
       border-bottom: 1px solid #34495e;
       vertical-align: middle;
     }
@@ -616,14 +632,21 @@ export function addEndGameStyles() {
 
     .end-game-table .token-cell {
       text-align: center;
-      padding: 8px 0;
+      padding: 4px 0;
       width: 80px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .end-game-table .token-cell:hover {
+      background: rgba(52, 152, 219, 0.15);
     }
 
     .mini-token {
       width: 70px;
       height: 70px;
       margin: 0 auto;
+      display: block;
     }
 
     .token-cell.incorrect-token {
@@ -631,7 +654,7 @@ export function addEndGameStyles() {
     }
 
     .cards-cell {
-      padding: 8px 12px;
+      padding: 4px 8px;
       width: 1%;
       white-space: nowrap;
     }
@@ -961,7 +984,7 @@ export function addEndGameStyles() {
         display: flex;
         flex-wrap: wrap;
         padding: 12px 8px;
-        gap: 8px;
+        gap: 4px;
         border-bottom: 1px solid #34495e;
         justify-content: center;
       }
@@ -971,20 +994,21 @@ export function addEndGameStyles() {
         padding: 0;
       }
 
-      /* First line: Avatar + Tokens - centered */
+      /* First line: Avatar + Tokens - keep on one line */
       .avatar-cell {
         order: 1;
         width: auto;
         padding: 0;
-        margin-right: 8px;
+        margin-right: 4px;
         display: flex;
         align-items: center;
+        flex-shrink: 0;
       }
 
       .token-cell {
         order: 2;
         width: auto;
-        padding: 0 2px;
+        padding: 0 1px;
         flex-shrink: 0;
       }
 

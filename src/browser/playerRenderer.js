@@ -17,6 +17,58 @@ import { createTokenElement } from './tokenRenderer.js';
  */
 
 /**
+ * Calculate edge position for a player based on total player count
+ * @param {number} index - Player index (non-current player)
+ * @param {number} total - Total non-current players
+ * @returns {{edge: 'left'|'top'|'right', position: number}} Edge and position along that edge
+ */
+function calculateEdgePosition(index, total) {
+  // Distribution strategy based on player count
+  // 1 player: top
+  // 2 players: top-left, top-right
+  // 3 players: left, top, right
+  // 4 players: left, top-left, top-right, right
+  // 5 players: left, top-left, top-center, top-right, right
+  // 6-7 players: 2 left, 2-3 top, 2 right
+
+  if (total === 1) {
+    return { edge: 'top', position: 0 };
+  } else if (total === 2) {
+    return index === 0 ? { edge: 'top', position: 0 } : { edge: 'top', position: 1 };
+  } else if (total === 3) {
+    if (index === 0) return { edge: 'left', position: 0 };
+    if (index === 1) return { edge: 'top', position: 0 };
+    return { edge: 'right', position: 0 };
+  } else if (total === 4) {
+    if (index === 0) return { edge: 'left', position: 0 };
+    if (index === 1) return { edge: 'top', position: 0 };
+    if (index === 2) return { edge: 'top', position: 1 };
+    return { edge: 'right', position: 0 };
+  } else if (total === 5) {
+    if (index === 0) return { edge: 'left', position: 0 };
+    if (index === 1) return { edge: 'top', position: 0 };
+    if (index === 2) return { edge: 'top', position: 1 };
+    if (index === 3) return { edge: 'top', position: 2 };
+    return { edge: 'right', position: 0 };
+  } else if (total === 6) {
+    if (index === 0) return { edge: 'left', position: 0 };
+    if (index === 1) return { edge: 'left', position: 1 };
+    if (index === 2) return { edge: 'top', position: 0 };
+    if (index === 3) return { edge: 'top', position: 1 };
+    if (index === 4) return { edge: 'right', position: 0 };
+    return { edge: 'right', position: 1 };
+  } else { // 7 players
+    if (index === 0) return { edge: 'left', position: 0 };
+    if (index === 1) return { edge: 'left', position: 1 };
+    if (index === 2) return { edge: 'top', position: 0 };
+    if (index === 3) return { edge: 'top', position: 1 };
+    if (index === 4) return { edge: 'top', position: 2 };
+    if (index === 5) return { edge: 'right', position: 0 };
+    return { edge: 'right', position: 1 };
+  }
+}
+
+/**
  * Render player avatars around the table
  * @param {HTMLElement} container - Container to render players in
  * @param {PlayerInfo[]} players - Array of player info
@@ -28,13 +80,24 @@ import { createTokenElement } from './tokenRenderer.js';
 export function renderPlayers(container, players, options = {}) {
   container.innerHTML = '';
 
-  players.forEach((player, index) => {
+  // Find current player index and count non-current players
+  const nonCurrentPlayers = players.filter(p => !p.isCurrentPlayer);
+  const numOtherPlayers = nonCurrentPlayers.length;
+
+  players.forEach((player) => {
     const playerDiv = document.createElement('div');
     playerDiv.className = 'table-player';
-    playerDiv.classList.add(`player-position-${index}`);
 
     if (player.isCurrentPlayer) {
       playerDiv.classList.add('current-player');
+    } else {
+      // Calculate edge position for non-current players
+      const nonCurrentIndex = nonCurrentPlayers.findIndex(p => p.id === player.id);
+      const edgePos = calculateEdgePosition(nonCurrentIndex, numOtherPlayers);
+
+      playerDiv.classList.add(`player-${edgePos.edge}-${edgePos.position}`);
+      playerDiv.dataset.edge = edgePos.edge;
+      playerDiv.dataset.edgePosition = String(edgePos.position);
     }
 
     if (player.isReady) {
@@ -128,15 +191,6 @@ export function renderPlayers(container, players, options = {}) {
     }
 
     playerDiv.appendChild(avatarWrapper);
-
-    // Player name
-    const nameDiv = document.createElement('div');
-    nameDiv.className = 'player-name-label';
-    nameDiv.textContent = player.name;
-    if (player.isCurrentPlayer) {
-      nameDiv.textContent += ' (You)';
-    }
-    playerDiv.appendChild(nameDiv);
 
     // Token history display for non-current players (below avatar)
     if (!player.isCurrentPlayer && player.tokenHistory && player.currentTurn) {
@@ -251,31 +305,45 @@ export function addPlayerStyles() {
       box-shadow: 0 0 12px rgba(52, 152, 219, 0.6);
     }
 
-    /* Other players positioned around table */
-    /* Position 0 (if not current player): top left */
-    .table-player.player-position-0:not(.current-player) {
-      top: 60px;
-      left: 15%;
+    /* Edge-based positioning for other players */
+
+    /* Left edge players */
+    .player-left-0 {
+      left: 5%;
+      top: 30%;
     }
 
-    /* Position 1 (if not current player): top right */
-    .table-player.player-position-1:not(.current-player) {
-      top: 60px;
-      right: 15%;
+    .player-left-1 {
+      left: 5%;
+      top: 55%;
     }
 
-    /* Position 2: left side */
-    .table-player.player-position-2 {
-      top: 50%;
-      left: 10%;
-      transform: translateY(-50%);
+    /* Top edge players */
+    .player-top-0 {
+      top: 8%;
+      left: 30%;
     }
 
-    /* Position 3: right side */
-    .table-player.player-position-3 {
-      top: 50%;
-      right: 10%;
-      transform: translateY(-50%);
+    .player-top-1 {
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .player-top-2 {
+      top: 8%;
+      left: 70%;
+    }
+
+    /* Right edge players */
+    .player-right-0 {
+      right: 5%;
+      top: 30%;
+    }
+
+    .player-right-1 {
+      right: 5%;
+      top: 55%;
     }
 
     .table-player.ready .player-avatar {
@@ -362,54 +430,40 @@ export function addPlayerStyles() {
         bottom: 10px;
       }
 
-      .table-player.player-position-0:not(.current-player) {
-        top: 40px;
-        left: 10%;
+      /* Mobile: tighter positioning */
+      .player-left-0 {
+        left: 3%;
+        top: 25%;
       }
 
-      .table-player.player-position-1:not(.current-player) {
-        top: 40px;
-        right: 10%;
+      .player-left-1 {
+        left: 3%;
+        top: 50%;
       }
 
-      .table-player.player-position-2 {
-        top: 40%;
-        left: 5%;
+      .player-top-0 {
+        top: 5%;
+        left: 25%;
       }
 
-      .table-player.player-position-3 {
-        top: 40%;
-        right: 5%;
+      .player-top-1 {
+        top: 5%;
+        left: 50%;
       }
 
-      /* Mobile token containers */
-      .player-token-container.current-player {
-        top: 85%;
-        transform: translate(-50%, 10px);
+      .player-top-2 {
+        top: 5%;
+        left: 75%;
       }
 
-      .player-token-container.player-position-0:not(.current-player) {
-        top: 40px;
-        left: 10%;
-        transform: translate(0, 50px);
+      .player-right-0 {
+        right: 3%;
+        top: 25%;
       }
 
-      .player-token-container.player-position-1:not(.current-player) {
-        top: 40px;
-        right: 10%;
-        transform: translate(0, 50px);
-      }
-
-      .player-token-container.player-position-2 {
-        top: 40%;
-        left: 5%;
-        transform: translate(0, 30px);
-      }
-
-      .player-token-container.player-position-3 {
-        top: 40%;
-        right: 5%;
-        transform: translate(0, 30px);
+      .player-right-1 {
+        right: 3%;
+        top: 50%;
       }
     }
   `;
