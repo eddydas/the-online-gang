@@ -79,6 +79,7 @@ function initializeLobbyUI() {
     <div id="lobby-controls">
       <div id="lobby-buttons">
         <button id="ready-toggle-button">Ready</button>
+        <button id="ready-all-button" style="visibility: hidden; background: #e67e22;">Ready All</button>
         <div id="waiting-spinner" style="display: none;">
           <div class="spinner">
             <div class="spinner-blade"></div>
@@ -251,6 +252,13 @@ function updateLobbyUI() {
     quickTestButton.style.visibility = canStart ? 'visible' : 'hidden';
   }
 
+  // Show "Ready All" button for host when there are unready players
+  const readyAllButton = document.getElementById('ready-all-button');
+  if (readyAllButton && gameController.isHost) {
+    const hasUnreadyPlayers = gameController.lobbyState.some(p => !p.isReady);
+    readyAllButton.style.visibility = hasUnreadyPlayers ? 'visible' : 'hidden';
+  }
+
   // Show spinner when waiting (for everyone, when button is hidden or not host)
   if (waitingSpinner) {
     const shouldShowSpinner = !canStart || !gameController.isHost;
@@ -265,6 +273,7 @@ function setupLobbyEventHandlers() {
   const readyToggleButton = document.getElementById('ready-toggle-button');
   const startGameButton = document.getElementById('start-game-button');
   const copyLinkButton = document.getElementById('copy-link-button');
+  const readyAllButton = document.getElementById('ready-all-button');
 
   if (readyToggleButton) {
     readyToggleButton.addEventListener('click', () => {
@@ -290,6 +299,20 @@ function setupLobbyEventHandlers() {
       }
 
       readyToggleButton.textContent = newReadyState ? 'Not Ready' : 'Ready';
+    });
+  }
+
+  if (readyAllButton && gameController.isHost) {
+    readyAllButton.addEventListener('click', () => {
+      // Set all players to ready
+      gameController.lobbyState = gameController.lobbyState.map(p => ({ ...p, isReady: true }));
+      gameController.broadcastLobbyState();
+      updateLobbyUI();
+
+      // Update ready toggle button text if host is now ready
+      if (readyToggleButton) {
+        readyToggleButton.textContent = 'Not Ready';
+      }
     });
   }
 

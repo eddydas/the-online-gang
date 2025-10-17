@@ -1,5 +1,5 @@
 // @ts-check
-import { evaluateHand, compareHands } from '../src/browser/poker.js';
+import { evaluateHand, evaluatePokerHand, compareHands } from '../src/browser/poker.js';
 
 describe('Poker Hand Evaluation', () => {
 
@@ -374,6 +374,52 @@ describe('Poker Hand Evaluation', () => {
   });
 
   describe('Critical Edge Cases', () => {
+    test('should handle Two Pair without kicker (exactly 4 cards)', () => {
+      const cards = [
+        { rank: 'A', suit: '♠' },
+        { rank: 'A', suit: '♥' },
+        { rank: 'K', suit: '♦' },
+        { rank: 'K', suit: '♣' }
+      ];
+
+      const result = evaluatePokerHand(cards);
+      expect(result.rank).toBe(3); // Two Pair
+      expect(result.name).toBe('Two Pair');
+      expect(result.bestFive).toHaveLength(4); // Only 4 cards available
+      expect(result.tiebreakers[2]).toBe(0); // No kicker, so 0
+    });
+
+    test('should handle Four of a Kind without kicker (exactly 4 cards)', () => {
+      const cards = [
+        { rank: 'K', suit: '♠' },
+        { rank: 'K', suit: '♥' },
+        { rank: 'K', suit: '♦' },
+        { rank: 'K', suit: '♣' }
+      ];
+
+      const result = evaluatePokerHand(cards);
+      expect(result.rank).toBe(8); // Four of a Kind
+      expect(result.name).toBe('Four of a Kind');
+      expect(result.bestFive).toHaveLength(4); // Only 4 cards available
+      expect(result.tiebreakers[1]).toBe(0); // No kicker, so 0
+    });
+
+    test('should handle Two Pair with kicker (5+ cards)', () => {
+      const cards = [
+        { rank: 'A', suit: '♠' },
+        { rank: 'A', suit: '♥' },
+        { rank: 'K', suit: '♦' },
+        { rank: 'K', suit: '♣' },
+        { rank: 'Q', suit: '♠' }
+      ];
+
+      const result = evaluatePokerHand(cards);
+      expect(result.rank).toBe(3); // Two Pair
+      expect(result.name).toBe('Two Pair');
+      expect(result.bestFive).toHaveLength(5);
+      expect(result.tiebreakers[2]).toBeGreaterThan(0); // Has kicker
+    });
+
     test('should NOT detect straight flush when straight and flush are different suits', () => {
       // Flush in spades, but straight uses mixed suits
       const cards = [

@@ -175,9 +175,20 @@ function evaluatePokerHand(cards) {
   if (groupSizes[0].count === 4) {
     const quadRank = groupSizes[0].rank;
     const kicker = groupSizes.find(g => g.rank !== quadRank);
+
+    // Handle edge case: exactly 4 of a kind with no kicker (e.g., 4 cards total)
     if (!kicker) {
-      throw new Error('Four of a Kind requires a kicker');
+      const bestFive = [...groups[quadRank]];
+      return {
+        rank: 8,
+        name: 'Four of a Kind',
+        bestFive,
+        primaryCards: groups[quadRank], // Only the quad
+        tiebreakers: [getRankValue(quadRank), 0], // No kicker
+        description: `Four ${quadRank}`
+      };
     }
+
     const bestFive = [
       ...groups[quadRank],
       groups[kicker.rank][0]
@@ -270,9 +281,27 @@ function evaluatePokerHand(cards) {
     const pair1Rank = groupSizes[0].rank;
     const pair2Rank = groupSizes[1].rank;
     const kicker = groupSizes.find(g => g.count === 1);
+
+    // Handle edge case: exactly 2 pairs with no kicker (e.g., 4 cards total)
     if (!kicker) {
-      throw new Error('Two Pair requires a kicker');
+      const bestFive = [
+        ...groups[pair1Rank],
+        ...groups[pair2Rank]
+      ];
+      return {
+        rank: 3,
+        name: 'Two Pair',
+        bestFive,
+        primaryCards: [...groups[pair1Rank], ...groups[pair2Rank]], // Both pairs
+        tiebreakers: [
+          getRankValue(pair1Rank),
+          getRankValue(pair2Rank),
+          0 // No kicker
+        ],
+        description: `Two Pair, ${pair1Rank} and ${pair2Rank}`
+      };
     }
+
     const bestFive = [
       ...groups[pair1Rank],
       ...groups[pair2Rank],

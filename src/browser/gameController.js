@@ -775,12 +775,8 @@ export class GameController {
 
     // Hide tokens during READY_UP phase
     if (this.gameState.phase === 'READY_UP') {
-      // Clear token area but preserve the ready button
-      const readyButton = document.getElementById('ready-button');
+      // Clear token area completely during ready up
       tokenArea.innerHTML = '';
-      if (readyButton) {
-        tokenArea.appendChild(readyButton);
-      }
 
       // Also clear any player token containers
       this.gameState.players.forEach(player => {
@@ -795,18 +791,8 @@ export class GameController {
     const interactive = this.gameState.phase === 'TOKEN_TRADING';
 
     // Clear and set up token area with placeholders
-    // Preserve the ready button if it exists
-    const readyButton = document.getElementById('ready-button');
     tokenArea.innerHTML = '';
-    if (readyButton) {
-      tokenArea.appendChild(readyButton);
-    }
     tokenArea.className = 'token-pool';
-
-    // Add dummy spacer at the start to balance the proceed button at the end
-    const spacer = document.createElement('div');
-    spacer.className = 'token-spacer';
-    tokenArea.appendChild(spacer);
 
     // Create placeholders for all tokens (to prevent reflow)
     this.gameState.tokens.forEach(token => {
@@ -831,9 +817,19 @@ export class GameController {
       tokenArea.appendChild(placeholder);
     });
 
-    // Append proceed button at the end of tokens
-    const proceedButton = this.createProceedButton();
-    tokenArea.appendChild(proceedButton);
+    // Move proceed button to action buttons container
+    const actionButtonsContainer = document.getElementById('action-buttons-container');
+    if (actionButtonsContainer) {
+      // Remove any existing proceed button
+      const existingProceedButton = document.getElementById('proceed-button');
+      if (existingProceedButton) {
+        existingProceedButton.remove();
+      }
+
+      // Create and append proceed button
+      const proceedButton = this.createProceedButton();
+      actionButtonsContainer.appendChild(proceedButton);
+    }
 
     // Clear any player token containers (tokens now shown in history row)
     this.gameState.players.forEach(player => {

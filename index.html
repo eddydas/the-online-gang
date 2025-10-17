@@ -34,10 +34,8 @@
 
             <!-- Center Area (vertical stack) -->
             <div class="table-center">
-              <!-- Token Trading Area / Ready Button Area -->
-              <div id="token-area">
-                <button id="ready-button" style="display: none;">Ready</button>
-              </div>
+              <!-- Token Trading Area -->
+              <div id="token-area"></div>
 
               <!-- Community Cards -->
               <div id="community-cards"></div>
@@ -46,6 +44,10 @@
               <div class="player-hand-section">
                 <div id="player-cards"></div>
                 <div id="hand-strength-text"></div>
+                <!-- Ready/Proceed Buttons Container -->
+                <div id="action-buttons-container">
+                  <button id="ready-button" style="display: none;">Ready</button>
+                </div>
               </div>
             </div>
           </div>
@@ -432,11 +434,24 @@
       text-align: center;
     }
 
-    /* Token spacer to balance proceed button */
-    .token-spacer {
-      width: 60px;
-      height: 60px;
-      flex-shrink: 0;
+    /* === Action Buttons Container === */
+    #action-buttons-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60px;
+    }
+
+    #action-buttons-container > * {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #action-buttons-container button {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
     }
 
     /* === Token Placeholder (dotted circle) === */
@@ -519,18 +534,17 @@
       background: #3498db;
       border: none;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.2s ease, visibility 0s;
+      transition: background 0.2s ease, transform 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       padding: 0;
       flex-shrink: 0;
-      visibility: visible;
     }
 
     .circular-proceed-button.hidden {
-      visibility: hidden;
+      display: none;
     }
 
     .circular-proceed-button:hover:not(.waiting) {
