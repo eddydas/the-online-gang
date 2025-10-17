@@ -34,16 +34,13 @@
 
             <!-- Center Area (vertical stack) -->
             <div class="table-center">
-              <!-- Token Trading Area -->
-              <div id="token-area"></div>
+              <!-- Token Trading Area / Ready Button Area -->
+              <div id="token-area">
+                <button id="ready-button" style="display: none;">Ready</button>
+              </div>
 
               <!-- Community Cards -->
               <div id="community-cards"></div>
-
-              <!-- Ready Button (for READY_UP phase) -->
-              <div id="action-buttons">
-                <button id="ready-button" style="display: none;">Ready</button>
-              </div>
 
               <!-- Player's Hole Cards -->
               <div class="player-hand-section">
@@ -492,26 +489,26 @@
     }
 
     .stolen-avatar {
-      /* Avatar size is 50% of placeholder height */
-      /* For medium (60px), avatar is 30px */
-      /* For mini (40px), avatar is 20px */
-      width: 50%;
-      height: 50%;
+      /* Avatar size is smaller than default */
+      /* For medium (60px placeholder), avatar is 20px */
+      /* For mini (40px placeholder), avatar is 14px */
+      width: 33%;
+      height: 33%;
       flex-shrink: 0;
     }
 
     .token-placeholder.medium .stolen-avatar {
-      width: 30px;
-      height: 30px;
-    }
-
-    .token-placeholder.mini .stolen-avatar {
       width: 20px;
       height: 20px;
     }
 
+    .token-placeholder.mini .stolen-avatar {
+      width: 14px;
+      height: 14px;
+    }
+
     .stolen-avatar .avatar-initials {
-      font-size: 8px;
+      font-size: 10px;
     }
 
     /* === Circular Proceed Button === */
@@ -579,18 +576,6 @@
 
     .circular-proceed-button.waiting .proceed-play-icon {
       display: none;
-    }
-
-    /* === Action Buttons === */
-    #action-buttons {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     /* === Card Styles === */
@@ -907,10 +892,6 @@
 
       #player-cards {
         top: 68%;
-      }
-
-      #action-buttons {
-        top: 50%;
       }
 
       /* Token placeholder mobile sizing */
