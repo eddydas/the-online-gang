@@ -775,7 +775,13 @@ export class GameController {
 
     // Hide tokens during READY_UP phase
     if (this.gameState.phase === 'READY_UP') {
+      // Clear token area but preserve the ready button
+      const readyButton = document.getElementById('ready-button');
       tokenArea.innerHTML = '';
+      if (readyButton) {
+        tokenArea.appendChild(readyButton);
+      }
+
       // Also clear any player token containers
       this.gameState.players.forEach(player => {
         const container = document.getElementById(`player-token-${player.id}`);
@@ -789,7 +795,12 @@ export class GameController {
     const interactive = this.gameState.phase === 'TOKEN_TRADING';
 
     // Clear and set up token area with placeholders
+    // Preserve the ready button if it exists
+    const readyButton = document.getElementById('ready-button');
     tokenArea.innerHTML = '';
+    if (readyButton) {
+      tokenArea.appendChild(readyButton);
+    }
     tokenArea.className = 'token-pool';
 
     // Add dummy spacer at the start to balance the proceed button at the end
