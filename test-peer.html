@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PeerJS Connection Test</title>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #log {
+      background: #f0f0f0;
+      padding: 10px;
+      margin-top: 20px;
+      height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 2px 0;
+    }
+    .error { color: red; }
+    .success { color: green; }
+    .info { color: blue; }
+    #shareLink {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PeerJS Connection Test</h1>
+
+  <div id="controls">
+    <button id="hostBtn">Create Host</button>
+    <button id="copyBtn" style="display:none;">Copy Link</button>
+    <button id="openBtn" style="display:none;">Open in New Window</button>
+    <input type="text" id="shareLink" readonly style="display:none;" />
+  </div>
+
+  <div id="status">
+    <p>Status: <span id="statusText">Not connected</span></p>
+    <p>My Peer ID: <span id="myPeerId">-</span></p>
+    <p>Connected Peers: <span id="peerCount">0</span></p>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    let peer = null;
+    let myPeerId = null;
+    let connections = [];
+
+    const log = (message, type = 'info') => {
+      const logDiv = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+      console.log(message);
+    };
+
+    const updateStatus = () => {
+      document.getElementById('peerCount').textContent = connections.length;
+    };
+
+    const getUrlParam = (param) => {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    };
+
+    const createHost = () => {
+      log('Creating host peer...');
+
+      peer = new Peer({
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+          ]
+        },
+        debug: 3
+      });
+
+      peer.on('open', (id) => {
+        myPeerId = id;
+        log(`Host created with ID: ${id}`, 'success');
+        document.getElementById('statusText').textContent = 'Host (waiting for connections)';
+        document.getElementById('myPeerId').textContent = id;
+
+        // Show share link
+        const shareLink = `${window.location.origin}${window.location.pathname}?peer=${id}`;
+        document.getElementById('shareLink').value = shareLink;
+        document.getElementById('shareLink').style.display = 'block';
+        document.getElementById('copyBtn').style.display = 'inline-block';
+        document.getElementById('openBtn').style.display = 'inline-block';
+        document.getElementById('hostBtn').disabled = true;
+      });
+
+      peer.on('connection', (conn) => {
+        log(`Incoming connection from: ${conn.peer}`, 'info');
+        setupConnection(conn);
+      });
+
+      peer.on('error', (err) => {
+        log(`Peer error: ${err}`, 'error');
+      });
+    };
+
+    const joinAsClient = (hostPeerId) => {
+      log(`Joining as client, connecting to: ${hostPeerId}`);
+
+      peer = new Peer({
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+          ]
+        },
+        debug: 3
+      });
+
+      peer.on('open', (id) => {
+        myPeerId = id;
+        log(`Client peer opened with ID: ${id}`, 'success');
+        document.getElementById('statusText').textContent = 'Client (connecting...)';
+        document.getElementById('myPeerId').textContent = id;
+
+        // Connect to host
+        log(`Attempting connection to host: ${hostPeerId}`);
+        const conn = peer.connect(hostPeerId);
+        setupConnection(conn);
+      });
+
+      peer.on('error', (err) => {
+        log(`Peer error: ${err}`, 'error');
+      });
+    };
+
+    const setupConnection = (conn) => {
+      log(`Setting up connection with: ${conn.peer}`);
+
+      conn.on('open', () => {
+        log(`Connection established with: ${conn.peer}`, 'success');
+        connections.push(conn);
+        updateStatus();
+        document.getElementById('statusText').textContent = 'Connected';
+
+        // Send test message
+        conn.send({ type: 'hello', message: `Hello from ${myPeerId}` });
+      });
+
+      conn.on('data', (data) => {
+        log(`Received data from ${conn.peer}: ${JSON.stringify(data)}`, 'success');
+      });
+
+      conn.on('close', () => {
+        log(`Connection closed with: ${conn.peer}`, 'info');
+        connections = connections.filter(c => c !== conn);
+        updateStatus();
+      });
+
+      conn.on('error', (err) => {
+        log(`Connection error with ${conn.peer}: ${err}`, 'error');
+      });
+    };
+
+    // Button handlers
+    document.getElementById('hostBtn').addEventListener('click', createHost);
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const input = document.getElementById('shareLink');
+      input.select();
+      document.execCommand('copy');
+      log('Link copied to clipboard!', 'success');
+    });
+
+    document.getElementById('openBtn').addEventListener('click', () => {
+      const shareLink = document.getElementById('shareLink').value;
+      log(`Opening new window with URL: ${shareLink}`);
+      const newWindow = window.open(shareLink, 'test-client');
+      if (newWindow) {
+        log('Window opened successfully', 'success');
+      } else {
+        log('Failed to open window (popup blocked?)', 'error');
+      }
+    });
+
+    // Auto-initialize based on URL
+    window.addEventListener('DOMContentLoaded', () => {
+      const peerIdFromUrl = getUrlParam('peer');
+      if (peerIdFromUrl) {
+        log('Detected peer ID in URL, joining as client...');
+        joinAsClient(peerIdFromUrl);
+      } else {
+        log('No peer ID in URL. Click "Create Host" to start.');
+      }
+    });
+  </script>
+</body>
+</html>

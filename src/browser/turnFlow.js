@@ -73,8 +73,13 @@ function updatePhaseUI(phase, tokens, isPlayerReady) {
   if (readyButtonEl) {
     if (shouldShowReadyButton(phase)) {
       readyButtonEl.style.display = 'block';
-      // Update button text based on ready state
-      readyButtonEl.textContent = isPlayerReady ? 'Not Ready' : 'Ready';
+      // Keep text as "Ready" but change color when ready
+      readyButtonEl.textContent = 'Ready';
+      if (isPlayerReady) {
+        readyButtonEl.classList.add('ready');
+      } else {
+        readyButtonEl.classList.remove('ready');
+      }
     } else {
       readyButtonEl.style.display = 'none';
     }

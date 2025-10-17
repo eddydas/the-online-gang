@@ -77,7 +77,7 @@ describe('Turn Flow UI', () => {
   describe('Phase UI Updates', () => {
     /** @type {{ textContent: string }} */
     let mockPhaseText;
-    /** @type {{ style: { display: string } }} */
+    /** @type {{ style: { display: string }, classList: { add: Function, remove: Function }, textContent: string }} */
     let mockReadyButton;
     /** @type {{ classList: { add: Function, remove: Function, contains: Function } }} */
     let mockProceedButton;
@@ -85,7 +85,14 @@ describe('Turn Flow UI', () => {
     beforeEach(() => {
       // Create mock DOM elements
       mockPhaseText = { textContent: '' };
-      mockReadyButton = { style: { display: '' } };
+      mockReadyButton = {
+        style: { display: '' },
+        textContent: '',
+        classList: {
+          add: vi.fn(),
+          remove: vi.fn()
+        }
+      };
       mockProceedButton = {
         classList: {
           add: vi.fn(),
