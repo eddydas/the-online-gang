@@ -79,7 +79,6 @@ function initializeLobbyUI() {
     <div id="lobby-controls">
       <div id="lobby-buttons">
         <button id="ready-toggle-button">Ready</button>
-        <button id="ready-all-button" style="visibility: hidden; background: #e67e22;">Ready All</button>
         <div id="waiting-spinner" style="display: none;">
           <div class="spinner">
             <div class="spinner-blade"></div>
@@ -97,11 +96,17 @@ function initializeLobbyUI() {
           </div>
         </div>
         <button id="start-game-button" style="visibility: hidden;">Start Game</button>
-        <button id="quick-test-button" style="visibility: hidden; background: #9b59b6; margin-left: 10px;">Quick Test Game</button>
       </div>
       <div id="share-link-container" style="display: none;">
         <input type="text" id="share-link-input" readonly />
         <button id="copy-link-button">Copy Link</button>
+      </div>
+      <div id="debug-options" style="display: none;">
+        <h3>Debug Options</h3>
+        <div id="debug-buttons">
+          <button id="ready-all-button">Ready All</button>
+          <button id="quick-test-button">Quick Test Game</button>
+        </div>
       </div>
     </div>
     <div id="token-showcase">
@@ -154,7 +159,6 @@ function renderTokenShowcase() {
 function updateLobbyUI() {
   const playersContainer = document.getElementById('players-container');
   const startGameButton = document.getElementById('start-game-button');
-  const quickTestButton = document.getElementById('quick-test-button');
   const waitingSpinner = document.getElementById('waiting-spinner');
 
   if (playersContainer) {
@@ -248,15 +252,10 @@ function updateLobbyUI() {
     startGameButton.style.visibility = canStart ? 'visible' : 'hidden';
   }
 
-  if (quickTestButton && gameController.isHost) {
-    quickTestButton.style.visibility = canStart ? 'visible' : 'hidden';
-  }
-
-  // Show "Ready All" button for host when there are unready players
-  const readyAllButton = document.getElementById('ready-all-button');
-  if (readyAllButton && gameController.isHost) {
-    const hasUnreadyPlayers = gameController.lobbyState.some(p => !p.isReady);
-    readyAllButton.style.visibility = hasUnreadyPlayers ? 'visible' : 'hidden';
+  // Show debug options for host only
+  const debugOptions = document.getElementById('debug-options');
+  if (debugOptions && gameController.isHost) {
+    debugOptions.style.display = 'block';
   }
 
   // Show spinner when waiting (for everyone, when button is hidden or not host)
@@ -298,7 +297,12 @@ function setupLobbyEventHandlers() {
         });
       }
 
-      readyToggleButton.textContent = newReadyState ? 'Not Ready' : 'Ready';
+      // Keep text as "Ready" but toggle green color
+      if (newReadyState) {
+        readyToggleButton.classList.add('ready');
+      } else {
+        readyToggleButton.classList.remove('ready');
+      }
     });
   }
 
@@ -309,9 +313,9 @@ function setupLobbyEventHandlers() {
       gameController.broadcastLobbyState();
       updateLobbyUI();
 
-      // Update ready toggle button text if host is now ready
+      // Update ready toggle button to green if host is now ready
       if (readyToggleButton) {
-        readyToggleButton.textContent = 'Not Ready';
+        readyToggleButton.classList.add('ready');
       }
     });
   }
