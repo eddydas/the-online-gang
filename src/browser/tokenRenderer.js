@@ -195,6 +195,8 @@ export function addTokenStyles() {
       display: inline-block;
       margin: 5px;
       transition: transform 0.2s ease, filter 0.2s ease;
+      flex-shrink: 0;
+      box-sizing: border-box;
     }
 
     .token.interactive {
@@ -244,6 +246,8 @@ export function addTokenStyles() {
       width: 40px;
       height: 40px;
       margin: 2px;
+      min-width: 40px;
+      min-height: 40px;
     }
 
     /* Medium tokens for current turn in history */
@@ -251,6 +255,8 @@ export function addTokenStyles() {
       width: 60px;
       height: 60px;
       margin: 2px;
+      min-width: 60px;
+      min-height: 60px;
     }
 
     .player-tokens {
@@ -319,16 +325,22 @@ export function addTokenStyles() {
         width: 50px;
         height: 50px;
         margin: 3px;
+        min-width: 50px;
+        min-height: 50px;
       }
 
       .token.mini {
         width: 30px;
         height: 30px;
+        min-width: 30px;
+        min-height: 30px;
       }
 
       .token.medium {
         width: 45px;
         height: 45px;
+        min-width: 45px;
+        min-height: 45px;
       }
 
       .token-pool {
