@@ -218,8 +218,11 @@ export class GameController {
   handleJoinRequest(payload) {
     if (!this.isHost) return;
 
+    console.log('[Host] JOIN_REQUEST from', payload.playerId, 'connections:', this.connectionManager?.getConnections().length);
+
     // If this is the first client reconnecting after host refresh, request state
     if (!this.hasRequestedStateRecovery && this.connectionManager && this.connectionManager.getConnections().length === 1) {
+      console.log('[Host] First client reconnected, requesting full state');
       this.hasRequestedStateRecovery = true;
       this.sendMessage({
         type: 'REQUEST_FULL_STATE',
@@ -248,6 +251,7 @@ export class GameController {
 
     // If game is active, also broadcast game state to the new client
     if (this.gameState) {
+      console.log('[Host] Game is active, broadcasting game state to new client');
       this.broadcastGameState();
     }
   }
@@ -1006,6 +1010,12 @@ export class GameController {
   handleStateRequest() {
     if (this.isHost) return;
 
+    console.log('[Client] Received REQUEST_FULL_STATE, sending state back:', {
+      hasGameState: !!this.gameState,
+      hasLobbyState: !!this.lobbyState,
+      gamePhase: this.gameState?.phase
+    });
+
     // Send back both game state and lobby state
     this.sendMessage({
       type: 'FULL_STATE_RESPONSE',
@@ -1024,17 +1034,29 @@ export class GameController {
   handleStateResponse(payload) {
     if (!this.isHost) return;
 
+    console.log('[Host] Received FULL_STATE_RESPONSE:', {
+      hasGameState: !!payload.gameState,
+      hasLobbyState: !!payload.lobbyState,
+      lobbyLength: payload.lobbyState?.length,
+      gamePhase: payload.gameState?.phase
+    });
+
     // Restore lobby state if provided
     if (payload.lobbyState && Array.isArray(payload.lobbyState) && payload.lobbyState.length > 0) {
+      console.log('[Host] Restoring lobby state with', payload.lobbyState.length, 'players');
       this.lobbyState = payload.lobbyState;
       this.delegate?.onLobbyStateChange?.();
     }
 
     // Restore game state if provided
     if (payload.gameState) {
+      console.log('[Host] Restoring game state, phase:', payload.gameState.phase);
       this.gameState = payload.gameState;
+      console.log('[Host] Calling onGameStateChange delegate');
       this.delegate?.onGameStateChange?.();
+      console.log('[Host] Calling updateGameUI');
       this.updateGameUI();
+      console.log('[Host] State recovery complete');
     }
   }
 }

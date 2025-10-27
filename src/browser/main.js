@@ -448,9 +448,11 @@ async function initializeGame() {
   // Set up delegate to handle state changes
   gameController.setDelegate({
     onLobbyStateChange: () => {
+      console.log('[Main] onLobbyStateChange called');
       updateLobbyUI();
     },
     onGameStateChange: () => {
+      console.log('[Main] onGameStateChange called');
       showGameScreen();
     }
   });
