@@ -65,10 +65,12 @@ export class GameController {
    * @returns {Promise<string>} The peer ID to share with others
    */
   async initializeAsHost(requestedPeerId) {
+    console.log('[GameController] Initializing as host, requestedPeerId:', requestedPeerId);
     this.connectionManager = new ConnectionManager();
     const peerId = await this.connectionManager.createHost(requestedPeerId);
     this.isHost = true;
     this.myPlayerId = peerId;
+    console.log('[GameController] Host initialized with peerId:', peerId);
 
     // Add self to lobby with first available color
     const hostColor = getNextAvailableColor([]);
@@ -84,6 +86,7 @@ export class GameController {
       this.handlePeerDisconnect(peerId);
     });
 
+    console.log('[GameController] Host ready, hasRequestedStateRecovery:', this.hasRequestedStateRecovery);
     return peerId;
   }
 
@@ -94,10 +97,12 @@ export class GameController {
    * @returns {Promise<void>}
    */
   async initializeAsClient(hostPeerId, requestedPeerId) {
+    console.log('[GameController] Initializing as client, hostPeerId:', hostPeerId, 'requestedPeerId:', requestedPeerId);
     this.connectionManager = new ConnectionManager();
     await this.connectionManager.joinAsClient(hostPeerId, requestedPeerId);
     this.isHost = false;
     this.myPlayerId = this.connectionManager.peerId;
+    console.log('[GameController] Client initialized with peerId:', this.myPlayerId);
 
     // Listen for messages from host
     this.connectionManager.onMessage((/** @type {any} */ message) => {
@@ -105,6 +110,7 @@ export class GameController {
     });
 
     // Send join request to host
+    console.log('[GameController] Sending JOIN_REQUEST to host');
     this.sendMessage({
       type: 'JOIN_REQUEST',
       payload: {
@@ -119,6 +125,8 @@ export class GameController {
    * @param {any} message
    */
   handlePeerMessage(message) {
+    console.log('[GameController] Received message:', message.type, 'isHost:', this.isHost);
+
     // Host assigns server timestamp to all incoming messages for consistency
     if (this.isHost) {
       message.timestamp = Date.now();
@@ -182,12 +190,14 @@ export class GameController {
         break;
 
       case 'REQUEST_FULL_STATE':
+        console.log('[GameController] Handling REQUEST_FULL_STATE, isHost:', this.isHost);
         if (!this.isHost) {
           this.handleStateRequest();
         }
         break;
 
       case 'FULL_STATE_RESPONSE':
+        console.log('[GameController] Handling FULL_STATE_RESPONSE, isHost:', this.isHost);
         if (this.isHost) {
           this.handleStateResponse(message.payload);
         }
