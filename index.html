@@ -10,6 +10,29 @@
 </head>
 <body>
   <div id="app">
+    <!-- Connection Modal (for clients only) -->
+    <div id="connection-modal" style="display: none;">
+      <div class="modal-overlay">
+        <div class="modal-content">
+          <div class="spinner">
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+            <div class="spinner-blade"></div>
+          </div>
+          <div id="connection-message"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Lobby Screen -->
     <div id="lobby-screen" style="display: none;">
       <h1>The Online Gang</h1>
@@ -264,6 +287,52 @@
 
     #quick-test-button:hover {
       background: #8e44ad;
+    }
+
+    /* === Connection Modal Styles === */
+    #connection-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+    }
+
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 40px;
+      background: #2c3e50;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    #connection-message {
+      font-size: 18px;
+      font-weight: 500;
+      color: white;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .modal-content .spinner {
+      width: 40px;
+      height: 40px;
     }
 
     /* === Spinner Styles === */

@@ -41,6 +41,9 @@ export class GameController {
     /** @type {boolean} */
     this.isHost = false;
 
+    /** @type {boolean} */
+    this.hasRequestedStateRecovery = false;
+
     /** @type {Array<{id: string, name: string, isReady: boolean, isHost: boolean, avatarColor: string}>} */
     this.lobbyState = [];
 
@@ -171,6 +174,18 @@ export class GameController {
           this.handleNextGameReady(message.payload.playerId);
         }
         break;
+
+      case 'REQUEST_FULL_STATE':
+        if (!this.isHost) {
+          this.handleStateRequest();
+        }
+        break;
+
+      case 'FULL_STATE_RESPONSE':
+        if (this.isHost) {
+          this.handleStateResponse(message.payload);
+        }
+        break;
     }
   }
 
@@ -180,6 +195,15 @@ export class GameController {
    */
   handleJoinRequest(payload) {
     if (!this.isHost) return;
+
+    // If this is the first client reconnecting after host refresh, request state
+    if (!this.hasRequestedStateRecovery && this.connectionManager && this.connectionManager.getConnections().length === 1) {
+      this.hasRequestedStateRecovery = true;
+      this.sendMessage({
+        type: 'REQUEST_FULL_STATE',
+        payload: {}
+      });
+    }
 
     // Generate unique name if the requested name collides
     const uniqueName = generateUniquePlayerName(this.lobbyState);
@@ -946,5 +970,44 @@ export class GameController {
     }
 
     console.log('Quick test game complete - showing end game screen');
+  }
+
+  /**
+   * Handle state request from host (client only)
+   * Send back full game state and lobby state
+   */
+  handleStateRequest() {
+    if (this.isHost) return;
+
+    // Send back both game state and lobby state
+    this.sendMessage({
+      type: 'FULL_STATE_RESPONSE',
+      payload: {
+        gameState: this.gameState,
+        lobbyState: this.lobbyState
+      }
+    });
+  }
+
+  /**
+   * Handle state response from client (host only)
+   * Restore game state and lobby state from first reconnecting client
+   * @param {{gameState: any, lobbyState: any}} payload
+   */
+  handleStateResponse(payload) {
+    if (!this.isHost) return;
+
+    // Restore lobby state if provided
+    if (payload.lobbyState && Array.isArray(payload.lobbyState) && payload.lobbyState.length > 0) {
+      this.lobbyState = payload.lobbyState;
+      this.delegate?.onLobbyStateChange?.();
+    }
+
+    // Restore game state if provided
+    if (payload.gameState) {
+      this.gameState = payload.gameState;
+      this.updateGameUI();
+      this.delegate?.onGameStateChange?.();
+    }
   }
 }

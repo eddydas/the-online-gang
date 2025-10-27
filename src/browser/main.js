@@ -19,6 +19,30 @@ addEndGameStyles();
 addPlayerStyles();
 
 /**
+ * Show connection modal with message
+ * @param {string} message - Message to display
+ */
+function showConnectionModal(message) {
+  const modal = document.getElementById('connection-modal');
+  const messageEl = document.getElementById('connection-message');
+
+  if (modal && messageEl) {
+    messageEl.textContent = message;
+    modal.style.display = 'block';
+  }
+}
+
+/**
+ * Hide connection modal
+ */
+function hideConnectionModal() {
+  const modal = document.getElementById('connection-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+/**
  * Parse peer ID from URL
  * @returns {{type: 'host' | 'client' | 'new', peerId: string | null}}
  */
@@ -421,7 +445,25 @@ async function initializeGame() {
   if (urlInfo.type === 'client') {
     // Client joining host
     if (urlInfo.peerId) {
+      // Show connecting modal
+      showConnectionModal(`Connecting to host ${urlInfo.peerId.substring(0, 8)}...`);
+
+      // Set up connection state listener before connecting
       await gameController.initializeAsClient(urlInfo.peerId);
+
+      // Set up connection state change handler
+      if (gameController.connectionManager) {
+        gameController.connectionManager.onConnectionStateChange((/** @type {string} */ state) => {
+          const peerId = urlInfo.peerId || '';
+          if (state === 'connecting') {
+            showConnectionModal(`Connecting to host ${peerId.substring(0, 8)}...`);
+          } else if (state === 'connected') {
+            hideConnectionModal();
+          } else if (state === 'reconnecting') {
+            showConnectionModal('Host disconnected, re-connecting...');
+          }
+        });
+      }
     }
   } else if (urlInfo.type === 'host') {
     // Host refresh - reuse peer ID
