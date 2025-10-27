@@ -781,6 +781,14 @@ export function addEndGameStyles() {
       box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
+    .next-game-btn.ready {
+      background: #2ecc71;
+    }
+
+    .next-game-btn.ready:hover {
+      background: #27ae60;
+    }
+
     .next-game-btn:hover {
       background: #2980b9;
       transform: translateY(-2px);

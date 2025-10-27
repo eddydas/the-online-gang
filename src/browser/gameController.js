@@ -347,7 +347,16 @@ export class GameController {
     if (!nextGameButton) return;
 
     const isPlayerReady = this.gameState.readyStatus?.[this.myPlayerId || ''] ?? false;
-    nextGameButton.textContent = isPlayerReady ? 'Not ready yet' : 'Ready for Next Game';
+
+    // Always keep the same text, but change the style
+    nextGameButton.textContent = 'Ready for Next Game';
+
+    // Toggle the 'ready' class to change background color
+    if (isPlayerReady) {
+      nextGameButton.classList.add('ready');
+    } else {
+      nextGameButton.classList.remove('ready');
+    }
   }
 
   /**
