@@ -31,6 +31,8 @@ export class ConnectionManager {
     this._connectionStateCallbacks = [];
     /** @type {Array<Function>} */
     this._disconnectCallbacks = [];
+    /** @type {Array<Function>} */
+    this._reconnectCallbacks = [];
     /** @type {string | null} */
     this.hostPeerId = null;
     /** @type {ReturnType<typeof setInterval> | null} */
@@ -140,6 +142,14 @@ export class ConnectionManager {
   }
 
   /**
+   * Register a callback for successful reconnections (client only)
+   * @param {Function} callback - Function to call when reconnection succeeds
+   */
+  onReconnect(callback) {
+    this._reconnectCallbacks.push(callback);
+  }
+
+  /**
    * Emit connection state change event
    * @private
    * @param {string} state - Connection state ('connecting' | 'connected' | 'disconnected' | 'reconnecting')
@@ -155,6 +165,14 @@ export class ConnectionManager {
    */
   _emitPeerDisconnect(peerId) {
     this._disconnectCallbacks.forEach(callback => callback(peerId));
+  }
+
+  /**
+   * Emit reconnection event (client only)
+   * @private
+   */
+  _emitReconnect() {
+    this._reconnectCallbacks.forEach(callback => callback());
   }
 
   /**
@@ -253,11 +271,14 @@ export class ConnectionManager {
         console.log('[ConnectionManager] Reconnection successful!');
         this._stopReconnection();
         this._emitConnectionState('connected');
+        // Notify GameController that reconnection succeeded
+        this._emitReconnect();
       });
 
       conn.on('close', () => {
-        // Will be handled by reconnection interval
-        console.log('[ConnectionManager] Reconnection attempt closed');
+        // Connection closed after successful reconnection - restart reconnection
+        console.log('[ConnectionManager] Reconnection attempt closed, restarting reconnection...');
+        this._startReconnection();
       });
 
       conn.on('error', (/** @type {*} */ error) => {

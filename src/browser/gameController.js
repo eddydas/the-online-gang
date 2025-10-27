@@ -86,7 +86,7 @@ export class GameController {
       this.handlePeerDisconnect(peerId);
     });
 
-    console.log('[GameController] Host ready, hasRequestedStateRecovery:', this.hasRequestedStateRecovery);
+    console.log('[GameController] Host ready, hasRequestedStateRecovery:', this.hasRequestedStateRecovery, 'hasGameState:', !!this.gameState);
     return peerId;
   }
 
@@ -109,7 +109,21 @@ export class GameController {
       this.handlePeerMessage(message);
     });
 
+    // Listen for successful reconnections (client only)
+    this.connectionManager.onReconnect(() => {
+      console.log('[GameController] Reconnection detected, resending JOIN_REQUEST');
+      this.sendJoinRequest();
+    });
+
     // Send join request to host
+    this.sendJoinRequest();
+  }
+
+  /**
+   * Send JOIN_REQUEST to host
+   * @private
+   */
+  sendJoinRequest() {
     console.log('[GameController] Sending JOIN_REQUEST to host');
     this.sendMessage({
       type: 'JOIN_REQUEST',
@@ -230,9 +244,20 @@ export class GameController {
 
     console.log('[Host] JOIN_REQUEST from', payload.playerId, 'connections:', this.connectionManager?.getConnections().length);
 
-    // If this is the first client reconnecting after host refresh, request state
-    if (!this.hasRequestedStateRecovery && this.connectionManager && this.connectionManager.getConnections().length === 1) {
-      console.log('[Host] First client reconnected, requesting full state');
+    // Only request state recovery if:
+    // 1. We don't already have game state (not recovered yet)
+    // 2. This is the first client reconnecting
+    // 3. We haven't requested state recovery yet this session
+    const needsStateRecovery = !this.gameState && !this.hasRequestedStateRecovery;
+    console.log('[Host] State recovery check:', {
+      hasGameState: !!this.gameState,
+      hasRequestedStateRecovery: this.hasRequestedStateRecovery,
+      needsStateRecovery,
+      connectionCount: this.connectionManager?.getConnections().length
+    });
+
+    if (needsStateRecovery && this.connectionManager && this.connectionManager.getConnections().length === 1) {
+      console.log('[Host] First client reconnected and we need state recovery, requesting full state');
       this.hasRequestedStateRecovery = true;
       this.sendMessage({
         type: 'REQUEST_FULL_STATE',
