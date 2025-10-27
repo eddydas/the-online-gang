@@ -44,19 +44,20 @@ function hideConnectionModal() {
 
 /**
  * Parse peer ID from URL
- * @returns {{type: 'host' | 'client' | 'new', peerId: string | null}}
+ * @returns {{type: 'host' | 'client' | 'new', peerId: string | null, selfId: string | null}}
  */
 function getPeerIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const hostId = params.get('host');
   const peerId = params.get('peer');
+  const selfId = params.get('self');
 
   if (hostId) {
-    return { type: 'host', peerId: hostId };
+    return { type: 'host', peerId: hostId, selfId: null };
   } else if (peerId) {
-    return { type: 'client', peerId: peerId };
+    return { type: 'client', peerId: peerId, selfId: selfId };
   } else {
-    return { type: 'new', peerId: null };
+    return { type: 'new', peerId: null, selfId: null };
   }
 }
 
@@ -67,6 +68,18 @@ function getPeerIdFromUrl() {
 function updateUrlWithHostId(peerId) {
   const url = new URL(window.location.href);
   url.searchParams.set('host', peerId);
+  window.history.replaceState({}, '', url);
+}
+
+/**
+ * Update URL with client's own peer ID (for client refresh recovery)
+ * @param {string} hostPeerId - The host's peer ID
+ * @param {string} selfPeerId - The client's own peer ID
+ */
+function updateUrlWithSelfId(hostPeerId, selfPeerId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('peer', hostPeerId);
+  url.searchParams.set('self', selfPeerId);
   window.history.replaceState({}, '', url);
 }
 
@@ -448,8 +461,13 @@ async function initializeGame() {
       // Show connecting modal
       showConnectionModal(`Connecting to host ${urlInfo.peerId.substring(0, 8)}...`);
 
-      // Initialize as client and set up connection state handler
-      await gameController.initializeAsClient(urlInfo.peerId);
+      // Initialize as client with optional self peer ID for refresh recovery
+      await gameController.initializeAsClient(urlInfo.peerId, urlInfo.selfId || undefined);
+
+      // Update URL with self peer ID if not already present (for refresh recovery)
+      if (!urlInfo.selfId && gameController.myPlayerId) {
+        updateUrlWithSelfId(urlInfo.peerId, gameController.myPlayerId);
+      }
 
       // Set up connection state change handler AFTER connecting
       if (gameController.connectionManager) {

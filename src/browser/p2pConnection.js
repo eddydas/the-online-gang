@@ -29,6 +29,8 @@ export class ConnectionManager {
     this._messageCallbacks = [];
     /** @type {Array<Function>} */
     this._connectionStateCallbacks = [];
+    /** @type {Array<Function>} */
+    this._disconnectCallbacks = [];
     /** @type {string | null} */
     this.hostPeerId = null;
     /** @type {ReturnType<typeof setInterval> | null} */
@@ -93,6 +95,11 @@ export class ConnectionManager {
 
     conn.on('close', () => {
       this.connections = this.connections.filter(c => c !== conn);
+
+      // Emit disconnect event with peer ID (host only)
+      if (this.isHost && conn.peer) {
+        this._emitPeerDisconnect(conn.peer);
+      }
     });
 
     conn.on('error', (/** @type {*} */ error) => {
@@ -117,6 +124,14 @@ export class ConnectionManager {
   }
 
   /**
+   * Register a callback for peer disconnections (host only)
+   * @param {Function} callback - Function to call with disconnected peer ID
+   */
+  onPeerDisconnect(callback) {
+    this._disconnectCallbacks.push(callback);
+  }
+
+  /**
    * Emit connection state change event
    * @private
    * @param {string} state - Connection state ('connecting' | 'connected' | 'disconnected' | 'reconnecting')
@@ -126,11 +141,21 @@ export class ConnectionManager {
   }
 
   /**
+   * Emit peer disconnect event (host only)
+   * @private
+   * @param {string} peerId - Peer ID of disconnected peer
+   */
+  _emitPeerDisconnect(peerId) {
+    this._disconnectCallbacks.forEach(callback => callback(peerId));
+  }
+
+  /**
    * Initialize as client and connect to host
    * @param {string} hostPeerId - Host's peer ID to connect to
+   * @param {string} [requestedPeerId] - Optional peer ID to reuse (for client refresh recovery)
    * @returns {Promise<void>}
    */
-  async joinAsClient(hostPeerId) {
+  async joinAsClient(hostPeerId, requestedPeerId) {
     if (this.peer) {
       throw new Error('Already initialized');
     }
@@ -138,7 +163,8 @@ export class ConnectionManager {
     this.hostPeerId = hostPeerId;
 
     return new Promise((resolve, reject) => {
-      this.peer = this.peerFactory();
+      // Pass requested peer ID to Peer constructor if provided
+      this.peer = requestedPeerId ? new Peer(requestedPeerId) : this.peerFactory();
       this.isHost = false;
 
       this.peer.on('open', (/** @type {string} */ id) => {
@@ -165,6 +191,10 @@ export class ConnectionManager {
       });
 
       this.peer.on('error', (/** @type {*} */ error) => {
+        // Check if error is due to peer ID already taken
+        if (error && error.type === 'unavailable-id') {
+          alert(`Error: Peer ID "${requestedPeerId}" is already in use. This is very rare and should be investigated.`);
+        }
         reject(error);
       });
     });

@@ -79,17 +79,23 @@ export class GameController {
       this.handlePeerMessage(message);
     });
 
+    // Listen for peer disconnections (host only)
+    this.connectionManager.onPeerDisconnect((/** @type {string} */ peerId) => {
+      this.handlePeerDisconnect(peerId);
+    });
+
     return peerId;
   }
 
   /**
    * Initialize as client and connect to host
    * @param {string} hostPeerId - The host's peer ID
+   * @param {string} [requestedPeerId] - Optional peer ID to reuse (for client refresh recovery)
    * @returns {Promise<void>}
    */
-  async initializeAsClient(hostPeerId) {
+  async initializeAsClient(hostPeerId, requestedPeerId) {
     this.connectionManager = new ConnectionManager();
-    await this.connectionManager.joinAsClient(hostPeerId);
+    await this.connectionManager.joinAsClient(hostPeerId, requestedPeerId);
     this.isHost = false;
     this.myPlayerId = this.connectionManager.peerId;
 
@@ -190,6 +196,22 @@ export class GameController {
   }
 
   /**
+   * Handle peer disconnect (host only)
+   * Remove player from lobby or game state
+   * @param {string} peerId - Peer ID of disconnected peer
+   */
+  handlePeerDisconnect(peerId) {
+    if (!this.isHost) return;
+
+    // Remove from lobby state
+    this.lobbyState = this.lobbyState.filter(p => p.id !== peerId);
+    this.broadcastLobbyState();
+
+    // If game is active, could also remove from game state
+    // For now, just keep them in the game (they might reconnect)
+  }
+
+  /**
    * Handle new player joining (host only)
    * @param {{playerId: string, playerName: string}} payload
    */
@@ -223,6 +245,11 @@ export class GameController {
 
     // Broadcast updated lobby state
     this.broadcastLobbyState();
+
+    // If game is active, also broadcast game state to the new client
+    if (this.gameState) {
+      this.broadcastGameState();
+    }
   }
 
   /**
