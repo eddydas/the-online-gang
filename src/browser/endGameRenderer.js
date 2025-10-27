@@ -418,7 +418,8 @@ function updateTimeTravelView(table, selectedTurn) {
     if (cardTurn > selectedTurn) {
       htmlCard.style.opacity = '0.2';
     } else {
-      htmlCard.style.opacity = '1';
+      // Remove inline opacity to allow CSS classes to control opacity
+      htmlCard.style.opacity = '';
     }
   });
 }
