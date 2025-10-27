@@ -280,10 +280,13 @@ function evaluatePokerHand(cards) {
   if (groupSizes[0].count === 2 && groupSizes[1] && groupSizes[1].count === 2) {
     const pair1Rank = groupSizes[0].rank;
     const pair2Rank = groupSizes[1].rank;
-    const kicker = groupSizes.find(g => g.count === 1);
+
+    // Find kicker: highest card NOT in the top 2 pairs
+    // This handles the case where there are 3+ pairs (pick highest remaining card)
+    const remainingGroups = groupSizes.filter(g => g.rank !== pair1Rank && g.rank !== pair2Rank);
 
     // Handle edge case: exactly 2 pairs with no kicker (e.g., 4 cards total)
-    if (!kicker) {
+    if (remainingGroups.length === 0) {
       const bestFive = [
         ...groups[pair1Rank],
         ...groups[pair2Rank]
@@ -302,6 +305,8 @@ function evaluatePokerHand(cards) {
       };
     }
 
+    // Pick the highest remaining card (could be from a third pair or a singleton)
+    const kicker = remainingGroups[0];
     const bestFive = [
       ...groups[pair1Rank],
       ...groups[pair2Rank],

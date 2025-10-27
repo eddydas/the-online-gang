@@ -274,6 +274,49 @@ describe('Poker Hand Evaluation', () => {
       expect(result2.rank).toBe(2);
       expect(compareHands(result1, result2)).toBe(0); // Identical
     });
+
+    test('should detect identical Two Pair hands when kicker comes from shared community cards', () => {
+      // Simulating the scenario from the bug report:
+      // Community cards: 10♦, 9♠, 4♣, K♥, K♦
+      // CC: hole cards 10♠, 2♥  -> Two Pair K-K-10-10, kicker should be 9
+      const handCC = [
+        { rank: '10', suit: '♠' },  // hole
+        { rank: '2', suit: '♥' },   // hole
+        { rank: '10', suit: '♦' },  // community
+        { rank: '9', suit: '♠' },   // community
+        { rank: '4', suit: '♣' },   // community
+        { rank: 'K', suit: '♥' },   // community
+        { rank: 'K', suit: '♦' }    // community
+      ];
+
+      // AT: hole cards 10♥, 9♦  -> Two Pair K-K-10-10, kicker should be 9
+      const handAT = [
+        { rank: '10', suit: '♥' },  // hole
+        { rank: '9', suit: '♦' },   // hole (different from community 9♠)
+        { rank: '10', suit: '♦' },  // community
+        { rank: '9', suit: '♠' },   // community
+        { rank: '4', suit: '♣' },   // community
+        { rank: 'K', suit: '♥' },   // community
+        { rank: 'K', suit: '♦' }    // community
+      ];
+
+      const resultCC = evaluateHand(handCC);
+      const resultAT = evaluateHand(handAT);
+
+      // Both should be Two Pair (K and 10)
+      expect(resultCC.rank).toBe(3);
+      expect(resultCC.name).toBe('Two Pair');
+      expect(resultAT.rank).toBe(3);
+      expect(resultAT.name).toBe('Two Pair');
+
+      // Best 5 cards should be: K-K-10-10-9 for both
+      // The kicker should be 9 (from community), NOT the hole cards (2 or 9)
+      expect(resultCC.tiebreakers).toEqual([13, 10, 9]); // K, 10, 9
+      expect(resultAT.tiebreakers).toEqual([13, 10, 9]); // K, 10, 9
+
+      // Hands should be identical (tie)
+      expect(compareHands(resultCC, resultAT)).toBe(0);
+    });
   });
 
   describe('Best 5 Cards from 7', () => {
@@ -314,11 +357,13 @@ describe('Poker Hand Evaluation', () => {
       expect(result.rank).toBe(3); // Two Pair
       expect(result.bestFive).toHaveLength(5);
 
-      // Should select A-A-K-K-2 (two highest pairs + highest kicker)
+      // Should select A-A-K-K-5 (two highest pairs + highest remaining card)
+      // The kicker is 5 (from the third pair), not 2
       const bestRanks = result.bestFive.map(c => c.rank).sort();
       expect(bestRanks.filter(r => r === 'A')).toHaveLength(2);
       expect(bestRanks.filter(r => r === 'K')).toHaveLength(2);
-      expect(bestRanks).not.toContain('5'); // Should exclude lowest pair
+      expect(bestRanks.filter(r => r === '5')).toHaveLength(1); // One card from third pair
+      expect(bestRanks).not.toContain('2'); // Should exclude the singleton
     });
   });
 
