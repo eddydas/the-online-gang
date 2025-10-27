@@ -58,11 +58,12 @@ export class GameController {
 
   /**
    * Initialize as host
+   * @param {string} [requestedPeerId] - Optional peer ID to reuse (for host refresh recovery)
    * @returns {Promise<string>} The peer ID to share with others
    */
-  async initializeAsHost() {
+  async initializeAsHost(requestedPeerId) {
     this.connectionManager = new ConnectionManager();
-    const peerId = await this.connectionManager.createHost();
+    const peerId = await this.connectionManager.createHost(requestedPeerId);
     this.isHost = true;
     this.myPlayerId = peerId;
 

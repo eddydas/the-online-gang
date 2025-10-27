@@ -20,11 +20,30 @@ addPlayerStyles();
 
 /**
  * Parse peer ID from URL
- * @returns {string | null}
+ * @returns {{type: 'host' | 'client' | 'new', peerId: string | null}}
  */
 function getPeerIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  return params.get('peer');
+  const hostId = params.get('host');
+  const peerId = params.get('peer');
+
+  if (hostId) {
+    return { type: 'host', peerId: hostId };
+  } else if (peerId) {
+    return { type: 'client', peerId: peerId };
+  } else {
+    return { type: 'new', peerId: null };
+  }
+}
+
+/**
+ * Update URL with host parameter (for host refresh recovery)
+ * @param {string} peerId - The host's peer ID
+ */
+function updateUrlWithHostId(peerId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('host', peerId);
+  window.history.replaceState({}, '', url);
 }
 
 /**
@@ -384,7 +403,7 @@ function setupGameEventHandlers() {
  * Initialize the game on page load
  */
 async function initializeGame() {
-  const peerIdFromUrl = getPeerIdFromUrl();
+  const urlInfo = getPeerIdFromUrl();
 
   showLobbyScreen();
   initializeLobbyUI();
@@ -399,13 +418,30 @@ async function initializeGame() {
     }
   });
 
-  if (peerIdFromUrl) {
-    await gameController.initializeAsClient(peerIdFromUrl);
-  } else {
-    await gameController.initializeAsHost();
+  if (urlInfo.type === 'client') {
+    // Client joining host
+    if (urlInfo.peerId) {
+      await gameController.initializeAsClient(urlInfo.peerId);
+    }
+  } else if (urlInfo.type === 'host') {
+    // Host refresh - reuse peer ID
+    if (urlInfo.peerId) {
+      await gameController.initializeAsHost(urlInfo.peerId);
 
-    // Don't update URL - this prevents host from trying to join their own old session on reload
-    // The shareable link will still include the peer ID for clients to join
+      // Show share link
+      const shareLinkContainer = document.getElementById('share-link-container');
+      if (shareLinkContainer) {
+        shareLinkContainer.style.display = 'flex';
+      }
+
+      updateLobbyUI();
+    }
+  } else {
+    // New host - get random peer ID
+    const peerId = await gameController.initializeAsHost();
+
+    // Update URL with host=XXXXX (no reload)
+    updateUrlWithHostId(peerId);
 
     // Show share link
     const shareLinkContainer = document.getElementById('share-link-container');

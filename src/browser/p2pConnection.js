@@ -31,15 +31,17 @@ export class ConnectionManager {
 
   /**
    * Initialize as host (creates a peer and waits for connections)
+   * @param {string} [requestedPeerId] - Optional peer ID to reuse (for host refresh recovery)
    * @returns {Promise<string>} Host's peer ID
    */
-  async createHost() {
+  async createHost(requestedPeerId) {
     if (this.peer) {
       throw new Error('Already initialized');
     }
 
     return new Promise((resolve, reject) => {
-      this.peer = this.peerFactory();
+      // Pass requested peer ID to Peer constructor if provided
+      this.peer = requestedPeerId ? new Peer(requestedPeerId) : this.peerFactory();
       this.isHost = true;
 
       this.peer.on('open', (/** @type {string} */ id) => {
@@ -48,6 +50,10 @@ export class ConnectionManager {
       });
 
       this.peer.on('error', (/** @type {*} */ error) => {
+        // Check if error is due to peer ID already taken
+        if (error && error.type === 'unavailable-id') {
+          alert(`Error: Peer ID "${requestedPeerId}" is already in use. This is very rare and should be investigated.`);
+        }
         reject(error);
       });
 
