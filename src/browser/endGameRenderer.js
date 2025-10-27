@@ -644,8 +644,8 @@ export function addEndGameStyles() {
     }
 
     .mini-token {
-      width: 70px;
-      height: 70px;
+      width: 45px;
+      height: 45px;
       margin: 0 auto;
       display: block;
     }
@@ -669,19 +669,27 @@ export function addEndGameStyles() {
     }
 
     .card-spacer {
-      width: 16px;
-      height: 60px;
+      width: 9px;
+      height: 39px;
       flex-shrink: 0;
     }
 
     .end-game-table .mini-card {
-      width: 42px;
-      height: 60px;
-      font-size: 12px;
+      width: 28px;
+      height: 39px;
+      font-size: 9px;
       padding: 3px;
       flex-shrink: 0;
       outline: 2px solid transparent;
       outline-offset: 0px;
+    }
+
+    .end-game-table .mini-card .card-rank {
+      font-size: 10px;
+    }
+
+    .end-game-table .mini-card .card-suit.large {
+      font-size: 16px;
     }
 
     .end-game-table .mini-card.best-five {
@@ -919,74 +927,6 @@ export function addEndGameStyles() {
 
     /* === Responsive Design === */
 
-    /* Large screens (≥1400px) - Bigger cards and tokens */
-    @media (min-width: 1400px) {
-      .end-game-container {
-        max-width: 1600px;
-      }
-
-      .end-game-table .mini-card {
-        width: 32px;
-        height: 45px;
-        font-size: 10px;
-        padding: 2px;
-      }
-
-      .end-game-table .mini-card .card-rank {
-        font-size: 12px;
-        margin-bottom: 2px;
-      }
-
-      .end-game-table .mini-card .card-suit.large {
-        font-size: 18px;
-      }
-
-      .card-spacer {
-        width: 10px;
-        height: 45px;
-      }
-
-      .mini-token {
-        width: 50px;
-        height: 50px;
-      }
-
-      .hand-cell {
-        font-size: 16px;
-      }
-
-      .cards-container {
-        gap: 3px;
-      }
-    }
-
-    /* Medium screens (1024px - 1399px) - Slightly bigger */
-    @media (min-width: 1024px) and (max-width: 1399px) {
-      .end-game-table .mini-card {
-        width: 28px;
-        height: 39px;
-        font-size: 9px;
-      }
-
-      .end-game-table .mini-card .card-rank {
-        font-size: 10px;
-      }
-
-      .end-game-table .mini-card .card-suit.large {
-        font-size: 16px;
-      }
-
-      .card-spacer {
-        width: 9px;
-        height: 39px;
-      }
-
-      .mini-token {
-        width: 45px;
-        height: 45px;
-      }
-    }
-
     /* Narrow screens (≤768px) - Three-line layout */
     @media (max-width: 768px) {
       .end-game-table tbody tr {
@@ -1084,58 +1024,6 @@ export function addEndGameStyles() {
 
       .cards-container {
         gap: 4px;
-      }
-    }
-
-    /* Very narrow screens (≤480px) - Still bigger than before */
-    @media (max-width: 480px) {
-      .end-game-container {
-        padding: 10px;
-      }
-
-      .end-game-table .mini-card {
-        width: 32px;
-        height: 44px;
-        font-size: 9px;
-      }
-
-      .end-game-table .mini-card .card-rank {
-        font-size: 12px;
-      }
-
-      .end-game-table .mini-card .card-suit.large {
-        font-size: 18px;
-      }
-
-      .card-spacer {
-        width: 8px;
-        height: 44px;
-      }
-
-      .cards-container {
-        gap: 3px;
-      }
-
-      .mini-token {
-        width: 28px;
-        height: 28px;
-      }
-
-      .hand-cell {
-        font-size: 13px;
-      }
-
-      .avatar-cell .player-avatar {
-        width: 32px;
-        height: 32px;
-      }
-
-      .end-game-announcement h1 {
-        font-size: 28px;
-      }
-
-      .end-game-announcement p {
-        font-size: 14px;
       }
     }
   `;
