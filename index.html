@@ -434,6 +434,12 @@
       width: 65%;
       max-width: 700px;
       z-index: 5;
+      pointer-events: none; /* Allow mouse events to pass through to player tokens */
+    }
+
+    /* Re-enable pointer events for interactive children */
+    .table-center > * {
+      pointer-events: auto;
     }
 
     /* === Token Area === */
