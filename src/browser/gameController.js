@@ -1033,8 +1033,8 @@ export class GameController {
     // Restore game state if provided
     if (payload.gameState) {
       this.gameState = payload.gameState;
-      this.updateGameUI();
       this.delegate?.onGameStateChange?.();
+      this.updateGameUI();
     }
   }
 }
