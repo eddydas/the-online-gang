@@ -448,10 +448,10 @@ async function initializeGame() {
       // Show connecting modal
       showConnectionModal(`Connecting to host ${urlInfo.peerId.substring(0, 8)}...`);
 
-      // Set up connection state listener before connecting
+      // Initialize as client and set up connection state handler
       await gameController.initializeAsClient(urlInfo.peerId);
 
-      // Set up connection state change handler
+      // Set up connection state change handler AFTER connecting
       if (gameController.connectionManager) {
         gameController.connectionManager.onConnectionStateChange((/** @type {string} */ state) => {
           const peerId = urlInfo.peerId || '';
@@ -463,6 +463,9 @@ async function initializeGame() {
             showConnectionModal('Host disconnected, re-connecting...');
           }
         });
+
+        // Manually hide modal if already connected
+        hideConnectionModal();
       }
     }
   } else if (urlInfo.type === 'host') {
