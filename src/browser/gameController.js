@@ -929,12 +929,16 @@ export class GameController {
         await wait(100);
       }
 
-      // Proceed all players
+      // Ready up all players for proceed button
       await wait(300);
       if (!this.gameState) return;
       for (const player of this.gameState.players) {
-        this.handleProceedTurn(player.id);
-        await wait(200);
+        // Only call if player is not already ready (to avoid toggling off)
+        const isReady = this.gameState.readyStatus?.[player.id] ?? false;
+        if (!isReady) {
+          this.handleProceedTurn(player.id);
+          await wait(200);
+        }
       }
 
       console.log(`Turn ${turn} complete`);
