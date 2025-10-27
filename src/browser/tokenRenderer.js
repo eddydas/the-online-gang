@@ -325,22 +325,16 @@ export function addTokenStyles() {
         width: 50px;
         height: 50px;
         margin: 3px;
-        min-width: 50px;
-        min-height: 50px;
       }
 
       .token.mini {
         width: 30px;
         height: 30px;
-        min-width: 30px;
-        min-height: 30px;
       }
 
       .token.medium {
         width: 45px;
         height: 45px;
-        min-width: 45px;
-        min-height: 45px;
       }
 
       .token-pool {

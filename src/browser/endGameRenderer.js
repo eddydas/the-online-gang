@@ -670,13 +670,13 @@ export function addEndGameStyles() {
 
     .card-spacer {
       width: 9px;
-      height: 39px;
+      height: 49px;
       flex-shrink: 0;
     }
 
     .end-game-table .mini-card {
-      width: 28px;
-      height: 39px;
+      width: 35px;
+      height: 49px;
       font-size: 9px;
       padding: 3px;
       flex-shrink: 0;
