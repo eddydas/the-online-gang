@@ -59,7 +59,7 @@ function shouldShowProceedButton(phase, tokens) {
  * Updates the phase UI based on current game phase
  * @param {GamePhase} phase - Current game phase
  * @param {import('./tokens.js').Token[]} [tokens] - Token array (optional, needed for TOKEN_TRADING phase)
- * @param {boolean} [isPlayerReady] - Whether the current player is ready (optional, for READY_UP phase)
+ * @param {boolean} [isPlayerReady] - Whether the current player is ready (optional, for READY_UP phase and proceed button)
  */
 function updatePhaseUI(phase, tokens, isPlayerReady) {
   const phaseTextEl = document.getElementById('phase-text');
@@ -100,12 +100,25 @@ function updatePhaseUI(phase, tokens, isPlayerReady) {
       const allTokensOwned = tokens && tokens.every(t => t.ownerId !== null);
       if (allTokensOwned) {
         proceedButtonEl.classList.remove('waiting');
+        // Apply ready state when all tokens owned
+        if (isPlayerReady) {
+          proceedButtonEl.classList.add('ready');
+        } else {
+          proceedButtonEl.classList.remove('ready');
+        }
       } else {
         proceedButtonEl.classList.add('waiting');
+        proceedButtonEl.classList.remove('ready');
       }
     } else if (phase === 'TURN_COMPLETE') {
-      // Always show play icon (not waiting) during TURN_COMPLETE
+      // Show play icon (not waiting) during TURN_COMPLETE
       proceedButtonEl.classList.remove('waiting');
+      // Apply ready state
+      if (isPlayerReady) {
+        proceedButtonEl.classList.add('ready');
+      } else {
+        proceedButtonEl.classList.remove('ready');
+      }
     }
   }
 }

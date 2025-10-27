@@ -182,8 +182,7 @@ export function renderPlayers(container, players, options = {}) {
     avatarWrapper.appendChild(avatar);
 
     // Ready indicator - positioned at corner of avatar
-    // Hide during TOKEN_TRADING phase since everyone is already ready
-    if (player.isReady && options.phase !== 'TOKEN_TRADING') {
+    if (player.isReady) {
       const readyBadge = document.createElement('div');
       readyBadge.className = 'player-ready-badge';
       readyBadge.textContent = '✓';

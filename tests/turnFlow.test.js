@@ -123,16 +123,22 @@ describe('Turn Flow UI', () => {
       expect(mockProceedButton.classList.add).toHaveBeenCalledWith('hidden');
     });
 
-    test('should show proceed button in TOKEN_TRADING phase', () => {
+    test('should show proceed button in TOKEN_TRADING phase when all tokens owned and apply ready state', () => {
       const allOwned = [
         { number: 1, ownerId: 'player1', timestamp: 100 },
         { number: 2, ownerId: 'player2', timestamp: 200 }
       ];
 
-      updatePhaseUI('TOKEN_TRADING', allOwned);
+      // Not ready
+      updatePhaseUI('TOKEN_TRADING', allOwned, false);
       expect(mockReadyButton.style.display).toBe('none');
       expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('hidden');
       expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('waiting');
+      expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('ready');
+
+      // Ready
+      updatePhaseUI('TOKEN_TRADING', allOwned, true);
+      expect(mockProceedButton.classList.add).toHaveBeenCalledWith('ready');
     });
 
     test('should hide proceed button in TOKEN_TRADING when tokens not all owned', () => {
@@ -146,11 +152,17 @@ describe('Turn Flow UI', () => {
       expect(mockProceedButton.classList.add).toHaveBeenCalledWith('hidden');
     });
 
-    test('should show proceed button in TURN_COMPLETE phase', () => {
-      updatePhaseUI('TURN_COMPLETE');
+    test('should show proceed button in TURN_COMPLETE phase and apply ready state', () => {
+      // Not ready
+      updatePhaseUI('TURN_COMPLETE', undefined, false);
       expect(mockReadyButton.style.display).toBe('none');
       expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('hidden');
       expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('waiting');
+      expect(mockProceedButton.classList.remove).toHaveBeenCalledWith('ready');
+
+      // Ready
+      updatePhaseUI('TURN_COMPLETE', undefined, true);
+      expect(mockProceedButton.classList.add).toHaveBeenCalledWith('ready');
     });
 
     test('should hide all buttons in END_GAME phase', () => {

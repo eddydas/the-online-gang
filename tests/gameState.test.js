@@ -554,6 +554,9 @@ describe('Game State Machine', () => {
       state = setPlayerReady(state, 'p2', true);
       state = advancePhase(state); // TOKEN_TRADING
 
+      // Ready status should be reset when entering TOKEN_TRADING
+      expect(state.readyStatus).toEqual({ p1: false, p2: false });
+
       // Assign all tokens
       state = handleTokenAction(state, {
         type: 'select',
@@ -571,6 +574,7 @@ describe('Game State Machine', () => {
       state = advancePhase(state); // TURN_COMPLETE
       state = advancePhase(state); // READY_UP turn 2
 
+      // Ready status should be reset when entering READY_UP
       expect(state.readyStatus).toEqual({ p1: false, p2: false });
     });
   });

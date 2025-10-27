@@ -156,9 +156,16 @@ function advancePhase(state) {
       if (!allPlayersReady(state)) {
         return state;
       }
+      // Reset ready status for TOKEN_TRADING phase (proceed button ready-up)
+      /** @type {Object.<string, boolean>} */
+      const readyStatus = {};
+      state.players.forEach(p => {
+        readyStatus[p.id] = false;
+      });
       return {
         ...state,
-        phase: 'TOKEN_TRADING'
+        phase: 'TOKEN_TRADING',
+        readyStatus
       };
 
     case 'TOKEN_TRADING':
