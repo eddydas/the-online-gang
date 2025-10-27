@@ -85,18 +85,23 @@ export class ConnectionManager {
    * @param {*} conn - PeerJS connection
    */
   _setupConnection(conn) {
+    console.log('[ConnectionManager] Setting up connection handlers for peer:', conn.peer, 'isHost:', this.isHost);
+
     conn.on('open', () => {
+      console.log('[ConnectionManager] Connection opened with peer:', conn.peer, 'isHost:', this.isHost);
       this.connections.push(conn);
     });
 
     conn.on('data', (/** @type {*} */ data) => {
       const message = deserializeMessage(data);
       if (message) {
+        console.log('[ConnectionManager] Received message:', message.type, 'from peer:', conn.peer);
         this._messageCallbacks.forEach(callback => callback(message));
       }
     });
 
     conn.on('close', () => {
+      console.log('[ConnectionManager] Connection closed with peer:', conn.peer, 'isHost:', this.isHost);
       this.connections = this.connections.filter(c => c !== conn);
 
       // Emit disconnect event with peer ID (host only)
@@ -106,7 +111,7 @@ export class ConnectionManager {
     });
 
     conn.on('error', (/** @type {*} */ error) => {
-      console.error('Connection error:', error);
+      console.error('[ConnectionManager] Connection error with peer:', conn.peer, error);
     });
   }
 
