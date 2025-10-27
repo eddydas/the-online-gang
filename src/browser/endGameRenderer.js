@@ -987,8 +987,8 @@ export function addEndGameStyles() {
 
       /* Make cards bigger and tokens smaller on mobile */
       .end-game-table .mini-card {
-        width: 36px;
-        height: 50px;
+        width: 29px;
+        height: 40px;
         font-size: 10px;
       }
 
@@ -1002,7 +1002,7 @@ export function addEndGameStyles() {
 
       .card-spacer {
         width: 10px;
-        height: 50px;
+        height: 40px;
       }
 
       .mini-token {
