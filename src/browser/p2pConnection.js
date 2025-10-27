@@ -58,10 +58,12 @@ export class ConnectionManager {
 
       this.peer.on('open', (/** @type {string} */ id) => {
         this.peerId = id;
+        console.log('[ConnectionManager] Host peer opened, ID:', id);
         resolve(id);
       });
 
       this.peer.on('error', (/** @type {*} */ error) => {
+        console.error('[ConnectionManager] Host peer error:', error);
         // Check if error is due to peer ID already taken
         if (error && error.type === 'unavailable-id') {
           alert(`Error: Peer ID "${requestedPeerId}" is already in use. This is very rare and should be investigated.`);
@@ -71,6 +73,7 @@ export class ConnectionManager {
 
       // Listen for incoming connections
       this.peer.on('connection', (/** @type {*} */ conn) => {
+        console.log('[ConnectionManager] Host received incoming connection from:', conn.peer);
         this._setupConnection(conn);
       });
     });
@@ -235,21 +238,29 @@ export class ConnectionManager {
   _attemptReconnect() {
     if (!this.peer || !this.hostPeerId) return;
 
+    console.log('[ConnectionManager] Attempting to reconnect to host:', this.hostPeerId);
+
     try {
       const conn = this.peer.connect(this.hostPeerId);
       this._setupConnection(conn);
 
       conn.on('open', () => {
+        console.log('[ConnectionManager] Reconnection successful!');
         this._stopReconnection();
         this._emitConnectionState('connected');
       });
 
       conn.on('close', () => {
         // Will be handled by reconnection interval
+        console.log('[ConnectionManager] Reconnection attempt closed');
+      });
+
+      conn.on('error', (/** @type {*} */ error) => {
+        console.log('[ConnectionManager] Reconnection attempt error:', error);
       });
     } catch (error) {
       // Ignore connection errors during reconnection
-      console.error('Reconnection attempt failed:', error);
+      console.error('[ConnectionManager] Reconnection attempt failed:', error);
     }
   }
 
