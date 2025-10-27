@@ -10,9 +10,8 @@ import { createTokenElement } from './tokenRenderer.js';
 import { determineWinLoss } from './winCondition.js';
 import { createEndGameTable } from './endGameRenderer.js';
 import { renderPlayers } from './playerRenderer.js';
-import { evaluateHand, evaluatePokerHand } from './poker.js';
+import { evaluateHand } from './poker.js';
 import { getNextAvailableColor, createAvatarElement } from './avatarManager.js';
-import { cardsEqual } from './deck.js';
 
 /**
  * @typedef {import('./winCondition.js').PlayerWithHand} PlayerWithHand
@@ -647,75 +646,31 @@ export class GameController {
     // Find current player
     const currentPlayer = this.gameState.players.find(p => p.id === this.myPlayerId);
 
-    // Render player's hole cards with hand strength evaluation
+    // Render player's hole cards
     if (currentPlayer && currentPlayer.holeCards && currentPlayer.holeCards.length > 0) {
-      // Evaluate current hand strength
-      const allCards = [...currentPlayer.holeCards, ...this.gameState.communityCards];
-      let handResult = null;
-
-      // Evaluate hand if we have at least 2 cards
-      if (allCards.length >= 2) {
-        handResult = evaluatePokerHand(allCards);
-      }
-
       // Clear and render hole cards
       playerCardsContainer.innerHTML = '';
 
-      // Render hole cards with highlighting
+      // Render hole cards without highlighting
       currentPlayer.holeCards.forEach(card => {
         const cardEl = createCardElement(card, false);
-
-        // Apply highlighting if hand evaluated
-        if (handResult) {
-          const isPrimary = handResult.primaryCards?.some(c => cardsEqual(c, card));
-          if (isPrimary) {
-            cardEl.classList.add('best-five');
-          }
-        }
-
         playerCardsContainer.appendChild(cardEl);
       });
 
-      // Render hand strength text
-      if (handResult) {
-        handStrengthText.textContent = handResult.description;
-      } else {
-        handStrengthText.textContent = '';
-      }
+      // Clear hand strength text
+      handStrengthText.textContent = '';
     } else {
       playerCardsContainer.innerHTML = '';
       handStrengthText.textContent = '';
     }
 
-    // Render community cards with highlighting
+    // Render community cards
     if (this.gameState.communityCards.length > 0) {
       communityCardsContainer.innerHTML = '';
 
-      // Evaluate hand if player exists
-      const currentPlayer = this.gameState.players.find(p => p.id === this.myPlayerId);
-      let handResult = null;
-
-      if (currentPlayer && currentPlayer.holeCards && currentPlayer.holeCards.length > 0) {
-        const allCards = [...currentPlayer.holeCards, ...this.gameState.communityCards];
-
-        // Evaluate hand if we have at least 2 cards
-        if (allCards.length >= 2) {
-          handResult = evaluatePokerHand(allCards);
-        }
-      }
-
-      // Render community cards
+      // Render community cards without highlighting
       this.gameState.communityCards.forEach(card => {
         const cardEl = createCardElement(card, false);
-
-        // Apply highlighting if hand evaluated
-        if (handResult) {
-          const isPrimary = handResult.primaryCards?.some(c => cardsEqual(c, card));
-          if (isPrimary) {
-            cardEl.classList.add('best-five');
-          }
-        }
-
         communityCardsContainer.appendChild(cardEl);
       });
     } else {
